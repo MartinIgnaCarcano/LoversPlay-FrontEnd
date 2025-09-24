@@ -1,0 +1,134 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Updated to sophisticated red-based color palette */
+  --background: oklch(1 0 0); /* Pure white #ffffff */
+  --foreground: oklch(0.45 0.02 255); /* Dark slate gray #475569 */
+  --card: oklch(0.98 0.02 340); /* Light blush #fdf2f8 */
+  --card-foreground: oklch(0.45 0.15 15); /* Rose-600 #be123c */
+  --popover: oklch(1 0 0); /* Pure white #ffffff */
+  --popover-foreground: oklch(0.45 0.02 255); /* Dark slate gray #475569 */
+  --primary: oklch(0.45 0.15 15); /* Rose-600 #be123c */
+  --primary-foreground: oklch(1 0 0); /* White #ffffff */
+  --secondary: oklch(0.65 0.2 340); /* Vivid pink #ec4899 */
+  --secondary-foreground: oklch(1 0 0); /* White #ffffff */
+  --muted: oklch(0.98 0.02 340); /* Light blush #fdf2f8 */
+  --muted-foreground: oklch(0.45 0.02 255); /* Dark slate gray #475569 */
+  --accent: oklch(0.65 0.2 340); /* Vivid pink #ec4899 */
+  --accent-foreground: oklch(1 0 0); /* White #ffffff */
+  --destructive: oklch(0.45 0.15 15); /* Rose-600 #be123c */
+  --destructive-foreground: oklch(1 0 0); /* White #ffffff */
+  --border: oklch(0.45 0.02 255); /* Dark slate gray #475569 */
+  --input: oklch(0.98 0.02 340); /* Light blush #fdf2f8 */
+  --ring: oklch(0.65 0.2 340); /* Vivid pink #ec4899 */
+  --chart-1: oklch(0.45 0.15 15); /* Rose-600 #be123c */
+  --chart-2: oklch(0.65 0.2 340); /* Vivid pink #ec4899 */
+  --chart-3: oklch(0.98 0.02 340); /* Light blush #fdf2f8 */
+  --chart-4: oklch(1 0 0); /* Pure white #ffffff */
+  --chart-5: oklch(0.45 0.02 255); /* Dark slate gray #475569 */
+  --radius: 0.5rem;
+  --sidebar: oklch(0.98 0.02 340); /* Light blush #fdf2f8 */
+  --sidebar-foreground: oklch(0.45 0.02 255); /* Dark slate gray #475569 */
+  --sidebar-primary: oklch(0.45 0.15 15); /* Rose-600 #be123c */
+  --sidebar-primary-foreground: oklch(1 0 0); /* White #ffffff */
+  --sidebar-accent: oklch(0.65 0.2 340); /* Vivid pink #ec4899 */
+  --sidebar-accent-foreground: oklch(1 0 0); /* White #ffffff */
+  --sidebar-border: oklch(0.45 0.02 255); /* Dark slate gray #475569 */
+  --sidebar-ring: oklch(0.65 0.2 340); /* Vivid pink #ec4899 */
+  --brand: oklch(0.45 0.15 15); /* Rose-600 brand color #be123c */
+  --brand-foreground: oklch(1 0 0); /* White text on brand #ffffff */
+}
+
+.dark {
+  /* Updated dark mode colors to complement red palette */
+  --background: oklch(0.08 0 0); /* Deep dark background */
+  --foreground: oklch(0.96 0.01 255); /* Light text */
+  --card: oklch(0.12 0.02 15); /* Dark card with red tint */
+  --card-foreground: oklch(0.75 0.15 15); /* Light rose text */
+  --popover: oklch(0.08 0 0); /* Dark popover */
+  --popover-foreground: oklch(0.96 0.01 255); /* Light popover text */
+  --primary: oklch(0.65 0.2 15); /* Brighter rose for dark mode */
+  --primary-foreground: oklch(0.08 0 0); /* Dark text on primary */
+  --secondary: oklch(0.75 0.25 340); /* Bright pink secondary */
+  --secondary-foreground: oklch(0.08 0 0); /* Dark text on secondary */
+  --muted: oklch(0.25 0.02 15); /* Dark muted with red tint */
+  --muted-foreground: oklch(0.708 0 0); /* Light muted text */
+  --accent: oklch(0.75 0.25 340); /* Bright pink accent */
+  --accent-foreground: oklch(0.08 0 0); /* Dark text on accent */
+  --destructive: oklch(0.55 0.2 15); /* Dark mode rose */
+  --destructive-foreground: oklch(1 0 0); /* White text */
+  --border: oklch(0.25 0.02 15); /* Dark border with red tint */
+  --input: oklch(0.25 0.02 15); /* Dark input with red tint */
+  --ring: oklch(0.75 0.25 340); /* Bright pink focus ring */
+  --chart-1: oklch(0.65 0.2 15); /* Bright rose */
+  --chart-2: oklch(0.75 0.25 340); /* Bright pink */
+  --chart-3: oklch(0.45 0.15 15); /* Medium rose */
+  --chart-4: oklch(0.85 0.1 340); /* Light pink */
+  --chart-5: oklch(0.35 0.1 15); /* Dark rose */
+  --sidebar: oklch(0.08 0 0); /* Dark sidebar */
+  --sidebar-foreground: oklch(0.96 0.01 255); /* Light sidebar text */
+  --sidebar-primary: oklch(0.65 0.2 15); /* Bright rose */
+  --sidebar-primary-foreground: oklch(0.08 0 0); /* Dark text on primary */
+  --sidebar-accent: oklch(0.75 0.25 340); /* Bright pink accent */
+  --sidebar-accent-foreground: oklch(0.08 0 0); /* Dark text on accent */
+  --sidebar-border: oklch(0.25 0.02 15); /* Dark border with red tint */
+  --sidebar-ring: oklch(0.75 0.25 340); /* Bright pink focus ring */
+  --brand: oklch(0.65 0.2 15); /* Brighter rose for dark mode */
+  --brand-foreground: oklch(0.08 0 0); /* Dark text on brand */
+}
+
+@theme inline {
+  /* Updated font variables to use Space Grotesk and DM Sans */
+  --font-sans: var(--font-space-grotesk);
+  --font-mono: var(--font-dm-sans);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
