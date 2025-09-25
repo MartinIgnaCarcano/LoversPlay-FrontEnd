@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Slider } from "@/components/ui/slider"
 import { useFiltersStore } from "@/lib/store"
 import { fetchCategorias } from "@/lib/services/api"
+import { fetchCategoriasMock } from "@/lib/services/mock-api"
 
 interface CategorySidebarProps {
   className?: string
@@ -56,7 +57,7 @@ export function CategorySidebar({ className = "", onCategoriasChange }: Category
   useEffect(() => {
     const loadCategorias = async () => {
       try {
-        const data = await fetchCategorias()
+        const data = await fetchCategoriasMock()
         setCategorias(data.sort((a, b) => a.nombre.localeCompare(b.nombre)))
       } catch (error) {
         console.error("Error cargando categorías", error)

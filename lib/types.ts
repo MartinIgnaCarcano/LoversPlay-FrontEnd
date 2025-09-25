@@ -31,19 +31,6 @@ export type Product = {
   }[]
 }
 
-
-// 📝 Posts de blog
-export type BlogPost = {
-  id: string
-  title: string
-  slug: string
-  cover: string
-  excerpt: string
-  content: string
-  date: string
-  tags?: string[]
-}
-
 // 🚚 Métodos de envío
 export type ShippingMethod = {
   id: string

@@ -13,6 +13,7 @@ import type { Product } from "@/lib/types"
 import { fetchProductoPorId } from "@/lib/services/api"
 import { useKeenSlider } from "keen-slider/react"
 import "keen-slider/keen-slider.min.css"
+import { fetchProductoPorIdMock } from "@/lib/services/mock-api"
 
 export default function ProductPage() {
   const params = useParams<{ id: string }>()
@@ -29,7 +30,7 @@ export default function ProductPage() {
   useEffect(() => {
     setMounted(true);
     if (!params?.id) return
-    fetchProductoPorId(Number(params.id))
+    fetchProductoPorIdMock(Number(params.id))
       .then((data) => {
         setProduct(data.producto)
         setRelated(data.sugeridos)

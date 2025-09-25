@@ -18,6 +18,7 @@ import { fetchUsuario, fetchPedidosPorUsuario, actualizarUsuario } from "@/lib/s
 import type { Pedido } from "@/lib/types"
 import withAuth from "@/lib/withAuth"
 import { set } from "date-fns"
+import { mockUsuarios, mockPedidos } from "@/lib/services/mock-data"
 
 
 function ProfilePage() {
@@ -31,27 +32,25 @@ function ProfilePage() {
     telefono: "",
     direcciones: "",
   })
-  // Ajusta el estado inicial y el efecto para usar los nombres de propiedades del type Usuario
-  useEffect(() => {
-    if (!isAuthenticated || !user) {
-      return;
-    }
-    const fetchData = async () => {
-      if (user) {
-        const dataUser = await fetchUsuario();
-        setProfileData({
-          nombre: dataUser.nombre,
-          email: dataUser.email,
-          telefono: dataUser.telefono,
-          direcciones: dataUser.direcciones.length > 0 ? dataUser.direcciones.join("; ") : "",
-        })
-        const dataPedidos = await fetchPedidosPorUsuario();
-        setPedidos(Array.isArray(dataPedidos) ? dataPedidos : [dataPedidos]);
-      }
-    };
-    fetchData();
-  }, [user])
 
+  useEffect(() => {
+    if (!isAuthenticated || !user) return
+
+    // buscar usuario en el mock por email
+    const dataUser = mockUsuarios.find((u) => u.email === user.email)
+
+    if (dataUser) {
+      setProfileData({
+        nombre: dataUser.nombre,
+        email: dataUser.email,
+        telefono: "123456789", // mock fijo
+        direcciones: "Calle Falsa 123", // mock fijo
+      })
+    }
+
+    // pedidos mock
+    setPedidos(mockPedidos)
+  }, [user, isAuthenticated])
 
   const handleLogout = () => {
     logout()
@@ -59,19 +58,8 @@ function ProfilePage() {
   }
 
   const handleSaveProfile = () => {
-    // Mock save functionality
-    setIsEditing(true)
-    try {
-      actualizarUsuario(
-        profileData.nombre,
-        profileData.email,
-        profileData.telefono,
-        profileData.direcciones
-      )
-      setIsEditing(false)
-    } catch (error) {
-      console.error("Error actualizando perfil:", error);
-    }
+    console.log("Perfil actualizado (mock):", profileData)
+    setIsEditing(false)
   }
 
 

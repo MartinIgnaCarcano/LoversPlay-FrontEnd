@@ -7,7 +7,7 @@ import { Search, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useFiltersStore } from "@/lib/store"
-import { mockProducts, mockCategories } from "@/lib/services/mock-data"
+import { mockProductos, mockCategorias } from "@/lib/services/mock-data"
 import Link from "next/link"
 
 interface SearchBarProps {
@@ -18,8 +18,8 @@ interface SearchBarProps {
 export function SearchBar({ isOpen, onClose }: SearchBarProps) {
   const [query, setQuery] = useState("")
   const [results, setResults] = useState<{
-    products: typeof mockProducts
-    categories: typeof mockCategories
+    products: typeof mockProductos
+    categories: typeof mockCategorias
   }>({ products: [], categories: [] })
   const inputRef = useRef<HTMLInputElement>(null)
   const { setSearchQuery } = useFiltersStore()
@@ -32,17 +32,20 @@ export function SearchBar({ isOpen, onClose }: SearchBarProps) {
 
   useEffect(() => {
     if (query.length > 2) {
-      const filteredProducts = mockProducts
+      // 🔍 Filtrar productos
+      const filteredProducts = mockProductos
         .filter(
           (product) =>
-            product.name.toLowerCase().includes(query.toLowerCase()) ||
-            product.tags?.some((tag: string) => tag.toLowerCase().includes(query.toLowerCase())),
+            product.nombre.toLowerCase().includes(query.toLowerCase()) ||
+            product.descripcion_corta?.toLowerCase().includes(query.toLowerCase())
         )
         .slice(0, 5)
 
-      const filteredCategories = mockCategories
-        .filter((category) => category.name.toLowerCase().includes(query.toLowerCase()))
+      // 🔍 Filtrar categorías
+      const filteredCategories = mockCategorias
+        .filter((category) => category.nombre.toLowerCase().includes(query.toLowerCase()))
         .slice(0, 3)
+
 
       setResults({ products: filteredProducts, categories: filteredCategories })
     } else {
@@ -99,52 +102,39 @@ export function SearchBar({ isOpen, onClose }: SearchBarProps) {
           {/* Search results */}
           {(results.products.length > 0 || results.categories.length > 0) && (
             <div className="mt-4 bg-card rounded-lg border border-border shadow-lg max-h-96 overflow-y-auto">
-              {/* Categories */}
-              {results.categories.length > 0 && (
-                <div className="p-4 border-b border-border">
-                  <h3 className="text-sm font-semibold text-muted-foreground mb-2">Categorías</h3>
-                  <div className="space-y-2">
-                    {results.categories.map((category) => (
-                      <Link
-                        key={category.id}
-                        href={`/catalogo/${category.slug}`}
-                        onClick={onClose}
-                        className="block p-2 rounded hover:bg-muted transition-colors"
-                      >
-                        <div className="font-medium text-card-foreground">{category.name}</div>
-                        <div className="text-sm text-muted-foreground">{category.count} productos</div>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {/* Categorías */}
+              {results.categories.map((category) => (
+                <Link
+                  key={category.id}
+                  href={`/catalogo/${category.id}`}
+                  onClick={onClose}
+                  className="block p-2 rounded hover:bg-muted transition-colors"
+                >
+                  <div className="font-medium text-card-foreground">{category.nombre}</div>
+                  {/* Si no tenés count en tu mock, podés quitar esta línea */}
+                  {/* <div className="text-sm text-muted-foreground">{category.count} productos</div> */}
+                </Link>
+              ))}
 
-              {/* Products */}
-              {results.products.length > 0 && (
-                <div className="p-4">
-                  <h3 className="text-sm font-semibold text-muted-foreground mb-2">Productos</h3>
-                  <div className="space-y-2">
-                    {results.products.map((product) => (
-                      <Link
-                        key={product.id}
-                        href={`/producto/${product.slug}`}
-                        onClick={onClose}
-                        className="flex items-center gap-3 p-2 rounded hover:bg-muted transition-colors"
-                      >
-                        <img
-                          src={product.images[0] || "/placeholder.svg"}
-                          alt={product.name}
-                          className="w-10 h-10 rounded object-cover"
-                        />
-                        <div className="flex-1">
-                          <div className="font-medium text-card-foreground">{product.name}</div>
-                          <div className="text-sm text-brand font-semibold">${product.salePrice || product.price}</div>
-                        </div>
-                      </Link>
-                    ))}
+              {/* Productos */}
+              {results.products.map((product) => (
+                <Link
+                  key={product.id}
+                  href={`/producto/${product.id}`}
+                  onClick={onClose}
+                  className="flex items-center gap-3 p-2 rounded hover:bg-muted transition-colors"
+                >
+                  <img
+                    src={product.url_imagen_principal || "/placeholder.svg"}
+                    alt={product.nombre}
+                    className="w-10 h-10 rounded object-cover"
+                  />
+                  <div className="flex-1">
+                    <div className="font-medium text-card-foreground">{product.nombre}</div>
+                    <div className="text-sm text-brand font-semibold">${product.precio}</div>
                   </div>
-                </div>
-              )}
+                </Link>
+              ))}
             </div>
           )}
 

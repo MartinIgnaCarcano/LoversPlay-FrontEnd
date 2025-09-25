@@ -6,26 +6,27 @@ import { Footer } from "@/components/layout/footer"
 import { Hero } from "@/components/layout/hero"
 import { ShippingMethods } from "@/components/shipping/shipping-methods"
 import { ProductGrid } from "@/components/product/product-grid"
-import { BlogList } from "@/components/blog/blog-list"
+
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { fetchProductos } from "@/lib/services/api"
 import type { Product } from "@/lib/types"
-import { mockBlogPosts } from "@/lib/services/mock-data"
+import { fetchProductosMock } from "@/lib/services/mock-api"
+
 
 export default function HomePage() {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
   const [popularProducts, setPopularProducts] = useState<Product[]>([])
-  const latestBlogPosts = mockBlogPosts.slice(0, 3)
+
 
   useEffect(() => {
   // 🔹 Cargar productos destacados (los primeros 8, por ejemplo)
-  fetchProductos(1, 4)
+  fetchProductosMock(1, 4)
     .then((data) => setFeaturedProducts(data.productos))
     .catch((err) => console.error("Error cargando destacados:", err))
 
   // 🔹 Cargar productos más vistos (página 2, otros 8 productos)
-  fetchProductos(2, 4)
+  fetchProductosMock(2, 4)
     .then((data) => setPopularProducts(data.productos))
     .catch((err) => console.error("Error cargando populares:", err))
 }, [])
@@ -119,27 +120,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Latest blog posts */}
-        <section className="py-16">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-foreground mb-4 font-[family-name:var(--font-poppins)]">
-                Últimos Artículos
-              </h2>
-              <p className="text-muted-foreground font-[family-name:var(--font-inter)]">
-                Consejos y guías sobre bienestar íntimo
-              </p>
-            </div>
-            <BlogList posts={latestBlogPosts} className="mb-8" />
-            <div className="text-center">
-              <Link href="/blog">
-                <Button size="lg" variant="outline" asChild>
-                  Ver Todos los Artículos
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </section>
+        
       </main>
 
       <Footer />

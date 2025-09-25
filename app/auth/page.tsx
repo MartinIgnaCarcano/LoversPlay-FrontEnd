@@ -15,6 +15,7 @@ import { useAuthStore } from "@/lib/store"
 import { useRouter, useSearchParams } from "next/navigation"
 import { login as loginApi, register } from "@/lib/services/api" // 👈 importa tu función real
 import { toast } from "sonner"
+import { mockUsuarios } from "@/lib/services/mock-data"
 
 export default function AuthPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -42,32 +43,67 @@ export default function AuthPage() {
   })
 
   // ✅ LOGIN REAL
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    try {
-      const success = await loginApi(loginForm.email, loginForm.password)
-      if (success) {
-        // Actualiza el store global (para que Header muestre "Mi perfil")
-        login({
-          id: "1", // podrías usar el id real del backend si lo devuelve
-          email: loginForm.email,
-          name: loginForm.email.split("@")[0],
-          avatar: "/placeholder.svg?height=40&width=40&text=U",
-        })
-        router.push(redirect) // redirige a la página de destino
-      } else {
-        alert("Error iniciando sesión. Revisa tus credenciales.")
-      }
-    } catch (error) {
-      alert("Error iniciando sesión. Revisa tus credenciales.")
-      console.error("Login error:", error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  // const handleLogin = async (e: React.FormEvent) => {
+  //   e.preventDefault()
+  //   setIsLoading(true)
+  //   try {
+  //     const success = await loginApi(loginForm.email, loginForm.password)
+  //     if (success) {
+  //       // Actualiza el store global (para que Header muestre "Mi perfil")
+  //       login({
+  //         id: "1", // podrías usar el id real del backend si lo devuelve
+  //         email: loginForm.email,
+  //         name: loginForm.email.split("@")[0],
+  //         avatar: "/placeholder.svg?height=40&width=40&text=U",
+  //       })
+  //       router.push(redirect) // redirige a la página de destino
+  //     } else {
+  //       alert("Error iniciando sesión. Revisa tus credenciales.")
+  //     }
+  //   } catch (error) {
+  //     alert("Error iniciando sesión. Revisa tus credenciales.")
+  //     console.error("Login error:", error)
+  //   } finally {
+  //     setIsLoading(false)
+  //   }
+  // }
 
   // 🔧 TODO: Cuando implementes el registro real, vas a reemplazar el mock de abajo
+  
+  // ✅ LOGIN MOCK
+const handleLogin = async (e: React.FormEvent) => {
+  e.preventDefault()
+  setIsLoading(true)
+
+  try {
+    // Buscar usuario en el mock
+    const user = mockUsuarios.find((u) => u.email === loginForm.email)
+
+    if (user) {
+      // Ignoramos la contraseña, siempre entra
+      login({
+        id: user.id,
+        email: user.email,
+        name: user.nombre,
+        avatar: "/placeholder.svg?height=40&width=40&text=U",
+      })
+
+      // Guardar un token falso en localStorage (para que withAuth funcione)
+      localStorage.setItem("access_token", "mock-token")
+
+      router.push(redirect)
+    } else {
+      alert("El usuario no existe en el mock.")
+    }
+  } catch (error) {
+    console.error("Login error:", error)
+    alert("Error iniciando sesión.")
+  } finally {
+    setIsLoading(false)
+  }
+}
+
+  
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
     if (registerForm.password !== registerForm.confirmPassword) {

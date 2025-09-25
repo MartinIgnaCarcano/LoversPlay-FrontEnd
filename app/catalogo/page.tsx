@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Filter, Grid, List } from "lucide-react"
 import { useFiltersStore } from "@/lib/store"
 import { fetchProductos, fetchProductosPorCategorias } from "@/lib/services/api"
+import { fetchProductosMock } from "@/lib/services/mock-api"
 
 export default function CatalogPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -46,7 +47,7 @@ export default function CatalogPage() {
       if (categoriasSeleccionadas.length > 0) {
         data = await fetchProductosPorCategorias(categoriasSeleccionadas, nextPage)
       } else {
-        data = await fetchProductos(nextPage)
+        data = await fetchProductosMock(nextPage)
       }
 
       const nuevos = data.productos
