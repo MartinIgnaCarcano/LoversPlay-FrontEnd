@@ -120,19 +120,20 @@ export default function ProductPage() {
 
             {/* Cantidad y carrito */}
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm" onClick={() => setQuantity(Math.max(1, quantity - 1))} disabled={quantity <= 1}>
+              <Button variant="ghost" className="hover:cursor-pointer" size="sm" onClick={() => setQuantity(Math.max(1, quantity - 1))} disabled={quantity <= 1}>
                 <Minus className="h-4 w-4" />
               </Button>
               <span className="px-4 py-2 font-medium">{quantity}</span>
               <Button
                 variant="ghost"
+                className="hover:cursor-pointer"
                 size="sm"
                 onClick={() => setQuantity(quantity + 1)}
                 disabled={product.stock ? quantity >= product.stock : false}
               >
                 <Plus className="h-4 w-4" />
               </Button>
-              <Button onClick={handleAddToCart} disabled={product.stock === 0} className="flex-1 bg-brand hover:bg-brand/90" size="lg">
+              <Button onClick={handleAddToCart} disabled={product.stock === 0} className="flex-1 bg-primary hover:bg-brand/90 cursor-pointer" size="lg">
                 <ShoppingCart className="h-5 w-5 mr-2" />
                 {product.stock === 0 ? "Agotado" : "Agregar al Carrito"}
               </Button>

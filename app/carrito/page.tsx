@@ -46,7 +46,7 @@ export default function CartPage() {
             <p className="text-muted-foreground mb-8 font-[family-name:var(--font-inter)]">
               Parece que aún no has agregado ningún producto a tu carrito
             </p>
-            <Button size="lg" className="bg-brand hover:bg-brand/90" asChild>
+            <Button size="lg" className="bg-primary hover:bg-primary/60" asChild>
               <Link href="/catalogo">Explorar Productos</Link>
             </Button>
           </div>
@@ -69,7 +69,7 @@ export default function CartPage() {
               <h1 className="text-2xl font-bold text-foreground font-[family-name:var(--font-poppins)]">
                 Carrito de Compras ({getTotalItems()} {getTotalItems() === 1 ? "producto" : "productos"})
               </h1>
-              <Button variant="outline" size="sm" onClick={clearCart}>
+              <Button variant="outline" size="sm" onClick={clearCart} className="hover:cursor-pointer" >
                 <Trash2 className="h-4 w-4 mr-2" />
                 Vaciar carrito
               </Button>
@@ -98,7 +98,7 @@ export default function CartPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => removeItem(item.productId)}
-                          className="text-muted-foreground hover:text-destructive"
+                          className="text-muted-foreground hover:text-destructive hover:cursor-pointer"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -112,6 +112,7 @@ export default function CartPage() {
                             size="sm"
                             onClick={() => updateQuantity(String(item.productId), item.quantity - 1)}
                             disabled={item.quantity <= 1}
+                            className="hover:cursor-pointer"
                           >
                             <Minus className="h-4 w-4" />
                           </Button>
@@ -120,6 +121,7 @@ export default function CartPage() {
                             variant="ghost"
                             size="sm"
                             onClick={() => updateQuantity(String(item.productId), item.quantity + 1)}
+                            className="hover:cursor-pointer"
                           >
                             <Plus className="h-4 w-4" />
                           </Button>
@@ -195,7 +197,7 @@ export default function CartPage() {
               </div>
 
               {/* Checkout button */}
-              <Button className="w-full bg-brand hover:bg-brand/90 mb-4" size="lg" asChild>
+              <Button className="w-full bg-primary hover:bg-primary/60 mb-4" size="lg" asChild>
                 <Link href="/pago">
                   Proceder al pago
                   <ArrowRight className="h-4 w-4 ml-2" />

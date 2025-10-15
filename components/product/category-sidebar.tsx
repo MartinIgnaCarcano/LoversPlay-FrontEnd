@@ -42,14 +42,27 @@ export function CategorySidebar({ className = "", onCategoriasChange }: Category
     setFilters({ priceRange: [value[0], value[1]] as [number, number] })
   }
 
-  const handleRatingChange = (rating: number, checked: boolean) => {
-    const newRatings = checked ? [...filters.rating, rating] : filters.rating.filter((r) => r !== rating)
-
-    setFilters({ rating: newRatings })
-  }
-
   const handleStockChange = (checked: boolean) => {
     setFilters({ inStock: checked })
+  }
+
+  const handleClearButton = () => {
+    // Valores iniciales por defecto
+    const defaultFilters = {
+      categories: [],
+      priceRange: [0, 99999] as [number, number],
+      inStock: false,
+    }
+
+    setFilters(defaultFilters)
+
+    // Avisar al componente padre (si lo hay)
+    if (onCategoriasChange) {
+      onCategoriasChange([])
+    }
+
+    // Colapsar categorías (opcional)
+    setExpandedCategories([])
   }
 
 
@@ -72,7 +85,7 @@ export function CategorySidebar({ className = "", onCategoriasChange }: Category
     <div className={`bg-card rounded-xl border border-border p-6 ${className}`}>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-lg font-semibold text-card-foreground font-[family-name:var(--font-poppins)]">Filtros</h2>
-        <Button variant="ghost" size="sm" onClick={clearFilters}>
+        <Button variant="ghost" size="sm" onClick={handleClearButton}>
           Limpiar
         </Button>
       </div>
@@ -89,16 +102,30 @@ export function CategorySidebar({ className = "", onCategoriasChange }: Category
               onValueChange={handlePriceChange}
               max={99999}
               min={0}
-              step={10}
+              step={500}
               className="w-full"
             />
             <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <span>${filters.priceRange[0]}</span>
-              <span>${filters.priceRange[1]}</span>
+              <span>${filters.priceRange[0]?.toLocaleString?.("es-AR")}</span>
+              <span>${filters.priceRange[1]?.toLocaleString?.("es-AR")}</span>
             </div>
           </div>
         </div>
-
+        {/* Stock */}
+        <div>
+          <h3 className="font-medium text-card-foreground mb-3 font-[family-name:var(--font-poppins)]">
+            Disponibilidad
+          </h3>
+          <div className="flex items-center space-x-2">
+            <Checkbox id="in-stock" checked={filters.inStock} onCheckedChange={handleStockChange} />
+            <label
+              htmlFor="in-stock"
+              className="text-sm text-card-foreground cursor-pointer font-[family-name:var(--font-inter)]"
+            >
+              Solo productos en stock
+            </label>
+          </div>
+        </div>
         {/* Categories */}
         <div>
           <h3 className="font-medium text-card-foreground mb-3 font-[family-name:var(--font-poppins)]">Categorías</h3>
@@ -160,50 +187,6 @@ export function CategorySidebar({ className = "", onCategoriasChange }: Category
         </div>
 
 
-        {/* Rating */}
-        <div>
-          <h3 className="font-medium text-card-foreground mb-3 font-[family-name:var(--font-poppins)]">Calificación</h3>
-          <div className="space-y-2">
-            {[5, 4, 3, 2, 1].map((rating) => (
-              <div key={rating} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`rating-${rating}`}
-                  checked={filters.rating.includes(rating)}
-                  onCheckedChange={(checked) => handleRatingChange(rating, checked as boolean)}
-                />
-                <label
-                  htmlFor={`rating-${rating}`}
-                  className="text-sm text-card-foreground cursor-pointer flex items-center gap-1 font-[family-name:var(--font-inter)]"
-                >
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <span key={i} className={`text-xs ${i < rating ? "text-yellow-400" : "text-muted-foreground"}`}>
-                        ★
-                      </span>
-                    ))}
-                  </div>
-                  <span>y más</span>
-                </label>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Stock */}
-        <div>
-          <h3 className="font-medium text-card-foreground mb-3 font-[family-name:var(--font-poppins)]">
-            Disponibilidad
-          </h3>
-          <div className="flex items-center space-x-2">
-            <Checkbox id="in-stock" checked={filters.inStock} onCheckedChange={handleStockChange} />
-            <label
-              htmlFor="in-stock"
-              className="text-sm text-card-foreground cursor-pointer font-[family-name:var(--font-inter)]"
-            >
-              Solo productos en stock
-            </label>
-          </div>
-        </div>
       </div>
     </div>
   )

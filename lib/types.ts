@@ -22,6 +22,7 @@ export type Product = {
   // 👉 En el catálogo puede venir solo la principal, en detalle viene array
   imagenes?: string[]
   url_imagen_principal?: string
+  url_imagen_secundaria?: string
   // 👉 Cuando es detalle, vienen sugeridos. Cuando no, simplemente undefined
   sugeridos?: {
     id: number
@@ -31,18 +32,6 @@ export type Product = {
   }[]
 }
 
-
-// 📝 Posts de blog
-export type BlogPost = {
-  id: string
-  title: string
-  slug: string
-  cover: string
-  excerpt: string
-  content: string
-  date: string
-  tags?: string[]
-}
 
 // 🚚 Métodos de envío
 export type ShippingMethod = {
@@ -64,6 +53,17 @@ export interface CartItem {
   quantity: number
 }
 
+// 🏠 Dirección de envío
+export type Direccion = {
+  id: number
+  calle: string
+  codigo_postal: string
+  departamento?: string | null
+  provincia: string
+  pais?: string
+  extra?: string | null
+}
+
 // 👤 Usuario autenticado
 export type Usuario = {
   id: string
@@ -71,7 +71,7 @@ export type Usuario = {
   nombre: string
   telefono: string
   rol: "cliente" | "admin"
-  direcciones: string[]
+  direcciones: Direccion[]
 }
 
 // pedido

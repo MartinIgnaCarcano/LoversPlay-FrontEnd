@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import { useState } from "react"
 import Link from "next/link"
 import { ShoppingCart, Heart, Eye } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -30,6 +31,15 @@ export function ProductCard({ product, className = "" }: ProductCardProps) {
     (product as any).images?.[0] ??
     "/placeholder.svg"
 
+  const imagenSecundaria =
+    (product as any).url_imagen_secundaria ??
+    (product as any).image2 ??
+    product.imagenes?.[1] ??
+    imagenPrincipal
+
+  // 👇 Estado para cambiar imagen en hover
+  const [imagenActual, setImagenActual] = useState(imagenPrincipal)
+
   const descripcionCorta: string | undefined =
     (product as any).descripcion_corta ?? (product as any).shortDesc
 
@@ -40,9 +50,15 @@ export function ProductCard({ product, className = "" }: ProductCardProps) {
       productId: (product as any).id,
       name: nombre || "Producto",
       price: precio || 0,
-      image: imagenPrincipal,
+      image: imagenActual,
       quantity: 1,
     })
+  }
+  const handleLike = (e: React.MouseEvent) => {
+    //TODO
+    e.preventDefault()
+    e.stopPropagation()
+    console.log("agregar a favoritos")
   }
 
   return (
@@ -51,38 +67,54 @@ export function ProductCard({ product, className = "" }: ProductCardProps) {
     >
       <Link href={`/producto/${(product as any).id}`}>
         {/* Imagen */}
-        <div className="relative aspect-square overflow-hidden bg-gray-50 rounded-xl flex items-center justify-center">
+        <div className="relative aspect-square overflow-hidden bg-gray-50 rounded-xl flex items-center justify-center"
+          onMouseEnter={() => setImagenActual(imagenSecundaria)}
+          onMouseLeave={() => setImagenActual(imagenPrincipal)}
+        >
           <img
-            src={imagenPrincipal}
+            src={imagenActual}
             alt={nombre || "Producto"}
             className="object-contain max-h-full max-w-full drop-shadow-md group-hover:scale-105 transition-transform duration-300 rounded-lg"
           />
+          {/* 🔥 Precarga invisible de la imagen secundaria */}
+          {imagenSecundaria && (
+            <img
+              src={imagenSecundaria}
+              alt=""
+              style={{ display: "none" }}
+              loading="eager"
+            />
+          )}
 
           {/* Badges */}
-          <div className="absolute top-3 left-3 flex flex-col gap-2">
+          <div className="absolute top-2 left-2 sm:top-3 sm:left-3 flex flex-col gap-1 sm:gap-2">
             {typeof stock === "number" && stock <= 2 && stock > 0 && (
-              <Badge variant="outline" className="bg-background/80">
+              <Badge variant="outline" className="bg-background/80 text-[10px] sm:text-xs px-1.5 py-0.5 sm:px-2 sm:py-1">
                 Últimas {stock}
               </Badge>
             )}
           </div>
 
           {/* Acciones rápidas */}
-          <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <Button size="sm" variant="ghost" className="bg-background/80 hover:bg-background/90 h-8 w-8 p-0">
-              <Heart className="h-4 w-4" />
+          <div className="absolute top-2 right-2 sm:top-3 sm:right-3 flex flex-col gap-1 sm:gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <Button
+              size="sm"
+              variant="ghost"
+              className="bg-background/80 hover:bg-background/90 h-6 w-6 sm:h-8 sm:w-8 p-0"
+              onClick={handleLike}
+            >
+              <Heart className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="sr-only">Agregar a favoritos</span>
-            </Button>
-            <Button size="sm" variant="ghost" className="bg-background/80 hover:bg-background/90 h-8 w-8 p-0">
-              <Eye className="h-4 w-4" />
-              <span className="sr-only">Vista rápida</span>
             </Button>
           </div>
 
           {/* Overlay agotado */}
           {stock === 0 && (
             <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
-              <Badge variant="secondary" className="text-lg px-4 py-2">
+              <Badge
+                variant="secondary"
+                className="text-xs sm:text-lg px-2 sm:px-4 py-1 sm:py-2"
+              >
                 Agotado
               </Badge>
             </div>
@@ -90,22 +122,21 @@ export function ProductCard({ product, className = "" }: ProductCardProps) {
         </div>
 
         {/* Contenido */}
-        <div className="p-4">
-          <h3 className="font-semibold text-card-foreground mb-2 line-clamp-2 font-[family-name:var(--font-poppins)]">
+        <div className="p-2 sm:p-4 flex flex-col justify-between min-h-[130px] sm:min-h-[170px]">
+          <h3 className="font-semibold text-card-foreground mb-1 sm:mb-2 line-clamp-2 font-[family-name:var(--font-poppins)] text-xs sm:text-base">
             {nombre || "Producto sin nombre"}
           </h3>
 
           {descripcionCorta && (
-            <p className="text-sm text-muted-foreground mb-3 line-clamp-2 font-[family-name:var(--font-inter)]">
-              {/* viene con HTML a veces, pero en cards mostramos texto plano */}
+            <p className="text-[10px] sm:text-sm text-muted-foreground mb-2 sm:mb-3 line-clamp-2 font-[family-name:var(--font-inter)]">
               {descripcionCorta.replace(/<[^>]+>/g, "")}
             </p>
           )}
 
           {/* Precio */}
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <span className="text-lg font-bold text-brand font-[family-name:var(--font-poppins)]">
+          <div className="flex items-center justify-between mb-2 sm:mb-3">
+            <div className="flex items-center gap-1 sm:gap-2">
+              <span className="text-sm sm:text-lg font-bold text-brand font-[family-name:var(--font-poppins)]">
                 ${precio?.toLocaleString?.("es-AR") ?? precio}
               </span>
             </div>
@@ -115,14 +146,15 @@ export function ProductCard({ product, className = "" }: ProductCardProps) {
           <Button
             onClick={handleAddToCart}
             disabled={stock === 0}
-            className="w-full bg-brand hover:bg-brand/90"
+            className="w-full mt-auto bg-primary hover:bg-primary/60 cursor-pointer text-[10px] sm:text-sm h-8 sm:h-10"
             size="sm"
           >
-            <ShoppingCart className="h-4 w-4 mr-2" />
+            <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
             {stock === 0 ? "Agotado" : "Agregar al Carrito"}
           </Button>
         </div>
       </Link>
     </div>
+
   )
 }

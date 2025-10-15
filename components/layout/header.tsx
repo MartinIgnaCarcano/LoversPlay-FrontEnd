@@ -12,7 +12,6 @@ import { ErrorBoundary } from "@/components/ui/error-boundary"
 const navigation = [
   { name: "Inicio", href: "/" },
   { name: "Catálogo", href: "/catalogo" },
-  { name: "Blog", href: "/blog" },
   { name: "Envíos", href: "/envios" },
   { name: "Contacto", href: "/contacto" },
 ]

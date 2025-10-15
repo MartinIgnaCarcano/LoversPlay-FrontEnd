@@ -1,4 +1,4 @@
-import type { BackendProduct, Pedido, Product, Usuario } from "@/lib/types"
+import type {Pedido, Product, Usuario } from "@/lib/types"
 
 const API_URL = "http://192.168.100.219:5000/api"
 
@@ -12,6 +12,8 @@ export async function fetchProductos(
   const res = await fetch(`${API_URL}/productos?page=${page}&per_page=${perPage}`)
   if (!res.ok) throw new Error("Error cargando productos")
   const data = await res.json()
+  console.log("productos")
+  console.log(data)
 
   return {
     ...data,
@@ -21,6 +23,7 @@ export async function fetchProductos(
       price: p.precio,
       stock: p.stock,
       image: p.url_imagen_principal,
+      image2: p.url_imagen_secundaria,
       rating: p.valoracion_promedio,
       views: p.vistas,
     })),
@@ -39,7 +42,8 @@ export async function fetchProductosPorCategorias(
   if (!res.ok) throw new Error("Error cargando productos por categorías")
 
   const data = await res.json()
-
+  console.log("productos por categoría")
+  console.log(data)
   return {
     ...data,
     productos: data.productos.map((p: any) => ({
@@ -48,6 +52,7 @@ export async function fetchProductosPorCategorias(
       price: p.precio,
       stock: p.stock,
       image: p.url_imagen_principal,
+      image2: p.url_imagen_secundaria,
       rating: p.valoracion_promedio,
       views: p.vistas,
     })),
@@ -86,7 +91,8 @@ export async function fetchProductoPorId(id: number): Promise<{ producto: Produc
     id: s.id,
     nombre: s.nombre,
     precio: s.precio,
-    url_imagen_principal: s.url_imagen_principal
+    url_imagen_principal: s.url_imagen_principal,
+    url_imagen_secundaria: s.url_imagen_secundaria
   }))
 
   return { producto, sugeridos }
@@ -135,14 +141,14 @@ export async function register(nombre: string, email: string, password: string, 
         "telefono": telefono
       }),
     })
-    
+
     if (!res.ok) throw new Error("Error al registrar usuario")
     const data = await res.json()
 
     if (data.id) {
       return { register: true }
     }
-    
+
     return { register: false }
   } catch (error) {
     console.error("Error en registro:", error);
@@ -168,7 +174,7 @@ export async function fetchUsuario(): Promise<Usuario> {
     email: data.email,
     telefono: data.telefono,
     rol: data.rol || "cliente",
-    direcciones: data.direcciones?.map((d: { direccion: string }) => d.direccion) || []
+    direcciones: data.direcciones || [], 
   }
 }
 

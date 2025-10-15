@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import { Breadcrumbs } from "@/components/ui/breadcrumbs"
@@ -15,6 +15,8 @@ import { useCartStore } from "@/lib/store"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import withAuth from "@/lib/withAuth"
+import { fetchUsuario } from "@/lib/services/api"
+import { set } from "date-fns"
 // import { fetchCostoEnvio } from "@/app/api/costo-envio/route" // 👈 función que vas a definir
 
 function PaymentPage() {
@@ -23,18 +25,22 @@ function PaymentPage() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [orderComplete, setOrderComplete] = useState(false)
 
-  const [shippingMethod, setShippingMethod] = useState("delivery")
+  const [shippingMethod, setShippingMethod] = useState("")
+  const [paymentMethod, setPaymentMethod] = useState("")
   const [shippingCost, setShippingCost] = useState<number>(0)
 
 
   // Form states
   const [billingData, setBillingData] = useState({
-    email: "",
-    phone: "",
+    name: "",
     address: "",
     city: "",
+    province: "",
     postalCode: "",
-  })
+    phone: "",
+    extra: "",
+    email: "",
+  });
 
   // ✅ Ahora usamos los items del carrito directamente
   const cartItems = items
@@ -45,73 +51,126 @@ function PaymentPage() {
 
   const shipping = shippingMethod === "pickup" || shippingMethod === "arrange" ? 0 : shippingCost
   const total = subtotal + shipping
-
+  const [isCalculatingCost, setIsCalculatingCost] = useState(false)
   const breadcrumbItems = [{ label: "Carrito", href: "/carrito" }, { label: "Pago" }]
 
-  // ✅ Calcular costo de envío desde la API
+
+  useEffect(() => {
+    const cargarUsuario = async () => {
+      try {
+        const user = await fetchUsuario();
+        if (user) {
+          const direccion = user.direcciones[0]; // 👈 usamos la primera
+          setBillingData({
+            name: user.nombre || "",
+            email: user.email || "",
+            phone: user.telefono || "",
+            address: direccion?.calle || "",
+            city: direccion?.departamento || "",
+            province: direccion?.provincia || "",
+            postalCode: direccion?.codigo_postal || "",
+            extra: "",
+          });
+        }
+      } catch (error) {
+        console.error("❌ Error al cargar usuario:", error);
+      }
+    };
+
+    cargarUsuario();
+  }, []);
+
   const calculateShipping = async () => {
     if (!billingData.postalCode) {
       alert("Por favor ingresa un código postal válido")
       return
     }
 
-    try {
-      const postalCode = billingData.postalCode
-      const res = await fetch("/api/costo-envio", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ postalCode }),
-      })
-      const data = await res.json()
+    setIsCalculatingCost(true)
+    setShippingCost(0)
 
-      // Si eligió envío a domicilio usamos el costo de "home"
-      if (shippingMethod === "delivery" && data.home) {
-        setShippingCost(data.home)
+    try {
+      if (shippingMethod === "arrange" || shippingMethod === "pickup") {
+        setShippingCost(0)
+        return
       }
 
+      if (shippingMethod === "delivery") {
+        setShippingCost(300)
+        return
+      }
+
+      let endpoint = ""
+      if (shippingMethod === "correo") endpoint = "/api/envio-andreani"
+      else if (shippingMethod === "viacargo") endpoint = "/api/envio-viacargo"
+
+      if (!endpoint) return
+
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ postalCode: billingData.postalCode }),
+      })
+
+      const text = await res.text()
+
+      let data
+      try {
+        data = JSON.parse(text)
+      } catch {
+        alert("⚠️ Error calculando el envio: " + text)
+        return
+      }
+
+      if (data.error) {
+        alert("❌ Error del servidor: " + (data.detalle || "Desconocido"))
+        return
+      }
+
+      setShippingCost(parseFloat(data.precio) || 0)
     } catch (error) {
       console.error("❌ Error calculando el envío:", error)
       alert("Hubo un problema calculando el costo de envío")
+    } finally {
+      setIsCalculatingCost(false)
     }
   }
 
   const handleProcessPayment = async () => {
-  setIsProcessing(true);
+    setIsProcessing(true);
+    try {
+      // Adaptar items al formato que espera tu API
+      const detalles = cartItems.map((item) => ({
+        producto_id: item.productId, // 👈 asegurate que `item.productId` exista en tu store
+        cantidad: item.quantity,
+      }));
+      const token = localStorage.getItem("access_token")
+      const res = await fetch("/api/pagos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ detalles, token }),
+      });
 
-  try {
-    // Adaptar items al formato que espera tu API
-    const detalles = cartItems.map((item) => ({
-      producto_id: item.productId, // 👈 asegurate que `item.productId` exista en tu store
-      cantidad: item.quantity,
-    }));
-    const token = localStorage.getItem("access_token")
-    const res = await fetch("/api/pagos", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ detalles, token }),
-    });
+      if (!res.ok) {
+        throw new Error("Error creando pedido");
+      }
 
-    if (!res.ok) {
-      throw new Error("Error creando pedido");
+      const data = await res.json();
+      console.log("✅ Pedido creado:", data);
+
+      clearCart(); // limpiar carrito
+      setOrderComplete(true);
+
+      // Redirigir después de unos segundos
+      setTimeout(() => router.push("/"), 3000);
+
+    } catch (error) {
+      console.error("❌ Error en el pago:", error);
+      alert("Hubo un error procesando el pago");
+    } finally {
+      setIsProcessing(false);
     }
-
-    const data = await res.json();
-    console.log("✅ Pedido creado:", data);
-
-    clearCart(); // limpiar carrito
-    setOrderComplete(true);
-
-    // Redirigir después de unos segundos
-    setTimeout(() => router.push("/"), 3000);
-
-  } catch (error) {
-    console.error("❌ Error en el pago:", error);
-    alert("Hubo un error procesando el pago");
-  } finally {
-    setIsProcessing(false);
-  }
-};
-
+  };
 
 
   if (orderComplete) {
@@ -150,6 +209,7 @@ function PaymentPage() {
     )
   }
 
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -172,17 +232,16 @@ function PaymentPage() {
             {/* Datos de contacto */}
             <Card>
               <CardHeader>
-                <CardTitle>Información de Contacto</CardTitle>
+                <CardTitle>Dirección de Entrega</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="email">Email *</Label>
+                    <Label htmlFor="nombre">Nombre y Apellido *</Label>
                     <Input
-                      id="email"
-                      type="email"
-                      value={billingData.email}
-                      onChange={(e) => setBillingData({ ...billingData, email: e.target.value })}
+                      id="nombre"
+                      value={billingData.name || ""}
+                      onChange={(e) => setBillingData({ ...billingData, name: e.target.value })}
                       required
                     />
                   </div>
@@ -197,8 +256,70 @@ function PaymentPage() {
                     />
                   </div>
                 </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="address">Calle y Numeración *</Label>
+                    <Input
+                      id="address"
+                      value={billingData.address}
+                      onChange={(e) => setBillingData({ ...billingData, address: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="city">Departamento / Partido</Label>
+                    <Input
+                      id="city"
+                      value={billingData.city}
+                      onChange={(e) => setBillingData({ ...billingData, city: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="province">Provincia</Label>
+                    <Input
+                      id="province"
+                      value={billingData.province || ""}
+                      onChange={(e) => setBillingData({ ...billingData, province: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="postalCode">Código Postal *</Label>
+                    <Input
+                      id="postalCode"
+                      value={billingData.postalCode}
+                      onChange={(e) => setBillingData({ ...billingData, postalCode: e.target.value })}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="extra">Detalle extra para la entrega</Label>
+                  <Input
+                    id="extra"
+                    placeholder="Ej: Tocar el timbre derecho / Llamar al llegar"
+                    value={billingData.extra || ""}
+                    onChange={(e) => setBillingData({ ...billingData, extra: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="email">Email *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={billingData.email}
+                    onChange={(e) => setBillingData({ ...billingData, email: e.target.value })}
+                    required
+                  />
+                </div>
               </CardContent>
             </Card>
+
 
             {/* Método de entrega */}
             <Card>
@@ -206,46 +327,23 @@ function PaymentPage() {
                 <CardTitle>Método de Entrega</CardTitle>
               </CardHeader>
               <CardContent>
-                <RadioGroup value={shippingMethod} onValueChange={setShippingMethod} className="space-y-4">
-                  <div className="flex items-center space-x-2 p-4 border rounded-lg">
-                    <RadioGroupItem value="delivery" id="delivery" />
-                    <Label htmlFor="delivery" className="flex items-center gap-2 cursor-pointer">
-                      <MapPin className="h-5 w-5" />
-                      Envío a domicilio
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2 p-4 border rounded-lg">
-                    <RadioGroupItem value="pickup" id="pickup" />
-                    <Label htmlFor="pickup" className="flex items-center gap-2 cursor-pointer">
-                      <Store className="h-5 w-5" />
-                      Retiro en local
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2 p-4 border rounded-lg">
-                    <RadioGroupItem value="arrange" id="arrange" />
-                    <Label htmlFor="arrange" className="flex items-center gap-2 cursor-pointer">
-                      <MessageCircle className="h-5 w-5" />
-                      Arreglar con el vendedor
-                    </Label>
-                  </div>
-                </RadioGroup>
-
-                {shippingMethod === "delivery" && (
-                  <div className="mt-6 space-y-4">
+                {shippingMethod !== "arrange" && (
+                  <div className="mb-4">
                     <div>
                       <Label htmlFor="postalCode">Código Postal *</Label>
                       <div className="flex gap-2">
                         <Input
                           id="postalCode"
-                          value={billingData.postalCode}
                           onChange={(e) => setBillingData({ ...billingData, postalCode: e.target.value })}
                           placeholder="Ej: 5500"
                           required
                         />
-                        <Button variant="outline" onClick={calculateShipping}>
-                          Calcular envío
+                        <Button
+                          variant="outline"
+                          onClick={calculateShipping}
+                          disabled={isCalculatingCost} // ⛔ mientras carga no se puede apretar
+                        >
+                          {isCalculatingCost ? "Calculando..." : "Calcular envío"}  {/* 🔄 texto dinámico */}
                         </Button>
                       </div>
                     </div>
@@ -256,6 +354,93 @@ function PaymentPage() {
                     )}
                   </div>
                 )}
+                <RadioGroup
+                  value={shippingMethod}
+                  onValueChange={(value) => {
+                    setShippingMethod(value);
+                    setShippingCost(0);
+                  }}
+                  className="space-y-4"
+                >
+                  <div className="flex items-center space-x-2 p-4 border rounded-lg">
+                    <RadioGroupItem value="correo" id="correo" />
+                    <Label htmlFor="correo" className="flex flex-col cursor-pointer">
+                      <span className="font-medium">Correo Argentino</span>
+                      <span className="text-xs text-muted-foreground">
+                        3 a 5 días hábiles
+                      </span>
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2 p-4 border rounded-lg">
+                    <RadioGroupItem value="delivery" id="delivery" />
+                    <Label htmlFor="delivery" className="flex flex-col cursor-pointer">
+                      <span className="font-medium">Delivery</span>
+                      <span className="text-xs text-muted-foreground">24 hs</span>
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2 p-4 border rounded-lg">
+                    <RadioGroupItem value="viacargo" id="viacargo" />
+                    <Label htmlFor="viacargo" className="flex flex-col cursor-pointer">
+                      <span className="font-medium">ViaCargo</span>
+                      <span className="text-xs text-muted-foreground">24–72 hs</span>
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2 p-4 border rounded-lg">
+                    <RadioGroupItem value="arrange" id="arrange" />
+                    <Label htmlFor="arrange" className="flex flex-col cursor-pointer">
+                      <span className="font-medium">Arreglar con el vendedor</span>
+                    </Label>
+                  </div>
+                </RadioGroup>
+
+
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Método de Pago</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <RadioGroup
+                  value={paymentMethod}
+                  onValueChange={setPaymentMethod}
+                  className="space-y-4"
+                >
+                  <div className="flex items-center space-x-2 p-4 border rounded-lg">
+                    <RadioGroupItem value="transferencia" id="transferencia" />
+                    <Label htmlFor="transferencia" className="cursor-pointer">
+                      Transferencia bancaria
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2 p-4 border rounded-lg">
+                    <RadioGroupItem value="credito" id="credito" />
+                    <Label htmlFor="credito" className="cursor-pointer">
+                      Tarjeta de crédito (+10%)
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2 p-4 border rounded-lg">
+                    <RadioGroupItem value="debito" id="debito" />
+                    <Label htmlFor="debito" className="cursor-pointer">
+                      Tarjeta de débito
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2 p-4 border rounded-lg">
+                    <RadioGroupItem
+                      value="mercadopago"
+                      id="mercadopago"
+                      className="text-brand border-primary data-[state=checked]:bg-brand data-[state=checked]:border-brand"
+                    />
+                    <Label htmlFor="mercadopago" className="cursor-pointer">
+                      Mercado Pago
+                    </Label>
+                  </div>
+                </RadioGroup>
               </CardContent>
             </Card>
           </div>
@@ -311,10 +496,20 @@ function PaymentPage() {
                 </div>
 
                 <Button
-                  className="w-full bg-brand hover:bg-brand/90"
+                  className="w-full bg-primary hover:bg-primary/60 cursor-pointer :disabled:cursor-not-allowed"
                   size="lg"
                   onClick={handleProcessPayment}
-                  disabled={isProcessing}
+                  disabled={
+                    isProcessing ||
+                    !billingData.name ||
+                    !billingData.address ||
+                    !billingData.province ||
+                    !billingData.postalCode ||
+                    !billingData.phone ||
+                    !billingData.email ||
+                    !shippingMethod ||
+                    !paymentMethod
+                  }
                 >
                   {isProcessing ? "Procesando..." : `Pagar con Mercado Pago $${total.toFixed(2)}`}
                 </Button>

@@ -32,10 +32,9 @@ export async function POST(req: Request) {
 
   // 👇 Mapeamos la respuesta para no depender de índices
   const branch = data.find((d: any) => d.type === "branch")?.price || null
-  const home = data.find((d: any) => d.type === "home")?.price || null
+  const precio = data.find((d: any) => d.type === "home")?.price || null
 
   return NextResponse.json({
-    branch,
-    home,
+    precio
   })
 }
