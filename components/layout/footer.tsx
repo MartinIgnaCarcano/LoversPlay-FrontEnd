@@ -12,10 +12,10 @@ export function Footer() {
   ]
 
   const categories = [
-    { name: "Juguetes para Parejas", href: "/catalogo/juguetes-parejas" },
-    { name: "Juguetes Femeninos", href: "/catalogo/juguetes-femeninos" },
-    { name: "Lubricantes", href: "/catalogo/lubricantes" },
-    { name: "Lencería", href: "/catalogo/lenceria" },
+    { name: "Lencería", href: "/catalogo/" },
+    { name: "Vibradores", href: "/catalogo/" },
+    { name: "Accesorios", href: "/catalogo/" },
+    { name: "Dildos", href: "/catalogo/" },
   ]
 
   const support = [

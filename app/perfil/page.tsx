@@ -14,8 +14,8 @@ import { Separator } from "@/components/ui/separator"
 import { User, Mail, Phone, MapPin, Package, Heart, Settings, LogOut, Edit } from "lucide-react"
 import { useAuthStore } from "@/lib/store"
 import { useRouter } from "next/navigation"
-import { fetchUsuario, fetchPedidosPorUsuario, actualizarUsuario } from "@/lib/services/api"
-import type { Pedido } from "@/lib/types"
+import { fetchUsuario, fetchPedidosPorUsuario, actualizarUsuario, fetchWishlist } from "@/lib/services/api"
+import type { Pedido, Product } from "@/lib/types"
 import withAuth from "@/lib/withAuth"
 import { set } from "date-fns"
 
@@ -25,6 +25,7 @@ function ProfilePage() {
   const router = useRouter()
   const [isEditing, setIsEditing] = useState(false)
   const [pedidos, setPedidos] = useState<Pedido[]>([])
+  const [wishlist, setWishlist]= useState<Product[]>([])
   const [profileData, setProfileData] = useState({
     nombre: "",
     email: "",
@@ -47,6 +48,10 @@ function ProfilePage() {
         })
         const dataPedidos = await fetchPedidosPorUsuario();
         setPedidos(Array.isArray(dataPedidos) ? dataPedidos : [dataPedidos]);
+        const dataWishlist = await fetchWishlist();
+        console.log(dataWishlist)
+        setWishlist(dataWishlist)
+
       }
     };
     fetchData();
@@ -74,23 +79,6 @@ function ProfilePage() {
     }
   }
 
-
-
-  // Mock wishlist data
-  const wishlist = [
-    {
-      id: "1",
-      name: "Vibrador de Lujo Rosa",
-      price: 69.99,
-      image: "/elegant-pink-luxury-vibrator.jpg",
-    },
-    {
-      id: "2",
-      name: "Lubricante Premium Natural",
-      price: 24.99,
-      image: "/premium-natural-lubricant-bottle-elegant.jpg",
-    },
-  ]
 
   const breadcrumbItems = [{ label: "Mi Perfil" }]
 
@@ -281,16 +269,16 @@ function ProfilePage() {
                       <div key={item.id} className="border border-border rounded-lg p-4">
                         <div className="flex gap-4">
                           <img
-                            src={item.image || "/placeholder.svg"}
-                            alt={item.name}
+                            src={item.url_imagen_principal || "/placeholder.svg"}
+                            alt={item.nombre}
                             className="w-16 h-16 rounded-lg object-cover"
                           />
                           <div className="flex-1">
                             <h3 className="font-semibold text-card-foreground mb-1 font-[family-name:var(--font-poppins)]">
-                              {item.name}
+                              {item.nombre}
                             </h3>
                             <p className="text-lg font-bold text-brand font-[family-name:var(--font-poppins)]">
-                              ${item.price}
+                              ${item.precio}
                             </p>
                             <div className="flex gap-2 mt-2">
                               <Button size="sm" className="bg-brand hover:bg-brand/90">

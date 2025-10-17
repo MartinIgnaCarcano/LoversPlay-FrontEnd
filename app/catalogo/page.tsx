@@ -17,7 +17,8 @@ export default function CatalogPage() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
 
   const { filters, sortBy, searchQuery } = useFiltersStore()
-
+  const [totalGlobal, setTotalGlobal] = useState(0)
+  const [totalFiltrados, setTotalFiltrados] = useState(0)
   const [productos, setProductos] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(1)
@@ -51,6 +52,7 @@ export default function CatalogPage() {
 
       const nuevos = data.productos
 
+      setTotalGlobal(data.total)
       if (reset) {
         setProductos(nuevos)
         setPage(1)                // página actual es 1
@@ -81,6 +83,8 @@ export default function CatalogPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page])
 
+
+
   const loadMore = () => setPage((prev) => prev + 1)
 
   // Filtros y orden
@@ -108,6 +112,7 @@ export default function CatalogPage() {
       return true
     })
 
+
     // Sort
     switch (sortBy) {
       case "price-asc":
@@ -126,9 +131,12 @@ export default function CatalogPage() {
         filtered.sort((a, b) => Number(b.id) - Number(a.id))
         break
     }
-
     return filtered
   }, [productos, filters, sortBy, searchQuery])
+
+  useEffect(() => {
+    setTotalFiltrados(filteredAndSortedProducts.length)
+  }, [filteredAndSortedProducts])
 
   const breadcrumbItems = [{ label: "Catálogo" }]
 
@@ -170,7 +178,9 @@ export default function CatalogPage() {
                 </Button>
 
                 <span className="text-sm text-muted-foreground font-[family-name:var(--font-inter)]">
-                  {loading ? "Cargando..." : `${filteredAndSortedProducts.length} productos encontrados`}
+                  {loading
+                    ? "Cargando..."
+                    : `Mostrando ${totalFiltrados} de ${totalGlobal} productos`}
                 </span>
               </div>
 

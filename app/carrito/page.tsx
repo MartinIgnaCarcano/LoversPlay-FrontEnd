@@ -90,26 +90,29 @@ export default function CartPage() {
 
                     {/* Product details */}
                     <div className="flex-1">
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-semibold text-card-foreground font-[family-name:var(--font-poppins)]">
+                      {/* Nombre + tacho */}
+                      <div className="flex justify-between items-center mb-3 sm:mb-2">
+                        <h3 className="font-semibold text-card-foreground font-[family-name:var(--font-poppins)] truncate">
                           {item.name}
                         </h3>
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="icon"
                           onClick={() => removeItem(item.productId)}
-                          className="text-muted-foreground hover:text-destructive hover:cursor-pointer"
+                          className="text-muted-foreground hover:text-destructive transition-colors"
+                          aria-label="Eliminar producto"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
 
-                      <div className="flex items-center justify-between">
+                      {/* Sumador + precio */}
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         {/* Quantity controls */}
-                        <div className="flex items-center border border-border rounded-lg">
+                        <div className="flex items-center justify-center sm:justify-start border border-border rounded-lg px-1">
                           <Button
                             variant="ghost"
-                            size="sm"
+                            size="icon"
                             onClick={() => updateQuantity(String(item.productId), item.quantity - 1)}
                             disabled={item.quantity <= 1}
                             className="hover:cursor-pointer"
@@ -119,7 +122,7 @@ export default function CartPage() {
                           <span className="px-4 py-2 font-medium">{item.quantity}</span>
                           <Button
                             variant="ghost"
-                            size="sm"
+                            size="icon"
                             onClick={() => updateQuantity(String(item.productId), item.quantity + 1)}
                             className="hover:cursor-pointer"
                           >
@@ -128,13 +131,14 @@ export default function CartPage() {
                         </div>
 
                         {/* Price */}
-                        <div className="text-right">
+                        <div className="text-center sm:text-right">
                           <div className="font-bold text-lg text-card-foreground font-[family-name:var(--font-poppins)]">
                             ${(item.price * item.quantity).toFixed(2)}
                           </div>
                         </div>
                       </div>
                     </div>
+
                   </div>
                 </div>
               ))}

@@ -70,7 +70,7 @@ export function CategorySidebar({ className = "", onCategoriasChange }: Category
     const loadCategorias = async () => {
       try {
         const data = await fetchCategorias()
-        setCategorias(data.sort((a, b) => a.nombre.localeCompare(b.nombre)))
+        setCategorias(data)
       } catch (error) {
         console.error("Error cargando categorías", error)
       } finally {

@@ -1,6 +1,6 @@
-import type {Pedido, Product, Usuario } from "@/lib/types"
+import type { Pedido, Product, Usuario } from "@/lib/types"
 
-const API_URL = "http://192.168.100.219:5000/api"
+const API_URL = "http://localhost:5000/api"
 
 
 
@@ -98,6 +98,19 @@ export async function fetchProductoPorId(id: number): Promise<{ producto: Produc
   return { producto, sugeridos }
 }
 
+export async function fetchProductosBase() {
+  const res = await fetch(`${API_URL}/productos/nombres`)
+  if (!res.ok) throw new Error("Error al cargar productos")
+  const data = await res.json()
+  return data.map((p: any) => ({
+    id: p.id,
+    nombre: p.nombre,
+    categoria_id: p.categoria_id,
+    url_imagen_principal: p.url_imagen_principal
+  }))
+}
+
+
 export { fetchProductoPorId as fetchProducto }
 
 // 🔹 Login
@@ -174,7 +187,7 @@ export async function fetchUsuario(): Promise<Usuario> {
     email: data.email,
     telefono: data.telefono,
     rol: data.rol || "cliente",
-    direcciones: data.direcciones || [], 
+    direcciones: data.direcciones || [],
   }
 }
 
@@ -241,4 +254,24 @@ export async function actualizarUsuario(nombre: string, email: string, telefono:
     console.error("Error en actualización de usuario:", error)
     return { update: false }
   }
+}
+
+export async function fetchWishlist() {
+  const response = await fetch(`${API_URL}/auth/me`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+    }
+  })
+  if (!response.ok) throw new Error("Error cargando fav")
+
+  const data = await response.json()
+  // Validamos que el backend devuelva un array en "favoritos"
+  const favoritos = Array.isArray(data?.favoritos) ? data.favoritos : [];
+  console.log("Favoritos: "+favoritos)
+  return favoritos.map((p: any) => ({
+    id: p.id,
+    nombre: p.nombre,
+    precio: p.precio,
+    url_imagen_principal: p.url_imagen_principal
+  }))
 }
