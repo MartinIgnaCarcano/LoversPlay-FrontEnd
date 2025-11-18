@@ -25,6 +25,7 @@ export function NavigationButtons({
     return (
         <div className="flex justify-between pt-2">
             <Button
+                className="cursor-pointer"
                 variant="outline"
                 disabled={step === 1}
                 onClick={onBack}
@@ -33,7 +34,7 @@ export function NavigationButtons({
             </Button>
 
             <Button
-                className="bg-primary hover:bg-primary/80"
+                className="bg-primary hover:bg-primary/80 cursor-pointer"
                 onClick={onNext}
                 disabled={isProcessing || !canGoNext}
             >
