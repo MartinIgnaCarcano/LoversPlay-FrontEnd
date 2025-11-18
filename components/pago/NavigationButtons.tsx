@@ -23,18 +23,18 @@ export function NavigationButtons({
     const isLastStep = step === 5
 
     return (
-        <div className="flex justify-between pt-2">
+        <div className="mt-4 flex justify-between">
             <Button
-                className="cursor-pointer"
                 variant="outline"
-                disabled={step === 1}
+                disabled={step === 1 || isProcessing}
                 onClick={onBack}
+                className="min-w-[96px] disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 Anterior
             </Button>
 
             <Button
-                className="bg-primary hover:bg-primary/80 cursor-pointer"
+                className="min-w-[150px] bg-primary hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={onNext}
                 disabled={isProcessing || !canGoNext}
             >

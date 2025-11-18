@@ -33,10 +33,10 @@ export function Step3EnvioDetalle({
             <CardHeader>
                 <CardTitle>Detalles del envío</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-2">
                 {(shippingType === "correo" || shippingType === "transporte") && (
                     <>
-                        <div>
+                        <div className="flex flex-col gap-1">
                             <Label htmlFor="postalCode3">Código Postal *</Label>
                             <div className="flex gap-2">
                                 <Input

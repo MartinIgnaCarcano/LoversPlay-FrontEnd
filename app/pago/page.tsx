@@ -1,7 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowLeft, CheckCircle } from "lucide-react"
+import { CheckCircle } from "lucide-react"
+import { AnimatePresence, motion } from "framer-motion"
 
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
@@ -140,21 +141,34 @@ function PaymentPage() {
     )
   }
 
+  // Step content centrado, con animación entre pasos
   const stepContent = (
-    <>
-      {stepComponent}
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={step}
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -20 }}
+        transition={{ duration: 0.2 }}
+        className="w-full flex flex-col items-center"
+      >
+        <div className="w-full max-w-lg space-y-4">
+          {stepComponent}
 
-      <NavigationButtons
-        step={step}
-        isProcessing={isProcessing}
-        canGoNext={canGoNext}
-        total={total}
-        onBack={goBack}
-        onNext={goNext}
-      />
-    </>
+          <NavigationButtons
+            step={step}
+            isProcessing={isProcessing}
+            canGoNext={canGoNext}
+            total={total}
+            onBack={goBack}
+            onNext={goNext}
+          />
+        </div>
+      </motion.div>
+    </AnimatePresence>
   )
 
+  // Summary solo en el step 5
   const summary = step === 5 ? (
     <SummaryCard
       cartItems={cartItems}
@@ -168,7 +182,8 @@ function PaymentPage() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 pt-2 pb-4">
+
         <Breadcrumbs items={breadcrumbItems} className="mb-6" />
 
         <Stepper currentStep={step} labels={stepLabels} />
@@ -179,9 +194,8 @@ function PaymentPage() {
         />
       </main>
 
-      <Footer />
     </div>
   )
 }
 
-export default withAuth(PaymentPage)
+export default (PaymentPage)

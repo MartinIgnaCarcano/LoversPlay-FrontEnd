@@ -16,13 +16,13 @@ export function Step2MetodoEnvio({ shippingType, setShippingType }: Step2MetodoE
             <CardHeader>
                 <CardTitle>Método de entrega</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-2">
                 <RadioGroup
                     value={shippingType}
                     onValueChange={(value: ShippingType) => setShippingType(value)}
-                    className="space-y-4"
+                    className="space-y-2"
                 >
-                    <div className="flex items-center space-x-4 p-4 border rounded-lg">
+                    <div className="flex items-center space-x-4 p-3 border rounded-lg">
                         <RadioGroupItem value="correo" id="correo" />
                         <Label htmlFor="correo" className="flex flex-col items-start cursor-pointer">
                             <span className="font-medium">Correo</span>
@@ -30,7 +30,7 @@ export function Step2MetodoEnvio({ shippingType, setShippingType }: Step2MetodoE
                         </Label>
                     </div>
 
-                    <div className="flex items-center space-x-4 p-4 border rounded-lg">
+                    <div className="flex items-center space-x-4 p-3 border rounded-lg">
                         <RadioGroupItem value="transporte" id="transporte" />
                         <Label htmlFor="transporte" className="flex flex-col items-start cursor-pointer">
                             <span className="font-medium">Transporte</span>
@@ -38,7 +38,7 @@ export function Step2MetodoEnvio({ shippingType, setShippingType }: Step2MetodoE
                         </Label>
                     </div>
 
-                    <div className="flex items-center space-x-4 p-4 border rounded-lg">
+                    <div className="flex items-center space-x-4 p-3 border rounded-lg">
                         <RadioGroupItem value="pickup" id="pickup" />
                         <Label htmlFor="pickup" className="flex flex-col items-start cursor-pointer">
                             <span className="font-medium">Retirar por el local</span>
@@ -46,7 +46,7 @@ export function Step2MetodoEnvio({ shippingType, setShippingType }: Step2MetodoE
                         </Label>
                     </div>
 
-                    <div className="flex items-center space-x-4 p-4 border rounded-lg">
+                    <div className="flex items-center space-x-4 p-3 border rounded-lg">
                         <RadioGroupItem value="arrange" id="arrange" />
                         <Label htmlFor="arrange" className="flex flex-col items-start cursor-pointer">
                             <span className="font-medium">Arreglar con el vendedor</span>
