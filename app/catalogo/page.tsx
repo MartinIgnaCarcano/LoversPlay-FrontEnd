@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button"
 import { Filter, Grid, List } from "lucide-react"
 import { useFiltersStore } from "@/lib/store"
 import { fetchProductos, fetchProductosPorCategorias } from "@/lib/services/api"
+import { Pagination } from "@/components/ui/pagination"
+
 
 export default function CatalogPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -22,7 +24,7 @@ export default function CatalogPage() {
   const [productos, setProductos] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(1)
-  const [hasMore, setHasMore] = useState(true)
+  const [totalPages, setTotalPages] = useState(1)
   const [categoriasSeleccionadas, setCategoriasSeleccionadas] = useState<number[]>([])
 
   // Normalizador para que coincidan con tus componentes
@@ -38,31 +40,23 @@ export default function CatalogPage() {
     }))
 
   // Función de carga
-  const loadProductos = async (reset = false) => {
+  const loadProductos = async (pageNumber = 1) => {
     setLoading(true)
     try {
       let data
-      const nextPage = reset ? 1 : page
 
       if (categoriasSeleccionadas.length > 0) {
-        data = await fetchProductosPorCategorias(categoriasSeleccionadas, nextPage)
+        data = await fetchProductosPorCategorias(categoriasSeleccionadas, pageNumber)
       } else {
-        data = await fetchProductos(nextPage)
+        data = await fetchProductos(pageNumber)
       }
 
-      const nuevos = data.productos
-
+      setProductos(data.productos)
       setTotalGlobal(data.total)
-      if (reset) {
-        setProductos(nuevos)
-        setPage(1)                // página actual es 1
-      } else {
-        setProductos((prev) => [...prev, ...nuevos])
-        setPage(nextPage)         // mantener sincronizado el page usado
-      }
-      setHasMore(data.page * data.per_page < data.total)
+      setPage(pageNumber)
+      setTotalPages(Math.ceil(data.total / data.per_page))
     } catch (err) {
-      console.error("Error cargando productos:", err)
+      console.error(err)
     } finally {
       setLoading(false)
     }
@@ -70,18 +64,12 @@ export default function CatalogPage() {
 
 
 
+
   // Primera carga y cuando cambian categorías
   useEffect(() => {
-    loadProductos(true)
+    loadProductos(1)
   }, [categoriasSeleccionadas])
 
-  // Cuando cambia la página (para "cargar más")
-  useEffect(() => {
-    if (page > 1) {
-      loadProductos(false)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page])
 
 
 
@@ -180,7 +168,7 @@ export default function CatalogPage() {
                 <span className="text-sm text-muted-foreground font-[family-name:var(--font-inter)]">
                   {loading
                     ? "Cargando..."
-                    : `Mostrando ${totalFiltrados} de ${totalGlobal} productos`}
+                    : `${totalGlobal} productos encontrados`}
                 </span>
               </div>
 
@@ -191,20 +179,15 @@ export default function CatalogPage() {
 
             {/* Products grid */}
             <ProductGrid products={filteredAndSortedProducts} />
-            {hasMore && (
-              <div className="flex justify-center mt-6">
-                <button
-                  onClick={loadMore}
-                  disabled={loading}
-                  className="flex items-center gap-2 text-primary hover:underline disabled:opacity-50"
-                >
-                  <span>Cargar más</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-              </div>
-            )}
+
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              onPageChange={(p) => loadProductos(p)}
+              maxVisible={5}
+            />
+
+
           </div>
         </div>
       </main>

@@ -1,13 +1,13 @@
 import type { Pedido, Product, Usuario } from "@/lib/types"
 
-const API_URL = "http://localhost:5000/api"
+const API_URL = "http://192.168.100.219:5000/api"
 
 
 
 // 🔹 Cargar productos (paginado)
 export async function fetchProductos(
   page: number = 1,
-  perPage: number = 15
+  perPage: number = 16
 ): Promise<{ page: number; per_page: number; productos: any[]; total: number }> {
   const res = await fetch(`${API_URL}/productos?page=${page}&per_page=${perPage}`)
   if (!res.ok) throw new Error("Error cargando productos")
@@ -34,7 +34,7 @@ export async function fetchProductos(
 export async function fetchProductosPorCategorias(
   ids: number[],
   page: number = 1,
-  perPage: number = 15
+  perPage: number = 16
 ): Promise<{ page: number; per_page: number; productos: Product[]; total: number }> {
   const res = await fetch(
     `${API_URL}/productos/por_categoria?ids=${ids.join(",")}&page=${page}&per_page=${perPage}`
