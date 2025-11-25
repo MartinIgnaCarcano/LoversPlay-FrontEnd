@@ -54,6 +54,14 @@ export function useCheckout() {
 
     const stepLabels = ["Dirección", "Envío", "Datos de envío", "Pago", "Confirmación"] as const
 
+    //Para cuando hacen hacia atras y cambia el metodo de envio
+    const handleShippingTypeChange = (value: ShippingType) => {
+        setShippingType(value)
+        setShippingCost(0)              // ← resetea el precio
+        setShippingCarrier("")          // ← opcional: limpia el transporte elegido
+    }
+
+
     // Cargar usuario logueado
     useEffect(() => {
         const cargarUsuario = async () => {
@@ -145,6 +153,24 @@ export function useCheckout() {
     // Validaciones por paso
     const canGoNext: boolean = (() => {
         if (step === 1) {
+            return !!shippingType
+        }
+        if (step === 2) {
+            if (shippingType === "correo" || shippingType === "transporte") {
+                return shippingCost > 0
+            }
+            return true
+        }
+        if (step === 3) {
+            if (shippingType === "pickup" || shippingType === "arrange") {
+                return (
+                    !!billingData.name &&
+                    !!billingData.phone &&
+                    !!billingData.email
+                )
+            }
+
+            // envío normal → validar todo
             return (
                 !!billingData.name &&
                 !!billingData.address &&
@@ -153,15 +179,6 @@ export function useCheckout() {
                 !!billingData.email &&
                 !!billingData.province
             )
-        }
-        if (step === 2) {
-            return !!shippingType
-        }
-        if (step === 3) {
-            if (shippingType === "correo" || shippingType === "transporte") {
-                return shippingCost > 0
-            }
-            return true
         }
         if (step === 4) {
             return !!paymentMethod
@@ -179,7 +196,11 @@ export function useCheckout() {
             return false
         }
         if (currentStep === 3 && !canGoNext) {
-            alert("Calculá el costo de envío antes de continuar")
+            if (shippingType === "pickup" || shippingType === "arrange") {
+                alert("Completá nombre, teléfono y email")
+            } else {
+                alert("Completá todos los datos de dirección obligatorios")
+            }
             return false
         }
         if (currentStep === 4 && !canGoNext) {
@@ -241,11 +262,7 @@ export function useCheckout() {
         }
 
         if (step === 2) {
-            if (shippingType === "pickup" || shippingType === "arrange") {
-                setStep(4)
-            } else {
-                setStep(3)
-            }
+            setStep(3)
             return
         }
 
@@ -298,7 +315,7 @@ export function useCheckout() {
         total,
         // setters / acciones
         setBillingData,
-        setShippingType,
+        setShippingType: handleShippingTypeChange,
         setShippingCarrier,
         setPaymentMethod,
         calculateShipping,

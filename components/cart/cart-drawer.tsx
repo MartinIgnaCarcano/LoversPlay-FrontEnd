@@ -67,7 +67,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
               {/* Items */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {cartItems.map((item) => (
-                  <div key={`${item.productId}-${item.selectedVariant || "default"}`} className="flex gap-3">
+                  <div key={`${item.productId}-`} className="flex gap-3">
                     <img
                       src={item.product!.images[0] || "/placeholder.svg"}
                       alt={item.product!.name}

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import type { BillingData, ShippingType, ShippingCarrier } from "../useCheckout"
 
-interface Step3EnvioDetalleProps {
+interface Step2EnvioDetalleProps {
     billingData: BillingData
     setBillingData: (data: BillingData) => void
     shippingType: ShippingType
@@ -18,7 +18,7 @@ interface Step3EnvioDetalleProps {
     calculateShipping: () => void
 }
 
-export function Step3EnvioDetalle({
+export function Step2EnvioDetalle({
     billingData,
     setBillingData,
     shippingType,
@@ -27,7 +27,7 @@ export function Step3EnvioDetalle({
     shippingCost,
     isCalculatingCost,
     calculateShipping,
-}: Step3EnvioDetalleProps) {
+}: Step2EnvioDetalleProps) {
     return (
         <Card>
             <CardHeader>
@@ -41,6 +41,7 @@ export function Step3EnvioDetalle({
                             <div className="flex gap-2">
                                 <Input
                                     id="postalCode3"
+                                    className="placeholder:text-muted-foreground/50"
                                     value={billingData.postalCode}
                                     onChange={(e) => setBillingData({ ...billingData, postalCode: e.target.value })}
                                     placeholder="Ej: 5500"

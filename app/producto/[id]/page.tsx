@@ -20,16 +20,35 @@ export default function ProductPage() {
   const [related, setRelated] = useState<Product[]>([])
   const [quantity, setQuantity] = useState(1)
   const { addItem } = useCartStore()
-  const [mounted, setMounted] = useState(false);
+  const [mounted, setMounted] = useState(false)
   const [isGalleryOpen, setIsGalleryOpen] = useState(false)
 
-  const [sliderRef, slider] = useKeenSlider<HTMLDivElement>({
+  // --- Sliders ---
+  const [sliderRefSmall, sliderSmall] = useKeenSlider<HTMLDivElement>({
+    loop: true,
+    slideChanged(s) {
+      setActiveSlide(s.track.details.rel)
+    },
+  })
+
+  const [sliderRefFull, sliderFull] = useKeenSlider<HTMLDivElement>({
     loop: true,
   })
 
+  const [activeSlide, setActiveSlide] = useState(0);
+
   useEffect(() => {
-    setMounted(true);
+    if (!sliderSmall.current) return;
+
+    sliderSmall.current.on("slideChanged", (s) => {
+      setActiveSlide(s.track.details.rel);
+    });
+  }, [sliderSmall]);
+
+  useEffect(() => {
+    setMounted(true)
     if (!params?.id) return
+
     fetchProductoPorId(Number(params.id))
       .then((data) => {
         setProduct(data.producto)
@@ -56,12 +75,13 @@ export default function ProductPage() {
       quantity,
     })
   }
-  const imagenesCarrusel = [
+
+  const imagenes = [
     product.url_imagen_principal,
     ...(product.imagenes ?? []),
-  ].filter(Boolean) // saca null/undefined
+  ].filter(Boolean)
 
-  if (!mounted) return null;
+  if (!mounted) return null
 
   return (
     <div className="min-h-screen bg-background">
@@ -71,148 +91,161 @@ export default function ProductPage() {
         <Breadcrumbs items={breadcrumbItems} className="mb-6" />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
-          {/* Carrusel con controles */}
-          <div className="relative">
-            <div
-              ref={sliderRef}
-              className="keen-slider rounded-xl overflow-hidden h-[500px] cursor-zoom-in"
-              onClick={() => setIsGalleryOpen(true)}
-            >
-              {imagenesCarrusel.map((img, index) => (
-                <div key={index} className="keen-slider__slide flex items-center justify-center bg-brand">
+
+          {/* ------------------ GALERÍA COMPLETA ------------------ */}
+          <div className="flex gap-6">
+
+            {/* Miniaturas verticales */}
+            <div className="flex flex-col gap-2">
+              {imagenes.map((img, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => sliderSmall.current?.moveToIdx(idx)}
+                  className={`w-14 h-14 cursor-pointer rounded-lg overflow-hidden border-2 transition
+                            ${activeSlide === idx ? "border-black" : "border-gray-300"}`}
+                >
                   <img
                     src={img || "/placeholder.svg"}
-                    alt={`${product.nombre} ${index + 1}`}
-                    className="max-h-full max-w-full object-contain"
+                    className="w-full h-full object-cover"
+                    alt={"thumb " + idx}
                   />
-                </div>
+                </button>
               ))}
             </div>
 
-            {/* Botones prev/next */}
-            <button
-              onClick={() => slider.current?.prev()}
-              className="absolute top-1/2 left-2 -translate-y-1/2 bg-black/50 text-white rounded-full p-2 hover:cursor-pointer"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </button>
-            <button
-              onClick={() => slider.current?.next()}
-              className="absolute top-1/2 right-2 -translate-y-1/2 bg-black/50 text-white rounded-full p-2 hover:cursor-pointer"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </button>
-
-            {/* Galería fullscreen */}
-            {isGalleryOpen && (
-              <div className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center">
-                {/* Botón cerrar */}
-                <button
-                  onClick={() => setIsGalleryOpen(false)}
-                  className="absolute top-6 right-6 text-white hover:text-brand transition hover:cursor-pointer text-3xl font-bold"
-                  aria-label="Cerrar galería"
-                >
-                  ✕
-                </button>
-
-                {/* Carrusel fullscreen */}
-                <div
-                  ref={sliderRef}
-                  className="keen-slider w-full max-w-5xl h-[80vh] rounded-xl overflow-hidden"
-                >
-                  {imagenesCarrusel.map((img, index) => (
-                    <div
-                      key={index}
-                      className="keen-slider__slide flex items-center justify-center"
-                    >
-                      <img
-                        src={img || "/placeholder.svg"}
-                        alt={`${product.nombre} ${index + 1}`}
-                        className="max-h-full max-w-full object-contain"
-                      />
-                    </div>
-                  ))}
-                </div>
-
-                {/* Botones navegación fullscreen */}
-                <button
-                  onClick={() => slider.current?.prev()}
-                  className="absolute left-6 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full p-3"
-                >
-                  <ChevronLeft className="h-6 w-6" />
-                </button>
-                <button
-                  onClick={() => slider.current?.next()}
-                  className="absolute right-6 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full p-3"
-                >
-                  <ChevronRight className="h-6 w-6" />
-                </button>
+            {/* Carrusel principal con ancho controlado */}
+            <div className="relative w-full max-w-[450px]">
+              <div
+                ref={sliderRefSmall}
+                className="keen-slider rounded-xl overflow-hidden cursor-zoom-in h-[420px] bg-white"
+                onClick={() => setIsGalleryOpen(true)}
+              >
+                {imagenes.map((img, index) => (
+                  <div
+                    key={index}
+                    className="keen-slider__slide flex items-center justify-center"
+                  >
+                    <img
+                      src={img || "/placeholder.svg"}
+                      alt={`${product.nombre} ${index + 1}`}
+                      className="object-contain max-h-[420px] w-full"
+                    />
+                  </div>
+                ))}
               </div>
-            )}
+
+              {/* Botones prev/next */}
+              <button
+                onClick={() => sliderSmall.current?.prev()}
+                className="absolute top-1/2 left-2 -translate-y-1/2 bg-black/50 text-white rounded-full p-2 cursor-pointer"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+
+              <button
+                onClick={() => sliderSmall.current?.next()}
+                className="absolute top-1/2 right-2 -translate-y-1/2 bg-black/50 text-white rounded-full p-2 cursor-pointer"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </div>
+
           </div>
+
+
+
+          {/* ------------------ FULLSCREEN GALLERY (NO TOCAR) ------------------ */}
+          {isGalleryOpen && (
+            <div className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center">
+              <button
+                onClick={() => setIsGalleryOpen(false)}
+                className="absolute top-6 right-6 text-white hover:text-brand text-3xl font-bold"
+              >
+                ✕
+              </button>
+
+              <div
+                ref={sliderRefFull}
+                className="keen-slider w-full max-w-5xl h-[80vh] rounded-xl overflow-hidden"
+              >
+                {imagenes.map((img, index) => (
+                  <div
+                    key={index}
+                    className="keen-slider__slide flex items-center justify-center"
+                  >
+                    <img
+                      src={img || "/placeholder.svg"}
+                      className="object-contain max-h-full max-w-full"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <button
+                onClick={() => sliderFull.current?.prev()}
+                className="absolute left-6 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full p-3 cursor-pointer"
+              >
+                <ChevronLeft className="h-6 w-6" />
+              </button>
+
+              <button
+                onClick={() => sliderFull.current?.next()}
+                className="absolute right-6 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full p-3 cursor-pointer"
+              >
+                <ChevronRight className="h-6 w-6" />
+              </button>
+            </div>
+          )}
 
           {/* Info producto */}
           <div className="space-y-6">
             <h1 className="text-3xl font-bold text-foreground mb-2">{product.nombre}</h1>
-
             <div className="flex items-center gap-4">
               <span className="text-3xl font-bold text-brand">${product.precio}</span>
             </div>
-
             {product.descripcion_corta && (
-              <div
-                className="prose prose-sm text-muted-foreground"
-                dangerouslySetInnerHTML={{ __html: product.descripcion_corta }}
-              />
-            )}
-
+              <div className="prose prose-sm text-muted-foreground" dangerouslySetInnerHTML={{ __html: product.descripcion_corta }} />)}
             {/* Cantidad y carrito */}
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" className="hover:cursor-pointer" size="sm" onClick={() => setQuantity(Math.max(1, quantity - 1))} disabled={quantity <= 1}>
-                <Minus className="h-4 w-4" />
-              </Button>
-              <span className="px-4 py-2 font-medium">{quantity}</span>
-              <Button
-                variant="ghost"
-                className="hover:cursor-pointer"
-                size="sm"
-                onClick={() => setQuantity(quantity + 1)}
-                disabled={product.stock ? quantity >= product.stock : false}
-              >
+            <div className="flex items-center gap-4"> <Button variant="ghost" className="hover:cursor-pointer" size="sm" onClick={() => setQuantity(Math.max(1, quantity - 1))} disabled={quantity <= 1}>
+              <Minus className="h-4 w-4" />
+            </Button>
+              <span className="px-4 py-2 font-medium">{quantity}
+              </span>
+              <Button variant="ghost" className="hover:cursor-pointer" size="sm" onClick={() => setQuantity(quantity + 1)} disabled={product.stock ? quantity >= product.stock : false} >
                 <Plus className="h-4 w-4" />
               </Button>
               <Button onClick={handleAddToCart} disabled={product.stock === 0} className="flex-1 bg-primary hover:bg-brand/90 cursor-pointer" size="lg">
-                <ShoppingCart className="h-5 w-5 mr-2" />
-                {product.stock === 0 ? "Agotado" : "Agregar al Carrito"}
+                <ShoppingCart className="h-5 w-5 mr-2" /> {product.stock === 0 ? "Agotado" : "Agregar al Carrito"}
               </Button>
             </div>
           </div>
         </div>
-
         {/* Tabs como en tu diseño */}
         <div className="border-t border-border pt-6 padding-x-4">
           <div className="flex gap-6 mb-4">
-            <button className="px-4 py-2 font-semibold border-b-2 border-brand">Descripción</button>
+            <button className="px-4 py-2 font-semibold border-b-2 border-brand">
+              Descripción
+            </button>
           </div>
-
           <div className="prose prose-sm text-muted-foreground">
             {product.descripcion_larga ? (
-              <div dangerouslySetInnerHTML={{ __html: product.descripcion_larga }} />
-            ) : (
-              <p>No hay descripción detallada disponible.</p>
+              <div dangerouslySetInnerHTML={{ __html: product.descripcion_larga }} />) : (
+              <p>
+                No hay descripción detallada disponible.
+              </p>
             )}
           </div>
         </div>
-
         {/* Productos relacionados */}
         {related.length > 0 && (
           <section className="mt-12">
-            <h2 className="text-2xl font-bold text-foreground mb-6">Productos Relacionados</h2>
+            <h2 className="text-2xl font-bold text-foreground mb-6">
+              Productos Relacionados
+            </h2>
             <ProductGrid products={related} />
           </section>
         )}
       </main>
-
       <Footer />
     </div>
   )

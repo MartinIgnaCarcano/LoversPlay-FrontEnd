@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, memo } from "react"
+import { useState, useEffect, useCallback, memo } from "react"
 import Link from "next/link"
 import { Search, ShoppingCart, Menu, User, Phone, Mail, MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -17,17 +17,24 @@ const navigation = [
 ]
 
 const CartBadge = memo(({ totalItems }: { totalItems: number }) => {
-  if (totalItems === 0) return null
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
+  const show = mounted ? totalItems > 0 : false
 
   return (
     <span
-      className="absolute -top-1 -right-1 bg-brand text-brand-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center animate-in fade-in-0 zoom-in-75 duration-200"
-      aria-label={`${totalItems} artículos en el carrito`}
+      className={
+        show
+          ? "absolute -top-1 -right-1 bg-brand text-brand-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center"
+          : "absolute -top-1 -right-1 h-5 w-5"
+      }
     >
-      {totalItems > 99 ? "99+" : totalItems}
+      {show ? (totalItems > 99 ? "99+" : totalItems) : ""}
     </span>
   )
 })
+
 
 CartBadge.displayName = "CartBadge"
 
@@ -37,6 +44,10 @@ export function Header() {
   const { getTotalItems } = useCartStore()
   const { isAuthenticated, user } = useAuthStore()
   const totalItems = getTotalItems()
+
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
 
   const handleMobileMenuOpen = useCallback(() => setIsMobileMenuOpen(true), [])
   const handleMobileMenuClose = useCallback(() => setIsMobileMenuOpen(false), [])
@@ -96,7 +107,7 @@ export function Header() {
             </nav>
 
             {/* Actions */}
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1">
               {/* Search */}
               <Button
                 variant="ghost"
@@ -105,27 +116,29 @@ export function Header() {
                 className="hidden sm:flex hover:bg-brand/10 transition-colors border border-border rounded-md px-2"
                 aria-label="Abrir búsqueda"
               >
-                <input type="text" className="w-14 h-5" placeholder="Buscar.." />
+                <input type="text" className="w-20 h-5" placeholder="Buscar..." />
                 <Search className="h-5 w-5" aria-hidden="true" />
               </Button>
 
               {/* Auth */}
-              {isAuthenticated ? (
-                <Button variant="ghost" size="sm" className="hover:bg-brand/10 transition-colors" asChild>
-                  <Link href="/perfil" aria-label={`Perfil de ${user?.name}`}>
-                    <User className="h-5 w-5" aria-hidden="true" />
-                    <span className="hidden sm:ml-2 sm:block truncate max-w-20">{user?.name}</span>
-                  </Link>
-                </Button>
-              ) : (
-                <Button variant="ghost" size="sm" className="hover:bg-brand/10 transition-colors" asChild>
-                  <Link href="/auth">
-                    <User className="h-5 w-5" aria-hidden="true" />
-                    <span className="hidden sm:ml-2 sm:block">Ingresar</span>
-                  </Link>
-                </Button>
-              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="hover:bg-brand/10 transition-colors"
+                asChild
+              >
+                <Link
+                  href={isAuthenticated ? "/perfil" : "/auth"}
+                  aria-label={isAuthenticated ? `Perfil de ${user?.name}` : "Ingresar"}
+                >
+                  <User className="h-5 w-5" aria-hidden="true" />
 
+                  {/* Texto estable en SSR — dinámico solo después del mount */}
+                  <span className="hidden sm:ml-2 sm:block truncate max-w-20">
+                    {mounted ? (isAuthenticated ? user?.name : "Ingresar") : "Ingresar"}
+                  </span>
+                </Link>
+              </Button>
               {/* Cart */}
               <Button variant="ghost" size="sm" className="relative hover:bg-brand/10 transition-colors" asChild>
                 <Link href="/carrito" aria-label={`Carrito de compras con ${totalItems} artículos`}>

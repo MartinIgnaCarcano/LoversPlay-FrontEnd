@@ -100,7 +100,7 @@ export function ProductCard({ product, className = "" }: ProductCardProps) {
             <Button
               size="sm"
               variant="ghost"
-              className="bg-background/80 hover:bg-background/90 h-6 w-6 sm:h-8 sm:w-8 p-0"
+              className="bg-background/80 cursor-pointer hover:bg-background/90 h-6 w-6 sm:h-8 sm:w-8 p-0"
               onClick={handleLike}
             >
               <Heart className="h-3 w-3 sm:h-4 sm:w-4" />

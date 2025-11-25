@@ -23,6 +23,9 @@ const dmSans = DM_Sans({
 
 export const metadata: Metadata = {
   title: "LoversPlay - Tienda de Bienestar Íntimo",
+  icons:{
+    icon: "/loversplay-logo-mobile.png"
+  },
   description:
     "Descubre nuestra colección de productos de bienestar íntimo de alta calidad. Envío discreto y atención personalizada.",
   generator: "v0.app",

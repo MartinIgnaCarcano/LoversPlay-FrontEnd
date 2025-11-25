@@ -67,7 +67,7 @@ export default function CartPage() {
           <div className="lg:col-span-2">
             <div className="flex items-center justify-between mb-6">
               <h1 className="text-2xl font-bold text-foreground font-[family-name:var(--font-poppins)]">
-                Carrito de Compras ({getTotalItems()} {getTotalItems() === 1 ? "producto" : "productos"})
+                Carrito de Compras 
               </h1>
               <Button variant="outline" size="sm" onClick={clearCart} className="hover:cursor-pointer" >
                 <Trash2 className="h-4 w-4 mr-2" />
@@ -99,7 +99,7 @@ export default function CartPage() {
                           variant="ghost"
                           size="icon"
                           onClick={() => removeItem(item.productId)}
-                          className="text-muted-foreground hover:text-destructive transition-colors"
+                          className="text-muted-foreground cursor-pointer hover:text-destructive transition-colors"
                           aria-label="Eliminar producto"
                         >
                           <Trash2 className="h-4 w-4" />

@@ -18,16 +18,16 @@ export default function HomePage() {
   const [popularProducts, setPopularProducts] = useState<Product[]>([])
 
   useEffect(() => {
-  // 🔹 Cargar productos destacados (los primeros 8, por ejemplo)
-  fetchProductos(1, 4)
-    .then((data) => setFeaturedProducts(data.productos))
-    .catch((err) => console.error("Error cargando destacados:", err))
+    // 🔹 Cargar productos destacados (los primeros 4, por ejemplo)
+    fetchProductos(1, 4)
+      .then((data) => setFeaturedProducts(data.productos))
+      .catch((err) => console.error("Error cargando destacados:", err))
 
-  // 🔹 Cargar productos más vistos (página 2, otros 8 productos)
-  fetchProductos(2, 4)
-    .then((data) => setPopularProducts(data.productos))
-    .catch((err) => console.error("Error cargando populares:", err))
-}, [])
+    // 🔹 Cargar productos más vistos (página 2, otros 4 productos)
+    fetchProductos(2, 4)
+      .then((data) => setPopularProducts(data.productos))
+      .catch((err) => console.error("Error cargando populares:", err))
+  }, [])
 
   return (
     <div className="min-h-screen bg-background">
@@ -118,7 +118,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        
+
       </main>
 
       <Footer />

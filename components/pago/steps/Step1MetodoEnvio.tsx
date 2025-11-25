@@ -5,12 +5,13 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import type { ShippingType } from "../useCheckout"
 
-interface Step2MetodoEnvioProps {
+interface Step1MetodoEnvioProps {
     shippingType: ShippingType
     setShippingType: (value: ShippingType) => void
 }
 
-export function Step2MetodoEnvio({ shippingType, setShippingType }: Step2MetodoEnvioProps) {
+
+export function Step1MetodoEnvio({ shippingType, setShippingType }: Step1MetodoEnvioProps) {
     return (
         <Card>
             <CardHeader>

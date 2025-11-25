@@ -71,7 +71,7 @@ export type Usuario = {
   nombre: string
   telefono: string
   rol: "cliente" | "admin"
-  direcciones: Direccion[]
+  direccion: Direccion
 }
 
 // pedido

@@ -187,7 +187,7 @@ export async function fetchUsuario(): Promise<Usuario> {
     email: data.email,
     telefono: data.telefono,
     rol: data.rol || "cliente",
-    direcciones: data.direcciones || [],
+    direccion: data.direccion || {},
   }
 }
 
@@ -228,50 +228,83 @@ export async function fetchPedidosPorUsuario(): Promise<Pedido[]> {
   }));
 }
 
-export async function actualizarUsuario(nombre: string, email: string, telefono: string, direccion: string): Promise<{ update: boolean }> {
+export async function actualizarUsuario(data: {
+  nombre: string
+  email: string
+  telefono: string
+  direccion: {
+    calle: string
+    departamento: string
+    provincia: string
+    codigo_postal: string
+    extra: string
+  }
+}): Promise<{ update: boolean }> {
+
   try {
-    const res = await fetch(`${API_URL}/auth/`, {
+    const res = await fetch(`${API_URL}/auth/me`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${localStorage.getItem("access_token")}`
       },
-      body: JSON.stringify({
-        nombre,
-        email,
-        telefono,
-        direccion
-      })
+      body: JSON.stringify(data)
     })
 
     if (!res.ok) throw new Error("Error al actualizar usuario")
 
-    const data = await res.json()
-    console.log("Respuesta de actualización de usuario:", data)
+    const json = await res.json()
+    console.log("Respuesta actualización usuario:", json)
 
     return { update: true }
+
   } catch (error) {
     console.error("Error en actualización de usuario:", error)
     return { update: false }
   }
 }
 
-export async function fetchWishlist() {
-  const response = await fetch(`${API_URL}/auth/me`, {
-    headers: {
-      'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-    }
-  })
-  if (!response.ok) throw new Error("Error cargando fav")
 
-  const data = await response.json()
-  // Validamos que el backend devuelva un array en "favoritos"
-  const favoritos = Array.isArray(data?.favoritos) ? data.favoritos : [];
-  console.log("Favoritos: "+favoritos)
-  return favoritos.map((p: any) => ({
-    id: p.id,
-    nombre: p.nombre,
-    precio: p.precio,
-    url_imagen_principal: p.url_imagen_principal
-  }))
+export async function fetchFavorites() {
+  try {
+    const res = await fetch(`${API_URL}/auth/mis-productos`, {
+      headers: {
+        "Authorization": `Bearer ${localStorage.getItem("access_token")}`
+      }
+    });
+
+    if (!res.ok) throw new Error("Error obteniendo favoritos");
+
+    return await res.json();
+  } catch (error) {
+    console.error("❌ Error al obtener favoritos:", error);
+    return [];
+  }
+}
+
+// Agregar favorito
+export async function agregarFavorito(productoId: number) {
+  const res = await fetch(`${API_URL}/auth/fav/${productoId}`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${localStorage.getItem("access_token")}`
+    }
+  });
+
+  if (!res.ok) throw new Error("Error agregando favorito");
+  return await res.json();
+}
+
+
+// Eliminar favorito
+export async function eliminarFavorito(fav_id: number) {
+  const res = await fetch(`${API_URL}/auth/deletefav/${fav_id}`, {
+    method: "DELETE",
+    headers: {
+      "Authorization": `Bearer ${localStorage.getItem("access_token")}`
+    }
+  });
+
+  if (!res.ok) throw new Error("Error eliminando favorito");
+  return await res.json();
 }

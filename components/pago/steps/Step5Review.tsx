@@ -33,7 +33,7 @@ export function Step5Review({
                         {billingData.city && `, ${billingData.city}`}
                     </p>
                     <p>
-                        {billingData.province} ({billingData.postalCode})
+                        {billingData.province} {billingData.postalCode && `(${billingData.postalCode})`} 
                     </p>
                     <p>Tel: {billingData.phone}</p>
                     <p>Email: {billingData.email}</p>

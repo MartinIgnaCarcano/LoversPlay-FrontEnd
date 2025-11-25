@@ -16,9 +16,9 @@ import { Stepper } from "@/components/pago/Stepper"
 import { SummaryCard } from "@/components/pago/SummaryCard"
 import { NavigationButtons } from "@/components/pago/NavigationButtons"
 
-import { Step1Direccion } from "@/components/pago/steps/Step1Direccion"
-import { Step2MetodoEnvio } from "@/components/pago/steps/Step2MetodoEnvio"
-import { Step3EnvioDetalle } from "@/components/pago/steps/Step3EnvioDetalle"
+import { Step1MetodoEnvio } from "@/components/pago/steps/Step1MetodoEnvio"
+import { Step2EnvioDetalle } from "@/components/pago/steps/Step2EnvioDetalle"
+import { Step3Direccion } from "@/components/pago/steps/Step3Direccion"
 import { Step4Pago } from "@/components/pago/steps/Step4Pago"
 import { Step5Review } from "@/components/pago/steps/Step5Review"
 
@@ -97,21 +97,14 @@ function PaymentPage() {
   let stepComponent = null
   if (step === 1) {
     stepComponent = (
-      <Step1Direccion
-        billingData={billingData}
-        setBillingData={setBillingData}
-      />
-    )
-  } else if (step === 2) {
-    stepComponent = (
-      <Step2MetodoEnvio
+      <Step1MetodoEnvio
         shippingType={shippingType}
         setShippingType={setShippingType}
       />
     )
-  } else if (step === 3) {
+  } else if (step === 2) {
     stepComponent = (
-      <Step3EnvioDetalle
+      <Step2EnvioDetalle
         billingData={billingData}
         setBillingData={setBillingData}
         shippingType={shippingType}
@@ -120,6 +113,15 @@ function PaymentPage() {
         shippingCost={shippingCost}
         isCalculatingCost={isCalculatingCost}
         calculateShipping={calculateShipping}
+      />
+    )
+  } else if (step === 3) {
+
+    stepComponent = (
+      <Step3Direccion
+        billingData={billingData}
+        setBillingData={setBillingData}
+        shippingType={shippingType}
       />
     )
   } else if (step === 4) {

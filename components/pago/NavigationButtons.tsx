@@ -28,13 +28,13 @@ export function NavigationButtons({
                 variant="outline"
                 disabled={step === 1 || isProcessing}
                 onClick={onBack}
-                className="min-w-[96px] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="min-w-[96px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 Anterior
             </Button>
 
             <Button
-                className="min-w-[150px] bg-primary hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="min-w-[150px] cursor-pointer bg-primary hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={onNext}
                 disabled={isProcessing || !canGoNext}
             >

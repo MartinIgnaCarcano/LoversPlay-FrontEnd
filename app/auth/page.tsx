@@ -189,17 +189,20 @@ export default function AuthPage() {
                         checked={loginForm.rememberMe}
                         onCheckedChange={(checked) => setLoginForm({ ...loginForm, rememberMe: checked as boolean })}
                       />
-                      <Label htmlFor="remember-me" className="text-sm">
+                      <Label htmlFor="remember-me" className="cursor-pointer text-sm">
                         Recordarme
                       </Label>
                     </div>
-                    <Button variant="link" className="text-sm p-0 h-auto">
+                    <Button variant="link" className="cursor-pointer text-sm p-0 h-auto">
                       ¿Olvidaste tu contraseña?
                     </Button>
                   </div>
                 </div>
 
-                <Button type="submit" className="w-full bg-brand hover:bg-brand/90" disabled={isLoading}>
+                <Button
+                  type="submit" 
+                  className="w-full bg-primary hover:bg-primary/70 cursor-pointer" 
+                  disabled={isLoading}>
                   {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
                 </Button>
               </form>
@@ -308,22 +311,23 @@ export default function AuthPage() {
                   </div>
 
                   <div className="space-y-3">
-                    <div className="flex items-start space-x-2">
+                    <div className="flex items-center space-x-2">
                       <Checkbox
                         id="accept-terms"
+                        className="cursor-pointer"
                         checked={registerForm.acceptTerms}
                         onCheckedChange={(checked) =>
                           setRegisterForm({ ...registerForm, acceptTerms: checked as boolean })
                         }
                         required
                       />
-                      <Label htmlFor="accept-terms" className="text-sm leading-relaxed">
+                      <Label htmlFor="accept-terms" className="text-sm leading-relaxed cursor-pointer">
                         Acepto los{" "}
-                        <Button variant="link" className="text-sm p-0 h-auto">
+                        <Button variant="link" className="text-sm p-0 h-auto cursor-pointer">
                           términos y condiciones
                         </Button>{" "}
                         y la{" "}
-                        <Button variant="link" className="text-sm p-0 h-auto">
+                        <Button variant="link" className="text-sm p-0 h-auto cursor-pointer">
                           política de privacidad
                         </Button>
                       </Label>
@@ -337,14 +341,14 @@ export default function AuthPage() {
                           setRegisterForm({ ...registerForm, newsletter: checked as boolean })
                         }
                       />
-                      <Label htmlFor="newsletter" className="text-sm">
+                      <Label htmlFor="newsletter" className="text-sm cursor-pointer">
                         Quiero recibir ofertas y novedades por email
                       </Label>
                     </div>
                   </div>
                 </div>
 
-                <Button type="submit" className="w-full bg-brand hover:bg-brand/90" disabled={isLoading}>
+                <Button type="submit" className="w-full bg-primary cursor-pointer hover:bg-primary/70" disabled={isLoading}>
                   {isLoading ? "Creando cuenta..." : "Crear Cuenta"}
                 </Button>
               </form>
