@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useCartStore } from "@/lib/store"
-import { fetchUsuario, calcularEnvio } from "@/lib/services/api"
+import { fetchUsuario, calcularEnvio, crearPreferenciaPago, crearPedido } from "@/lib/services/api"
 
 export type ShippingType = "" | "correo" | "transporte" | "pickup" | "arrange"
 export type ShippingCarrier = "" | "viacargo" | "cata" | "andesmar"
@@ -190,47 +190,67 @@ export function useCheckout() {
     }
 
     const handleProcessPayment = async () => {
-        setIsProcessing(true)
+        setIsProcessing(true);
+
         try {
-            const detalles = cartItems.map((item: any) => ({
-                producto_id: item.productId,
-                cantidad: item.quantity,
-            }))
+            // 1) Crear orden en BD
+            const pedidoPayload = {
+                nombre: billingData.name,
+                email: billingData.email,
+                telefono: billingData.phone,
+                costo_envio: shipping,
+                detalles: cartItems.map((item: any) => ({
+                    producto_id: item.productId,
+                    cantidad: item.quantity,
+                })),
+            };
 
-            const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null
-
-            const res = await fetch("/api/pagos", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    detalles,
-                    token,
-                    billingData,
-                    shippingType,
-                    shippingCarrier,
-                    shippingCost,
-                    paymentMethod,
-                }),
-            })
-
-            if (!res.ok) {
-                throw new Error("Error creando pedido")
+            const pedido = await crearPedido(pedidoPayload);
+            if (!pedido) {
+                alert("No se pudo crear el pedido.");
+                setIsProcessing(false);
+                return;
             }
 
-            const data = await res.json()
-            console.log("✅ Pedido creado:", data)
+            const pedidoId = pedido.id;
 
-            clearCart()
-            setOrderComplete(true)
+            // 2) Crear preferencia MP
+            const preferenciaPayload = {
+                pedido_id: pedidoId,
+                tipo_pago: paymentMethod,
+                costo_envio: shipping,
+                items: cartItems.map((item: any) => ({
+                    producto_id: item.productId,
+                    nombre: item.name || item.nombre,
+                    cantidad: item.quantity,
+                    precio: item.price,
+                })),
+            };
 
-            setTimeout(() => router.push("/"), 3000)
-        } catch (error) {
-            console.error("❌ Error en el pago:", error)
-            alert("Hubo un error procesando el pago")
+            const pref = await crearPreferenciaPago(preferenciaPayload);
+            if (!pref || !pref.init_point) {
+                alert("No se pudo iniciar el pago.");
+                return;
+            }
+
+            // 3) Abrir MP Checkout Pro en nueva pestaña
+            window.open(pref.init_point, "_blank");
+
+            // 4) Limpio carrito local
+            clearCart();
+            setOrderComplete(true);
+
+            // 5) Paso 5 → success visual
+            setStep(5);
+
+        } catch (err) {
+            console.error("❌ Error procesando pago:", err);
+            alert("Error procesando el pago.");
         } finally {
-            setIsProcessing(false)
+            setIsProcessing(false);
         }
-    }
+    };
+
 
     const goNext = () => {
         if (!validateStep(step)) return

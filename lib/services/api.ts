@@ -377,3 +377,78 @@ export async function calcularEnvio(cp: number, tipo_envio: string) {
     return null;
   }
 }
+
+
+// -----------------------------
+// 1) Crear pedido en la BD
+// -----------------------------
+export async function crearPedido(payload: {
+  nombre: string;
+  email: string;
+  telefono: string;
+  costo_envio: number;
+  detalles: { producto_id: number; cantidad: number }[];
+}) {
+  const token = localStorage.getItem("access_token");
+
+  const res = await fetch(`${API_URL}/pedidos`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (res.status === 401 || res.status === 403) {
+    handleUnauthorized(res);
+    return null;
+  }
+
+  if (!res.ok) {
+    console.error(await res.text());
+    return null;
+  }
+
+  return await res.json(); // { id, ... }
+}
+
+
+
+// -----------------------------
+// 2) Crear preferencia de MP
+// -----------------------------
+export async function crearPreferenciaPago(payload: {
+  pedido_id: number;
+  tipo_pago: string;
+  costo_envio: number;
+  items: {
+    producto_id: number;
+    nombre: string;
+    cantidad: number;
+    precio: number;
+  }[];
+}) {
+  const token = localStorage.getItem("access_token");
+
+  const res = await fetch(`${API_URL}/pagos/preferencia`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (res.status === 401 || res.status === 403) {
+    handleUnauthorized(res);
+    return null;
+  }
+
+  if (!res.ok) {
+    console.error(await res.text());
+    return null;
+  }
+
+  return await res.json(); // { init_point }
+}
