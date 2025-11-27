@@ -25,15 +25,7 @@ export function Hero() {
             }`}
           >
             <div className="space-y-6">
-              <div
-                className={`inline-flex items-center px-4 py-2 bg-primary/10 rounded-full transition-all duration-800 delay-200 ${
-                  isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
-                }`}
-              >
-                <span className="text-primary-foreground bg-primary px-3 py-1 rounded-full font-medium text-sm font-[family-name:var(--font-open-sans)] tracking-wide">
-                  ✨ Bienestar Premium
-                </span>
-              </div>
+              
 
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground font-[family-name:var(--font-work-sans)] text-balance leading-tight">
                 Descubre tu
@@ -53,15 +45,6 @@ export function Hero() {
                 asChild
               >
                 <Link href="/catalogo">Explorar Catálogo</Link>
-              </Button>
-
-              <Button
-                variant="outline"
-                size="lg"
-                className="border-primary text-primary hover:bg-primary hover:text-primary-foreground text-lg px-8 py-6 rounded-xl transition-all duration-300 font-[family-name:var(--font-work-sans)] font-medium bg-transparent"
-                asChild
-              >
-                <Link href="/blog">Guías & Consejos</Link>
               </Button>
             </div>
           </div>

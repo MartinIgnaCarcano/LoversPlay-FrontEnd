@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useCartStore } from "@/lib/store"
 import type { Product } from "@/lib/types"
+import { agregarFavorito } from "@/lib/services/api"
 
 interface ProductCardProps {
   product: Product
@@ -55,9 +56,9 @@ export function ProductCard({ product, className = "" }: ProductCardProps) {
     })
   }
   const handleLike = (e: React.MouseEvent) => {
-    //TODO
     e.preventDefault()
     e.stopPropagation()
+    const response = agregarFavorito(product.id)
     console.log("agregar a favoritos")
   }
 

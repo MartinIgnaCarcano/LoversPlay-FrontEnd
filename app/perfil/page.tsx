@@ -72,6 +72,8 @@ function ProfilePage() {
       if (user) {
         const dataUser = await fetchUsuario();
 
+        if (!dataUser) return;
+
         const d = dataUser.direccion ?? {}
         setProfileData({
           nombre: dataUser.nombre || "",
@@ -87,10 +89,14 @@ function ProfilePage() {
         })
 
         const dataPedidos = await fetchPedidosPorUsuario();
-        setPedidos(Array.isArray(dataPedidos) ? dataPedidos : [dataPedidos]);
+        if (dataPedidos) {
+          setPedidos(Array.isArray(dataPedidos) ? dataPedidos : []);
+        }
 
         const favs = await fetchFavorites();
-        setWishlist(favs);
+        if (favs) {
+          setWishlist(favs);
+        }
       }
     };
     fetchData();

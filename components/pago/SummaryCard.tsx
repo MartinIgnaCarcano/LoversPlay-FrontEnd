@@ -14,7 +14,7 @@ export function SummaryCard({ cartItems, subtotal, shipping, total }: SummaryCar
     return (
         <Card className="sticky top-24">
             <CardHeader>
-                <CardTitle>Resumen del pedido</CardTitle>
+                <CardTitle className="text-lg">Resumen del pedido</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="space-y-3">

@@ -31,7 +31,7 @@ export function Step2EnvioDetalle({
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Detalles del envío</CardTitle>
+                <CardTitle className="text-xl">Detalles del envío</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
                 {(shippingType === "correo" || shippingType === "transporte") && (
@@ -47,9 +47,15 @@ export function Step2EnvioDetalle({
                                     placeholder="Ej: 5500"
                                 />
                                 <Button
+                                    className="cursor-pointer"
                                     variant="outline"
                                     onClick={calculateShipping}
-                                    disabled={isCalculatingCost}
+                                    disabled={
+                                        isCalculatingCost ||
+                                        !billingData.postalCode ||
+                                        (shippingType === "transporte" && !shippingCarrier)
+                                    }
+
                                 >
                                     {isCalculatingCost ? "Calculando..." : "Calcular envío"}
                                 </Button>

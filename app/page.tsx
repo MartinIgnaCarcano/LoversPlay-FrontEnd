@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { fetchProductos } from "@/lib/services/api"
 import type { Product } from "@/lib/types"
-import { mockBlogPosts } from "@/lib/services/mock-data"
 import "@/styles/globals.css"
 
 export default function HomePage() {

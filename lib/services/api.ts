@@ -1,7 +1,23 @@
 import type { Pedido, Product, Usuario } from "@/lib/types"
+export { fetchProductoPorId as fetchProducto }
 
-const API_URL = "http://192.168.100.219:5000/api"
+const API_URL = "https://mckenzie-burthensome-denita.ngrok-free.dev/api"
 
+function handleUnauthorized(res: Response) {
+  if (res.status === 401 || res.status === 403) {
+    // Token inválido o expirado
+    localStorage.removeItem("access_token");
+
+    try {
+      // Si usas Zustand para autenticación:
+      const { logout } = require("@/lib/store").useAuthStore.getState();
+      logout();
+    } catch { }
+
+    // Redirigir al login
+    window.location.href = "/login";
+  }
+}
 
 
 // 🔹 Cargar productos (paginado)
@@ -110,36 +126,44 @@ export async function fetchProductosBase() {
   }))
 }
 
-
-export { fetchProductoPorId as fetchProducto }
-
 // 🔹 Login
-export async function login(email: string, password: string): Promise<{ login: boolean }> {
+export async function login(email: string, password: string): Promise<{
+  login: boolean;
+  id?: number;
+  nombre?: string;
+}> {
   try {
     const res = await fetch(`${API_URL}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        "email": email,
-        "password": password
+        email,
+        password
       }),
-    })
+    });
 
-    if (!res.ok) throw new Error("Error al iniciar sesión")
+    if (!res.ok) throw new Error("Error al iniciar sesión");
 
-    const data = await res.json()
+    const data = await res.json();
     console.log("Respuesta del login:", data);
+
     if (data.access_token) {
       localStorage.setItem("access_token", data.access_token);
-      return { login: true }
+
+      return {
+        login: true,
+        id: data.id,
+        nombre: data.nombre
+      };
     }
 
-    return { login: false }
+    return { login: false };
   } catch (error) {
     console.error("Error en login:", error);
     throw error;
   }
 }
+
 
 // 🔹 Registro
 export async function register(nombre: string, email: string, password: string, telefono: string): Promise<{ register: boolean }> {
@@ -170,33 +194,43 @@ export async function register(nombre: string, email: string, password: string, 
 }
 
 // 🔹 Obtener detalles del usuario
-export async function fetchUsuario(): Promise<Usuario> {
-  const response = await fetch(`${API_URL}/auth/me`, {
-    headers: {
-      'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+export async function fetchUsuario() {
+  try {
+    const response = await fetch(`${API_URL}/auth/me`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+      }
+    })
+
+    if (response.status === 401 || response.status === 403) {
+      handleUnauthorized(response);
+      return null;
     }
-  })
 
-  if (!response.ok) throw new Error("Error cargando usuario")
+    if (!response.ok) {
+      throw new Error("Error cargando usuario");
+    }
 
-  const data = await response.json()
+    const data = await response.json()
 
-  return {
-    id: String(data.id),
-    nombre: data.nombre,
-    email: data.email,
-    telefono: data.telefono,
-    rol: data.rol || "cliente",
-    direccion: data.direccion || {},
+    return {
+      id: String(data.id),
+      nombre: data.nombre,
+      email: data.email,
+      telefono: data.telefono,
+      rol: data.rol || "cliente",
+      direccion: data.direccion || {},
+    }
+  } catch (err) {
+    console.error("❌ Error fetchUsuario:", err);
+    return null;
   }
 }
 
-export async function fetchPedidosPorUsuario(): Promise<Pedido[]> {
+export async function fetchPedidosPorUsuario(): Promise<Pedido[] | null> {
   const token = localStorage.getItem("access_token");
-  console.log("🔑 Token usado:", token);
 
-  const url = `${API_URL}/pedidos`; // 👈 sin barra al final
-  console.log("🌐 Llamando a:", url);
+  const url = `${API_URL}/pedidos`;
 
   const response = await fetch(url, {
     method: "GET",
@@ -206,14 +240,19 @@ export async function fetchPedidosPorUsuario(): Promise<Pedido[]> {
     },
   });
 
+  // 🔥 manejar token vencido
+  if (response.status === 401 || response.status === 403) {
+    handleUnauthorized(response);
+    return null;
+  }
+
   if (!response.ok) {
     const text = await response.text();
     console.error("❌ Error HTTP:", response.status, text);
-    throw new Error(`Error cargando pedidos: ${response.status}`);
+    return null; // 👈 detener ejecución limpia
   }
 
   const data = await response.json();
-  console.log("📦 Datos de pedidos recibidos:", data);
 
   return data.map((pedido: any) => ({
     id: String(pedido.id),
@@ -227,6 +266,7 @@ export async function fetchPedidosPorUsuario(): Promise<Pedido[]> {
     })),
   }));
 }
+
 
 export async function actualizarUsuario(data: {
   nombre: string
@@ -273,14 +313,20 @@ export async function fetchFavorites() {
       }
     });
 
+    if (res.status === 401 || res.status === 403) {
+      handleUnauthorized(res);
+      return null; // 👈 importante
+    }
+
     if (!res.ok) throw new Error("Error obteniendo favoritos");
 
     return await res.json();
   } catch (error) {
     console.error("❌ Error al obtener favoritos:", error);
-    return [];
+    return null; // 👈 importante: NO devolver [], así no rompe tu UI
   }
 }
+
 
 // Agregar favorito
 export async function agregarFavorito(productoId: number) {
@@ -295,7 +341,6 @@ export async function agregarFavorito(productoId: number) {
   return await res.json();
 }
 
-
 // Eliminar favorito
 export async function eliminarFavorito(fav_id: number) {
   const res = await fetch(`${API_URL}/auth/deletefav/${fav_id}`, {
@@ -307,4 +352,28 @@ export async function eliminarFavorito(fav_id: number) {
 
   if (!res.ok) throw new Error("Error eliminando favorito");
   return await res.json();
+}
+
+export async function calcularEnvio(cp: number, tipo_envio: string) {
+  try {
+    console.log("cp:" + cp)
+    console.log("tipo_envio: " + tipo_envio)
+    const res = await fetch(`${API_URL}/envios/calcular`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cp, tipo_envio }),
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      console.error("❌ Error al calcular envío:", text);
+      return null;
+    }
+
+    const data = await res.json();
+    return data; // { precio: number }
+  } catch (error) {
+    console.error("❌ Error en calcularEnvio:", error);
+    return null;
+  }
 }

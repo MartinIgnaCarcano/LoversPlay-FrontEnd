@@ -67,11 +67,11 @@ export type Direccion = {
 // 👤 Usuario autenticado
 export type Usuario = {
   id: string
-  email: string
+  email?: string
   nombre: string
-  telefono: string
-  rol: "cliente" | "admin"
-  direccion: Direccion
+  telefono?: string
+  rol?: "cliente" | "admin"
+  direccion?: Direccion
 }
 
 // pedido

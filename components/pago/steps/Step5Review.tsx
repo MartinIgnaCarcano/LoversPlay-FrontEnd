@@ -22,11 +22,11 @@ export function Step5Review({
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Revisá tu pedido</CardTitle>
+                <CardTitle className="text-xl">Revisá tu pedido</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
                 <div>
-                    <h3 className="font-semibold mb-2">Dirección de entrega</h3>
+                    <h3 className="font-semibold mb-2 text-lg">Dirección de entrega</h3>
                     <p>{billingData.name}</p>
                     <p>
                         {billingData.address}
@@ -43,7 +43,7 @@ export function Step5Review({
                 <Separator />
 
                 <div>
-                    <h3 className="font-semibold mb-2">Método de envío</h3>
+                    <h3 className="font-semibold mb-2 text-lg">Método de envío</h3>
                     <p>
                         {shippingType === "correo" && "Correo"}
                         {shippingType === "transporte" &&
@@ -60,7 +60,7 @@ export function Step5Review({
                 <Separator />
 
                 <div>
-                    <h3 className="font-semibold mb-2">Método de pago</h3>
+                    <h3 className="font-semibold mb-2 text-lg">Método de pago</h3>
                     <p>
                         {paymentMethod === "transferencia" && "Transferencia bancaria"}
                         {paymentMethod === "credito" && "Tarjeta de crédito (+10%)"}

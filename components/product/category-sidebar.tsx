@@ -50,7 +50,7 @@ export function CategorySidebar({ className = "", onCategoriasChange }: Category
     // Valores iniciales por defecto
     const defaultFilters = {
       categories: [],
-      priceRange: [0, 99999] as [number, number],
+      priceRange: [0, 99998] as [number, number],
       inStock: false,
     }
 
@@ -85,7 +85,7 @@ export function CategorySidebar({ className = "", onCategoriasChange }: Category
     <div className={`bg-card rounded-xl border border-border p-6 ${className}`}>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-lg font-semibold text-card-foreground font-[family-name:var(--font-poppins)]">Filtros</h2>
-        <Button variant="ghost" size="sm" onClick={handleClearButton}>
+        <Button className="cursor-pointer" variant="ghost" size="sm" onClick={handleClearButton}>
           Limpiar
         </Button>
       </div>

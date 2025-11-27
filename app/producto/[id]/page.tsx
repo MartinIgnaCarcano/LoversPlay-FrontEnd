@@ -6,7 +6,7 @@ import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import { Breadcrumbs } from "@/components/ui/breadcrumbs"
 import { Button } from "@/components/ui/button"
-import { ShoppingCart, Minus, Plus, ChevronLeft, ChevronRight } from "lucide-react"
+import { ShoppingCart, Minus, Plus, ChevronLeft, ChevronRight, Heart } from "lucide-react"
 import { useCartStore } from "@/lib/store"
 import { ProductGrid } from "@/components/product/product-grid"
 import type { Product } from "@/lib/types"
@@ -117,7 +117,7 @@ export default function ProductPage() {
             <div className="relative w-full max-w-[450px]">
               <div
                 ref={sliderRefSmall}
-                className="keen-slider rounded-xl overflow-hidden cursor-zoom-in h-[420px] bg-white"
+                className="keen-slider rounded-xl overflow-hidden cursor-zoom-in h-[420px] bg-background"
                 onClick={() => setIsGalleryOpen(true)}
               >
                 {imagenes.map((img, index) => (
@@ -149,7 +149,6 @@ export default function ProductPage() {
                 <ChevronRight className="h-5 w-5" />
               </button>
             </div>
-
           </div>
 
 

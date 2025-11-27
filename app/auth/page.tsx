@@ -50,10 +50,8 @@ export default function AuthPage() {
       if (success) {
         // Actualiza el store global (para que Header muestre "Mi perfil")
         login({
-          id: "1", // podrías usar el id real del backend si lo devuelve
-          email: loginForm.email,
-          name: loginForm.email.split("@")[0],
-          avatar: "/placeholder.svg?height=40&width=40&text=U",
+          id: String(success.id),
+          nombre: String(success.nombre)
         })
         router.push(redirect) // redirige a la página de destino
       } else {
@@ -200,8 +198,8 @@ export default function AuthPage() {
                 </div>
 
                 <Button
-                  type="submit" 
-                  className="w-full bg-primary hover:bg-primary/70 cursor-pointer" 
+                  type="submit"
+                  className="w-full bg-primary hover:bg-primary/70 cursor-pointer"
                   disabled={isLoading}>
                   {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
                 </Button>

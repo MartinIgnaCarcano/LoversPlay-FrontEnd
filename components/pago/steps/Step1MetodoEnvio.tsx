@@ -15,7 +15,7 @@ export function Step1MetodoEnvio({ shippingType, setShippingType }: Step1MetodoE
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Método de entrega</CardTitle>
+                <CardTitle className="text-xl">Método de entrega</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
                 <RadioGroup

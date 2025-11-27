@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Search, ShoppingCart, Menu, User, Phone, Mail, MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useCartStore, useAuthStore } from "@/lib/store"
+import { Usuario } from "@/lib/types"
 import { MobileMenu } from "./mobile-menu"
 import { SearchBar } from "./search-bar"
 import { ErrorBoundary } from "@/components/ui/error-boundary"
@@ -129,19 +130,19 @@ export function Header() {
               >
                 <Link
                   href={isAuthenticated ? "/perfil" : "/auth"}
-                  aria-label={isAuthenticated ? `Perfil de ${user?.name}` : "Ingresar"}
+                  aria-label={isAuthenticated ? `Perfil de ${user?.nombre}` : "Ingresar"}
                 >
                   <User className="h-5 w-5" aria-hidden="true" />
 
                   {/* Texto estable en SSR — dinámico solo después del mount */}
                   <span className="hidden sm:ml-2 sm:block truncate max-w-20">
-                    {mounted ? (isAuthenticated ? user?.name : "Ingresar") : "Ingresar"}
+                    {mounted ? (isAuthenticated ? user?.nombre : "Ingresar") : "Ingresar"}
                   </span>
                 </Link>
               </Button>
               {/* Cart */}
               <Button variant="ghost" size="sm" className="relative hover:bg-brand/10 transition-colors" asChild>
-                <Link href="/carrito" aria-label={`Carrito de compras con ${totalItems} artículos`}>
+                <Link href="/carrito" aria-label={`Carrito de compras`}>
                   <ShoppingCart className="h-5 w-5" aria-hidden="true" />
                   <CartBadge totalItems={totalItems} />
                 </Link>

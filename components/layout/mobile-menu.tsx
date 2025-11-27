@@ -63,7 +63,7 @@ export function MobileMenu({ isOpen, onClose, navigation }: MobileMenuProps) {
           <div className="px-4 py-4 border-t border-border">
             {isAuthenticated ? (
               <div className="space-y-3">
-                <p className="text-sm text-card-foreground">Hola, {user?.name}</p>
+                <p className="text-sm text-card-foreground">Hola, {user?.nombre}</p>
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" asChild className="flex-1 bg-transparent">
                     <Link href="/perfil" onClick={onClose}>

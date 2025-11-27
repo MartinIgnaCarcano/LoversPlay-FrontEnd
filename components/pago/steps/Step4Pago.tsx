@@ -13,7 +13,7 @@ export function Step4Pago({ paymentMethod, setPaymentMethod }: Step4PagoProps) {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Método de pago</CardTitle>
+                <CardTitle className="text-xl">Método de pago</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
                 <RadioGroup

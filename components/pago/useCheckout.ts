@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useCartStore } from "@/lib/store"
-import { fetchUsuario } from "@/lib/services/api"
+import { fetchUsuario, calcularEnvio } from "@/lib/services/api"
 
 export type ShippingType = "" | "correo" | "transporte" | "pickup" | "arrange"
 export type ShippingCarrier = "" | "viacargo" | "cata" | "andesmar"
@@ -68,7 +68,7 @@ export function useCheckout() {
             try {
                 const user = await fetchUsuario()
                 if (user) {
-                    const direccion = user.direcciones?.[0]
+                    const direccion = user.direccion
                     setBillingData((prev) => ({
                         ...prev,
                         name: user.nombre || "",
@@ -90,65 +90,44 @@ export function useCheckout() {
     // Cálculo de envío
     const calculateShipping = async () => {
         if (!billingData.postalCode) {
-            alert("Por favor ingresa un código postal válido")
-            return
+            alert("Por favor ingresa un código postal válido");
+            return;
         }
 
         if (shippingType === "pickup" || shippingType === "arrange") {
-            setShippingCost(0)
-            return
+            setShippingCost(0);
+            return;
         }
 
-        setIsCalculatingCost(true)
-        setShippingCost(0)
-
-        try {
-            let endpoint = ""
-
-            if (shippingType === "correo") {
-                endpoint = "/api/envio-andreani"
-            }
-
-            if (shippingType === "transporte") {
-                if (!shippingCarrier) {
-                    alert("Seleccioná un transporte")
-                    return
-                }
-                if (shippingCarrier === "viacargo") endpoint = "/api/envio-viacargo"
-                if (shippingCarrier === "cata") endpoint = "/api/envio-cata"
-                if (shippingCarrier === "andesmar") endpoint = "/api/envio-andesmar"
-            }
-
-            if (!endpoint) return
-
-            const res = await fetch(endpoint, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ postalCode: billingData.postalCode }),
-            })
-
-            const text = await res.text()
-            let data
-            try {
-                data = JSON.parse(text)
-            } catch {
-                alert("⚠️ Error calculando el envío: " + text)
-                return
-            }
-
-            if (data.error) {
-                alert("❌ Error del servidor: " + (data.detalle || "Desconocido"))
-                return
-            }
-
-            setShippingCost(parseFloat(data.precio) || 0)
-        } catch (error) {
-            console.error("❌ Error calculando el envío:", error)
-            alert("Hubo un problema calculando el costo de envío")
-        } finally {
-            setIsCalculatingCost(false)
+        // Transporte requiere carrier
+        if (shippingType === "transporte" && !shippingCarrier) {
+            alert("Seleccioná un transporte antes de calcular.");
+            return;
         }
-    }
+
+        setIsCalculatingCost(true);
+        setShippingCost(0);
+
+        const tipo =
+            shippingType === "correo"
+                ? "correo"
+                : shippingCarrier; // viacargo/cata/andesmar
+
+        const data = await calcularEnvio(
+            Number(billingData.postalCode),
+            tipo
+        );
+
+        if (!data || !data.precio) {
+            alert("No se pudo calcular el envío.");
+            setShippingCost(0);
+        } else {
+            setShippingCost(Number(data.precio));
+        }
+
+        setIsCalculatingCost(false);
+    };
+
 
     // Validaciones por paso
     const canGoNext: boolean = (() => {

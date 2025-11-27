@@ -1,6 +1,6 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
-import type { CartItem, User, FilterState, SortOption } from "./types"
+import type { CartItem, Usuario, FilterState, SortOption } from "./types"
 
 interface CartStore {
   items: CartItem[]
@@ -13,9 +13,9 @@ interface CartStore {
 }
 
 interface AuthStore {
-  user: User | null
+  user: Usuario | null
   isAuthenticated: boolean
-  login: (user: User) => void
+  login: (user: Usuario) => void
   logout: () => void
 }
 
@@ -91,8 +91,8 @@ export const useCartStore = create<CartStore>()(
             quantity <= 0
               ? state.items.filter((item) => String(item.productId) !== String(productId))
               : state.items.map((item) =>
-                  String(item.productId) === String(productId) ? { ...item, quantity } : item,
-                ),
+                String(item.productId) === String(productId) ? { ...item, quantity } : item,
+              ),
         })),
       clearCart: () => set({ items: [] }),
       getTotalItems: () => get().items.reduce((total, item) => total + item.quantity, 0),
@@ -112,7 +112,10 @@ export const useAuthStore = create<AuthStore>()(
       user: null,
       isAuthenticated: false,
       login: (user) => set({ user, isAuthenticated: true }),
-      logout: () => set({ user: null, isAuthenticated: false }),
+      logout: () => {
+        localStorage.removeItem("access_token");
+        set({ user: null, isAuthenticated: false })
+      }
     }),
     {
       name: "auth-storage",

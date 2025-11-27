@@ -18,7 +18,7 @@ export function Step3Direccion({ billingData, setBillingData, shippingType }: St
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Datos para el pedido</CardTitle>
+                <CardTitle className="text-xl">Datos para el pedido</CardTitle>
             </CardHeader>
 
             <CardContent className="space-y-2">
