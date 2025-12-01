@@ -6,9 +6,16 @@ import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import { Button } from "@/components/ui/button"
 import { CheckCircle, XCircle, Clock } from "lucide-react"
+import { useCartStore } from "@/lib/store"
+import { useEffect } from "react"
 
 export default function PaymentStatusPage() {
   const { status } = useParams<{ status: string }>()
+  const { clearCart } = useCartStore()
+
+  useEffect(()=>{
+    clearCart()
+  },[])
 
   let title = "Estado del pago"
   let description = "Revisa el resultado de tu transacción."

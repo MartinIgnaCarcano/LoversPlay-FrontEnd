@@ -10,6 +10,9 @@ interface Step5ReviewProps {
     shippingCarrier: ShippingCarrier
     shipping: number
     paymentMethod: string
+    subtotal: number
+    recargo: number
+    total: number
 }
 
 export function Step5Review({
@@ -18,6 +21,9 @@ export function Step5Review({
     shippingCarrier,
     shipping,
     paymentMethod,
+    subtotal,
+    recargo,
+    total,
 }: Step5ReviewProps) {
     return (
         <Card>
@@ -25,6 +31,8 @@ export function Step5Review({
                 <CardTitle className="text-xl">Revisá tu pedido</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
+                
+                {/* Dirección */}
                 <div>
                     <h3 className="font-semibold mb-2 text-lg">Dirección de entrega</h3>
                     <p>{billingData.name}</p>
@@ -33,7 +41,7 @@ export function Step5Review({
                         {billingData.city && `, ${billingData.city}`}
                     </p>
                     <p>
-                        {billingData.province} {billingData.postalCode && `(${billingData.postalCode})`} 
+                        {billingData.province} {billingData.postalCode && `(${billingData.postalCode})`}
                     </p>
                     <p>Tel: {billingData.phone}</p>
                     <p>Email: {billingData.email}</p>
@@ -42,6 +50,7 @@ export function Step5Review({
 
                 <Separator />
 
+                {/* Envío */}
                 <div>
                     <h3 className="font-semibold mb-2 text-lg">Método de envío</h3>
                     <p>
@@ -51,14 +60,12 @@ export function Step5Review({
                         {shippingType === "pickup" && "Retiro por el local"}
                         {shippingType === "arrange" && "A coordinar con el vendedor"}
                     </p>
-                    <p>
-                        Costo envío:{" "}
-                        {shipping === 0 ? "-" : `$${shipping.toFixed(2)}`}
-                    </p>
+                    <p>Costo envío: {shipping === 0 ? "-" : `$${shipping.toFixed(2)}`}</p>
                 </div>
 
                 <Separator />
 
+                {/* Pago */}
                 <div>
                     <h3 className="font-semibold mb-2 text-lg">Método de pago</h3>
                     <p>
@@ -67,6 +74,19 @@ export function Step5Review({
                         {paymentMethod === "debito" && "Tarjeta de débito"}
                         {paymentMethod === "mercadopago" && "Mercado Pago"}
                     </p>
+
+                    {paymentMethod === "credito" && (
+                        <p className="text-red-500 font-medium">
+                            Recargo por crédito: +${recargo.toFixed(2)}
+                        </p>
+                    )}
+                </div>
+
+                <Separator />
+
+                {/* Total */}
+                <div className="text-lg font-semibold">
+                    Total final: ${total.toFixed(2)}
                 </div>
             </CardContent>
         </Card>

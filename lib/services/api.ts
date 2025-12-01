@@ -1,7 +1,7 @@
 import type { Pedido, Product, Usuario } from "@/lib/types"
 export { fetchProductoPorId as fetchProducto }
 
-const API_URL = "https://mckenzie-burthensome-denita.ngrok-free.dev/api"
+const API_URL = "http://localhost:5000/api"
 
 function handleUnauthorized(res: Response) {
   if (res.status === 401 || res.status === 403) {

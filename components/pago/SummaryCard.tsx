@@ -32,6 +32,7 @@ export function SummaryCard({ cartItems, subtotal, shipping, total }: SummaryCar
                             <div className="text-sm font-medium">
                                 ${(item.price * item.quantity).toFixed(2)}
                             </div>
+                            
                         </div>
                     ))}
                 </div>

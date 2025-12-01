@@ -50,7 +50,9 @@ export function useCheckout() {
     const cartItems = items
     const subtotal = cartItems.reduce((total, item: any) => total + item.price * item.quantity, 0)
     const shipping = shippingType === "pickup" || shippingType === "arrange" ? 0 : shippingCost
-    const total = subtotal + shipping
+    const recargo = paymentMethod === "credito" ? subtotal * 0.10 : 0
+
+    const total = subtotal + shipping + recargo
 
     const stepLabels = ["Dirección", "Envío", "Datos de envío", "Pago", "Confirmación"] as const
 
@@ -212,7 +214,7 @@ export function useCheckout() {
                 return;
             }
 
-            const pedidoId = pedido.id;
+            const pedidoId = pedido.pedido_id;
 
             // 2) Crear preferencia MP
             const preferenciaPayload = {
@@ -223,7 +225,9 @@ export function useCheckout() {
                     producto_id: item.productId,
                     nombre: item.name || item.nombre,
                     cantidad: item.quantity,
-                    precio: item.price,
+                    precio: paymentMethod === "credito"
+                        ? item.price * 1.10    // ← AUMENTO 10%
+                        : item.price,
                 })),
             };
 
@@ -233,15 +237,9 @@ export function useCheckout() {
                 return;
             }
 
-            // 3) Abrir MP Checkout Pro en nueva pestaña
-            window.open(pref.init_point, "_blank");
+            // 3) Abrir MP Checkout Pro
+            window.location.href = pref.init_point
 
-            // 4) Limpio carrito local
-            clearCart();
-            setOrderComplete(true);
-
-            // 5) Paso 5 → success visual
-            setStep(5);
 
         } catch (err) {
             console.error("❌ Error procesando pago:", err);
@@ -312,6 +310,7 @@ export function useCheckout() {
         subtotal,
         shipping,
         total,
+        recargo,
         // setters / acciones
         setBillingData,
         setShippingType: handleShippingTypeChange,

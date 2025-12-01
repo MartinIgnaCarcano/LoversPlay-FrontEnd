@@ -44,6 +44,7 @@ function PaymentPage() {
     subtotal,
     shipping,
     total,
+    recargo,
     calculateShipping,
     goNext,
     goBack,
@@ -54,26 +55,6 @@ function PaymentPage() {
     { label: "Carrito", href: "/carrito" },
     { label: "Pago" },
   ]
-
-  // Pedido terminado
-  if (orderComplete) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <main className="container mx-auto px-4 py-8">
-          <div className="max-w-2xl mx-auto text-center py-16">
-            <CheckCircle className="h-24 w-24 mx-auto mb-6 text-green-500" />
-            <h1 className="text-3xl font-bold text-foreground mb-4">¡Pago Exitoso!</h1>
-            <p className="text-muted-foreground mb-8">
-              Tu pedido ha sido procesado correctamente. Recibirás un email de confirmación en breve.
-            </p>
-            <p className="text-sm text-muted-foreground">Redirigiendo al inicio...</p>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    )
-  }
 
   // Carrito vacío
   if (cartItems.length === 0) {
@@ -139,6 +120,9 @@ function PaymentPage() {
         shippingCarrier={shippingCarrier}
         shipping={shipping}
         paymentMethod={paymentMethod}
+        subtotal={subtotal}
+        recargo={recargo}
+        total={total}
       />
     )
   }
