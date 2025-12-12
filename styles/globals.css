@@ -43,7 +43,7 @@
 
 
 /*Rosé Vintage Warm (equilibrado y romántico)*/
-/* .dark {
+.dark {
   --background: #3b2a29;
   --foreground: #f4e9e8;
   --card: #4b3534;
@@ -62,10 +62,10 @@
   --ring: #d2a3a0;
   --muted: #6a4f4f;
   --muted-foreground: #c8b1b0;
-} */
+}
 
 /*BUENA opcion*/
-.dark{
+/* .dark{
   --background: oklch(0.97 0.02 350);
   --foreground: oklch(0.22 0.02 350);
   --card: oklch(0.98 0.03 355);
@@ -83,7 +83,7 @@
   --border: oklch(0.87 0.03 10);
   --input: oklch(0.87 0.03 10);
   --ring: oklch(0.8 0.1 10);
-} 
+}  */
 
 
 
