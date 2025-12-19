@@ -4,7 +4,6 @@ import { useAuthStore } from "@/lib/store"
 import { useRouter, usePathname } from "next/navigation"
 import { useEffect } from "react"
 
-// HOC (High Order Component) para proteger páginas privadas
 export default function withAuth<T extends object>(
   Component: React.ComponentType<T>
 ) {
@@ -15,15 +14,13 @@ export default function withAuth<T extends object>(
 
     useEffect(() => {
       const token = localStorage.getItem("access_token")
-
       if (!token || !isAuthenticated) {
-        // 🚨 Mandamos al login con la ruta actual como parámetro
         router.push(`/auth?redirect=${encodeURIComponent(pathname)}`)
       }
     }, [isAuthenticated, router, pathname])
 
+    if (!isAuthenticated) return null
+
     return <Component {...props} />
   }
 }
-
-

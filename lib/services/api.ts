@@ -1,4 +1,5 @@
 import type { Pedido, Product, Usuario } from "@/lib/types"
+import { fetchWithAuth } from "../fetchWithAuth";
 export { fetchProductoPorId as fetchProducto }
 
 const API_URL = "http://localhost:5000/api"
@@ -196,7 +197,7 @@ export async function register(nombre: string, email: string, password: string, 
 // 🔹 Obtener detalles del usuario
 export async function fetchUsuario() {
   try {
-    const response = await fetch(`${API_URL}/auth/me`, {
+    const response = await fetchWithAuth(`${API_URL}/auth/me`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('access_token')}`
       }
@@ -232,7 +233,7 @@ export async function fetchPedidosPorUsuario(): Promise<Pedido[] | null> {
 
   const url = `${API_URL}/pedidos`;
 
-  const response = await fetch(url, {
+  const response = await fetchWithAuth(url, {
     method: "GET",
     headers: {
       "Authorization": `Bearer ${token}`,
@@ -280,9 +281,8 @@ export async function actualizarUsuario(data: {
     extra: string
   }
 }): Promise<{ update: boolean }> {
-
   try {
-    const res = await fetch(`${API_URL}/auth/me`, {
+    const res = await fetchWithAuth(`${API_URL}/auth/me`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -307,7 +307,7 @@ export async function actualizarUsuario(data: {
 
 export async function fetchFavorites() {
   try {
-    const res = await fetch(`${API_URL}/auth/mis-productos`, {
+    const res = await fetchWithAuth(`${API_URL}/auth/mis-productos`, {
       headers: {
         "Authorization": `Bearer ${localStorage.getItem("access_token")}`
       }
@@ -412,8 +412,6 @@ export async function crearPedido(payload: {
 
   return await res.json(); // { id, ... }
 }
-
-
 
 // -----------------------------
 // 2) Crear preferencia de MP
