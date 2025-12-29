@@ -33,7 +33,7 @@ interface FiltersStore {
 export const useFiltersStore = create<FiltersStore>()((set) => ({
   filters: {
     categories: [],
-    priceRange: [0, 1_000_000], // rango extendido
+    priceRange: [0, 100_000], // rango extendido
     rating: [],
     inStock: false,
     tags: [],
@@ -53,7 +53,7 @@ export const useFiltersStore = create<FiltersStore>()((set) => ({
     set({
       filters: {
         categories: [],
-        priceRange: [0, 1_000_000],
+        priceRange: [0, 100_000],
         rating: [],
         inStock: false,
         tags: [],
