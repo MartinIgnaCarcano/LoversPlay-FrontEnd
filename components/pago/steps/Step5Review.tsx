@@ -31,7 +31,7 @@ export function Step5Review({
                 <CardTitle className="text-xl">Revisá tu pedido</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
-                
+
                 {/* Dirección */}
                 <div>
                     <h3 className="font-semibold mb-2 text-lg">Dirección de entrega</h3>
@@ -74,6 +74,23 @@ export function Step5Review({
                         {paymentMethod === "debito" && "Tarjeta de débito"}
                         {paymentMethod === "mercadopago" && "Mercado Pago"}
                     </p>
+
+                    {paymentMethod === "transferencia" && (
+                        <p className="text-500 font-medium">
+                            Alias: loversplay.mp
+                            <br />
+                            CBU: 000000000000000123123123
+                            <br />
+                            <br />
+                            - Realizá la transferencia por el monto indicado usando los datos de la cuenta que figuran debajo.
+                            <br />
+                            👉 Importante: incluí PEDIDO Nº "ID_PEDIDO" en el concepto para que podamos identificar el pago.
+                            <br />
+                            - Una vez recibida la transferencia, el pago será verificado y te avisaremos por email cuando el pedido cambie de estado.
+                            <br />
+
+                        </p>
+                    )}
 
                     {paymentMethod === "credito" && (
                         <p className="text-red-500 font-medium">

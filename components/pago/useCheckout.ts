@@ -46,6 +46,7 @@ export function useCheckout() {
     const [paymentMethod, setPaymentMethod] = useState("")
     const [isProcessing, setIsProcessing] = useState(false)
     const [orderComplete, setOrderComplete] = useState(false)
+    const [transferInfo, setTransferInfo] = useState<any>(null)
 
     const cartItems = items
     const subtotal = cartItems.reduce((total, item: any) => total + item.price * item.quantity, 0)
@@ -88,6 +89,26 @@ export function useCheckout() {
         }
         cargarUsuario()
     }, [])
+
+    // Invalida el costo si cambia algo que afecta la cotización (ej: CP/provincia/carrier/tipo)
+    useEffect(() => {
+        // Si no requiere cotización, no importa
+        if (shippingType === "pickup" || shippingType === "arrange") return
+
+        // Si estoy en pleno cálculo, no peleo con calculateShipping
+        if (isCalculatingCost) return
+
+        // Si el método es correo/transporte y ya había un costo, lo invalido
+        if ((shippingType === "correo" || shippingType === "transporte") && shippingCost > 0) {
+            setShippingCost(0)
+        }
+    }, [
+        billingData.postalCode,
+        billingData.province,
+        shippingType,
+        shippingCarrier,
+    ])
+
 
     // Cálculo de envío
     const calculateShipping = async () => {
@@ -192,10 +213,10 @@ export function useCheckout() {
     }
 
     const handleProcessPayment = async () => {
-        setIsProcessing(true);
+        setIsProcessing(true)
 
         try {
-            // 1) Crear orden en BD
+            // 1) Crear pedido
             const pedidoPayload = {
                 nombre: billingData.name,
                 email: billingData.email,
@@ -205,19 +226,34 @@ export function useCheckout() {
                     producto_id: item.productId,
                     cantidad: item.quantity,
                 })),
-            };
-
-            const pedido = await crearPedido(pedidoPayload);
-            if (!pedido) {
-                alert("No se pudo crear el pedido.");
-                setIsProcessing(false);
-                return;
             }
 
-            const pedidoId = pedido.pedido_id;
+            const pedido = await crearPedido(pedidoPayload)
+            if (!pedido) throw new Error("No se pudo crear el pedido")
 
-            // 2) Crear preferencia MP
-            const preferenciaPayload = {
+            const pedidoId = pedido.pedido_id
+
+            // 2) TRANSFERENCIA 👉 no redirecciona
+            if (paymentMethod === "transferencia") {
+                const resp = await crearPreferenciaPago({
+                    pedido_id: pedidoId,
+                    tipo_pago: "transferencia",
+                    costo_envio: shipping,
+                    items: cartItems.map((item: any) => ({
+                        producto_id: item.productId,
+                        nombre: item.name || item.nombre,
+                        cantidad: item.quantity,
+                        precio: item.price,
+                    })),
+                })
+
+                setTransferInfo(resp)
+                setStep(5)
+                return
+            }
+
+            // 3) MERCADO PAGO 👉 igual que hoy
+            const pref = await crearPreferenciaPago({
                 pedido_id: pedidoId,
                 tipo_pago: paymentMethod,
                 costo_envio: shipping,
@@ -225,29 +261,26 @@ export function useCheckout() {
                     producto_id: item.productId,
                     nombre: item.name || item.nombre,
                     cantidad: item.quantity,
-                    precio: paymentMethod === "credito"
-                        ? item.price * 1.10    // ← AUMENTO 10%
-                        : item.price,
+                    precio:
+                        paymentMethod === "credito"
+                            ? item.price * 1.10
+                            : item.price,
                 })),
-            };
+            })
 
-            const pref = await crearPreferenciaPago(preferenciaPayload);
-            if (!pref || !pref.init_point) {
-                alert("No se pudo iniciar el pago.");
-                return;
+            if (!pref?.init_point) {
+                throw new Error("No se pudo iniciar el pago")
             }
 
-            // 3) Abrir MP Checkout Pro
             window.location.href = pref.init_point
-
-
         } catch (err) {
-            console.error("❌ Error procesando pago:", err);
-            alert("Error procesando el pago.");
+            console.error(err)
+            alert("Error procesando el pago")
         } finally {
-            setIsProcessing(false);
+            setIsProcessing(false)
         }
-    };
+    }
+
 
 
     const goNext = () => {
@@ -306,6 +339,7 @@ export function useCheckout() {
         paymentMethod,
         isProcessing,
         orderComplete,
+        transferInfo,
         cartItems,
         subtotal,
         shipping,

@@ -182,6 +182,7 @@ export default function NewProductoPage() {
             accept="image/*"
             required
             onChange={(e) => setImagenPrincipal(e.target.files?.[0] || null)}
+            className="cursor-pointer"
           />
         </div>
 
@@ -192,6 +193,7 @@ export default function NewProductoPage() {
             type="file"
             accept="image/*"
             multiple
+            className="cursor-pointer"
             onChange={(e) => setImagenesSecundarias(Array.from(e.target.files || []))}
           />
         </div>
