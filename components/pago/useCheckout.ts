@@ -42,6 +42,9 @@ export function useCheckout() {
     const [shippingCarrier, setShippingCarrier] = useState<ShippingCarrier>("")
     const [shippingCost, setShippingCost] = useState(0)
     const [isCalculatingCost, setIsCalculatingCost] = useState(false)
+    const shippingRequiresQuote = shippingType === "correo" || shippingType === "transporte"
+    const shippingIsValid = !shippingRequiresQuote || shippingCost > 0
+
 
     const [paymentMethod, setPaymentMethod] = useState("")
     const [isProcessing, setIsProcessing] = useState(false)
@@ -63,7 +66,6 @@ export function useCheckout() {
         setShippingCost(0)              // ← resetea el precio
         setShippingCarrier("")          // ← opcional: limpia el transporte elegido
     }
-
 
     // Cargar usuario logueado
     useEffect(() => {
@@ -90,24 +92,6 @@ export function useCheckout() {
         cargarUsuario()
     }, [])
 
-    // Invalida el costo si cambia algo que afecta la cotización (ej: CP/provincia/carrier/tipo)
-    useEffect(() => {
-        // Si no requiere cotización, no importa
-        if (shippingType === "pickup" || shippingType === "arrange") return
-
-        // Si estoy en pleno cálculo, no peleo con calculateShipping
-        if (isCalculatingCost) return
-
-        // Si el método es correo/transporte y ya había un costo, lo invalido
-        if ((shippingType === "correo" || shippingType === "transporte") && shippingCost > 0) {
-            setShippingCost(0)
-        }
-    }, [
-        billingData.postalCode,
-        billingData.province,
-        shippingType,
-        shippingCarrier,
-    ])
 
 
     // Cálculo de envío
@@ -142,15 +126,14 @@ export function useCheckout() {
         );
 
         if (!data || !data.precio) {
-            alert("No se pudo calcular el envío.");
-            setShippingCost(0);
+            alert("No se pudo calcular el envío.")
+            setShippingCost(0)
         } else {
-            setShippingCost(Number(data.precio));
+            setShippingCost(Number(data.precio))
         }
 
         setIsCalculatingCost(false);
     };
-
 
     // Validaciones por paso
     const canGoNext: boolean = (() => {
@@ -213,8 +196,12 @@ export function useCheckout() {
     }
 
     const handleProcessPayment = async () => {
+        if (!shippingIsValid) {
+            alert("Tenés que calcular el costo de envío antes de continuar.")
+            setStep(2) // lo mando directo al paso de Envío
+            return
+        }
         setIsProcessing(true)
-
         try {
             // 1) Crear pedido
             const pedidoPayload = {
@@ -280,8 +267,6 @@ export function useCheckout() {
             setIsProcessing(false)
         }
     }
-
-
 
     const goNext = () => {
         if (!validateStep(step)) return

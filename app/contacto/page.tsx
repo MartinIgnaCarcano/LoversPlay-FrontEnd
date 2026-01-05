@@ -124,7 +124,7 @@ export default function ContactPage() {
                     <p className="text-muted-foreground mb-6 font-[family-name:var(--font-inter)]">
                       Gracias por contactarnos.
                     </p>
-                    <Button onClick={() => setIsSubmitted(false)} variant="outline">
+                    <Button className="bg-primary cursor-pointer" onClick={() => setIsSubmitted(false)} variant="outline">
                       Enviar otro mensaje
                     </Button>
                   </div>
@@ -199,7 +199,7 @@ export default function ContactPage() {
 
                     <Button
                       type="submit"
-                      className="w-full bg-brand hover:bg-brand/90"
+                      className="w-full bg-primary hover:bg-primary/70 cursor-pointer"
                       disabled={isSubmitting}
                       size="lg"
                     >

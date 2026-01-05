@@ -35,43 +35,7 @@ export default function HomePage() {
       <main>
         <Hero />
 
-        {/* Why choose us section */}
-        <section className="py-16">
-          <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl font-bold text-foreground mb-8 font-[family-name:var(--font-poppins)]">
-              ¿Por qué elegirnos?
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="bg-card rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-200">
-                <div className="text-4xl mb-4">🔒</div>
-                <h3 className="text-xl font-semibold text-card-foreground mb-2 font-[family-name:var(--font-poppins)]">
-                  Envío Discreto
-                </h3>
-                <p className="text-muted-foreground font-[family-name:var(--font-inter)]">
-                  Todos nuestros productos se envían en empaques completamente discretos
-                </p>
-              </div>
-              <div className="bg-card rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-200">
-                <div className="text-4xl mb-4">⭐</div>
-                <h3 className="text-xl font-semibold text-card-foreground mb-2 font-[family-name:var(--font-poppins)]">
-                  Calidad Premium
-                </h3>
-                <p className="text-muted-foreground font-[family-name:var(--font-inter)]">
-                  Productos de las mejores marcas con materiales seguros y certificados
-                </p>
-              </div>
-              <div className="bg-card rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-200">
-                <div className="text-4xl mb-4">💬</div>
-                <h3 className="text-xl font-semibold text-card-foreground mb-2 font-[family-name:var(--font-poppins)]">
-                  Asesoría Experta
-                </h3>
-                <p className="text-muted-foreground font-[family-name:var(--font-inter)]">
-                  Nuestro equipo te ayuda a encontrar el producto perfecto para ti
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
+
 
         {/* Featured products */}
         <section className="py-16 bg-muted/30">
@@ -107,6 +71,56 @@ export default function HomePage() {
               </p>
             </div>
             <ProductGrid products={popularProducts} />
+          </div>
+        </section>
+
+        {/* Why choose us section */}
+
+        <section
+          className="py-16 bg-no-repeat"
+          style={{ backgroundImage: "url(/fondoTela.png)" }}
+        >
+          <div className="container mx-auto px-4 text-center">
+            <h2 className="text-3xl font-bold text-foreground mb-8 font-[family-name:var(--font-poppins)]">
+              ¿Por qué elegirnos?
+            </h2>
+            <p className="max-w-3xl mx-auto mb-12 text-lg text-muted-foreground leading-relaxed">
+              Somos una tienda de bienestar íntimo con más de <strong>25 años de experiencia en Mendoza</strong>,
+              acompañando a personas y parejas a descubrir su sexualidad de forma
+              <strong> segura, confiable y discreta</strong>.
+              En Lovers Play combinamos <strong>atención personalizada</strong>, un
+              <strong> catálogo variado</strong> y <strong>precios competitivos</strong>,
+              para que cada compra sea una experiencia cómoda, respetuosa y sin prejuicios.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="bg-card rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-200">
+                <div className="text-4xl mb-4">🔒</div>
+                <h3 className="text-xl font-semibold text-card-foreground mb-2 font-[family-name:var(--font-poppins)]">
+                  Envío Discreto
+                </h3>
+                <p className="text-muted-foreground font-[family-name:var(--font-inter)]">
+                  Todos nuestros productos se envían en empaques completamente discretos
+                </p>
+              </div>
+              <div className="bg-card rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-200">
+                <div className="text-4xl mb-4">⭐</div>
+                <h3 className="text-xl font-semibold text-card-foreground mb-2 font-[family-name:var(--font-poppins)]">
+                  Calidad Premium
+                </h3>
+                <p className="text-muted-foreground font-[family-name:var(--font-inter)]">
+                  Productos de las mejores marcas con materiales seguros y certificados
+                </p>
+              </div>
+              <div className="bg-card rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-200">
+                <div className="text-4xl mb-4">💬</div>
+                <h3 className="text-xl font-semibold text-card-foreground mb-2 font-[family-name:var(--font-poppins)]">
+                  Asesoría Experta
+                </h3>
+                <p className="text-muted-foreground font-[family-name:var(--font-inter)]">
+                  Nuestro equipo te ayuda a encontrar el producto perfecto para ti
+                </p>
+              </div>
+            </div>
           </div>
         </section>
 

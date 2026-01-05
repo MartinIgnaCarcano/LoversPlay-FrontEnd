@@ -107,7 +107,7 @@ export function Step3Direccion({ billingData, setBillingData, shippingType }: St
                                 <Input
                                     id="postalCode"
                                     className="placeholder:text-muted-foreground/50"
-                                    disabled={simpleMode}
+                                    disabled={simpleMode || billingData.postalCode!= ""}
                                     value={billingData.postalCode}
                                     onChange={(e) => setBillingData({ ...billingData, postalCode: e.target.value })}
                                     required={!simpleMode}
