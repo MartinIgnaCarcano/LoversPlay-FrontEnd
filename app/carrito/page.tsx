@@ -67,7 +67,7 @@ export default function CartPage() {
           <div className="lg:col-span-2">
             <div className="flex items-center justify-between mb-6">
               <h1 className="text-2xl font-bold text-foreground font-[family-name:var(--font-poppins)]">
-                Carrito de Compras 
+                Carrito de Compras
               </h1>
               <Button variant="outline" size="sm" onClick={clearCart} className="hover:cursor-pointer" >
                 <Trash2 className="h-4 w-4 mr-2" />
@@ -125,6 +125,7 @@ export default function CartPage() {
                             size="icon"
                             onClick={() => updateQuantity(String(item.productId), item.quantity + 1)}
                             className="hover:cursor-pointer"
+                            disabled={typeof item.stock === "number" ? item.quantity >= item.stock : false}
                           >
                             <Plus className="h-4 w-4" />
                           </Button>

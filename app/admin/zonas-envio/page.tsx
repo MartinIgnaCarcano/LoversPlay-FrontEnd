@@ -1,21 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import {
-  adminFetchEnvios,
-  adminDeleteEnvio,
-} from "@/lib/services/api-admin";
-
+import { useEffect, useMemo, useState } from "react";
+import { adminFetchEnvios, adminDeleteEnvio } from "@/lib/services/api-admin";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash, Plus } from "lucide-react";
+import { ZonaEnvio } from "@/lib/types";
+
+type ActivaFilter = "all" | "activa" | "inactiva";
+type TipoFilter = "all" | string;
+
+function labelTipo(tipo: string) {
+  const t = (tipo || "").toLowerCase();
+  if (t === "correo") return "Correo";
+  if (t === "viacargo") return "ViaCargo";
+  if (t === "andesmar") return "Andesmar";
+  if (t === "cata") return "Cata";
+  return tipo; // fallback
+}
+
 
 export default function AdminEnviosPage() {
-  const [envios, setEnvios] = useState<any[]>([]);
-  const [enviosBase, setEnviosBase] = useState<any[]>([]);
+  const [enviosBase, setEnviosBase] = useState<ZonaEnvio[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
-  const [total, setTotal] = useState(0);
+
+  const [fActiva, setFActiva] = useState<ActivaFilter>("all");
+  const [fTipo, setFTipo] = useState<TipoFilter>("all");
 
   // ============================
   // Cargar envíos
@@ -24,9 +35,7 @@ export default function AdminEnviosPage() {
     setLoading(true);
     try {
       const data = await adminFetchEnvios();
-      setEnvios(data);
       setEnviosBase(data);
-      setTotal(data.length);
     } catch (err) {
       console.error(err);
     }
@@ -37,35 +46,45 @@ export default function AdminEnviosPage() {
     loadData();
   }, []);
 
-  // ============================
-  // Buscador local
-  // ============================
-  function handleSearch(e: any) {
-    const value = e.target.value;
-    setSearch(value);
+  const tiposDisponibles = useMemo(() => {
+    const set = new Set<string>();
+    for (const z of enviosBase) {
+      if (z?.tipo_envio) set.add(String(z.tipo_envio).toLowerCase());
+    }
+    return Array.from(set).sort(); // ["andesmar","cata","correo","viacargo",...]
+  }, [enviosBase]);
 
-    if (value.trim() === "") {
-      setEnvios(enviosBase);
-      setTotal(enviosBase.length);
-      return;
+  // ============================
+  // Derivar envíos filtrados
+  // ============================
+  const envios = useMemo(() => {
+    let list = [...enviosBase];
+
+    // 1) filtro activa
+    if (fActiva === "activa") list = list.filter((z) => z.activa === true);
+    if (fActiva === "inactiva") list = list.filter((z) => z.activa === false);
+
+    // 2) filtro tipo_envio
+    if (fTipo !== "all") {
+      list = list.filter((z) => String(z.tipo_envio).toLowerCase() === fTipo);
     }
 
-    if (value.trim().length < 3) {
-      setEnvios(enviosBase);
-      setTotal(enviosBase.length);
-      return;
+    // 3) búsqueda
+    const value = search.trim().toLowerCase();
+    if (value.length >= 3) {
+      list = list.filter(
+        (z) =>
+          z.nombre.toLowerCase().includes(value) ||
+          String(z.cp_inicio).includes(value) ||
+          String(z.cp_fin).includes(value) ||
+          z.tipo_envio.toLowerCase().includes(value)
+      );
     }
 
-    const buscado = value.toLowerCase();
+    return list;
+  }, [enviosBase, search, fActiva, fTipo]);
 
-    const filtrados = enviosBase.filter((e) =>
-      e.nombre.toLowerCase().includes(buscado) ||
-      e.tipo_envio.toLowerCase().includes(buscado)
-    );
-
-    setEnvios(filtrados);
-    setTotal(filtrados.length);
-  }
+  const total = envios.length;
 
   // ============================
   // Eliminar
@@ -84,7 +103,6 @@ export default function AdminEnviosPage() {
 
   return (
     <div className="max-w-6xl mx-auto py-10">
-      
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">Zonas de Envío</h1>
@@ -97,17 +115,56 @@ export default function AdminEnviosPage() {
       </div>
 
       {/* Total */}
-      <div className="mb-4 text-gray-600">
-        Zonas — {total}
-      </div>
+      <div className="mb-4 text-gray-600">Zonas — {total}</div>
 
-      {/* Buscador */}
-      <input
-        value={search}
-        onChange={handleSearch}
-        placeholder="Buscar por nombre o tipo..."
-        className="border px-3 py-2 rounded w-1/2 mb-6"
-      />
+      <div className="flex gap-4 mb-6">
+        {/* Buscador */}
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Buscar por nombre, tipo o CP (min 3 letras)..."
+          className="border px-3 py-2 rounded w-1/2"
+        />
+
+        {/* Filtro Activa */}
+        <select
+          className="border px-3 h-10 rounded"
+          value={fActiva}
+          onChange={(e) => setFActiva(e.target.value as ActivaFilter)}
+        >
+          <option value="all">Todas</option>
+          <option value="activa">Activas</option>
+          <option value="inactiva">Desactivadas</option>
+        </select>
+
+        <select
+          className="border px-3 h-10 rounded"
+          value={fTipo}
+          onChange={(e) => setFTipo(e.target.value)}
+        >
+          <option value="all">Todos los tipos</option>
+
+          {tiposDisponibles.map((t) => (
+            <option key={t} value={t}>
+              {labelTipo(t)}
+            </option>
+          ))}
+        </select>
+
+
+        {/* Reset rápido */}
+        <Button
+          variant="outline"
+          className="h-10"
+          onClick={() => {
+            setSearch("");
+            setFActiva("all");
+            setFTipo("all");
+          }}
+        >
+          Limpiar
+        </Button>
+      </div>
 
       {/* Tabla */}
       <div className="rounded-md border bg-white shadow">

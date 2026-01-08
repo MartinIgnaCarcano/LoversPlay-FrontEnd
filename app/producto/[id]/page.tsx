@@ -12,6 +12,7 @@ import { ProductGrid } from "@/components/product/product-grid"
 import type { Product } from "@/lib/types"
 import { fetchProductoPorId } from "@/lib/services/api"
 import { useKeenSlider } from "keen-slider/react"
+import { Package } from "lucide-react"
 import "keen-slider/keen-slider.min.css"
 
 export default function ProductPage() {
@@ -19,7 +20,7 @@ export default function ProductPage() {
   const [product, setProduct] = useState<Product | null>(null)
   const [related, setRelated] = useState<Product[]>([])
   const [quantity, setQuantity] = useState(1)
-  const { addItem } = useCartStore()
+  const { addItem, items } = useCartStore()
   const [mounted, setMounted] = useState(false)
   const [isGalleryOpen, setIsGalleryOpen] = useState(false)
 
@@ -46,6 +47,13 @@ export default function ProductPage() {
   }, [sliderSmall]);
 
   useEffect(() => {
+    if (!mounted || !product) return
+    const inCart = items.find((i) => String(i.productId) === String(product.id))?.quantity ?? 0
+    const available = Math.max(1, (product.stock ?? 1) - inCart)
+    setQuantity((q) => Math.min(q, available))
+  }, [product?.id, product?.stock, items, mounted])
+
+  useEffect(() => {
     setMounted(true)
     if (!params?.id) return
 
@@ -61,18 +69,36 @@ export default function ProductPage() {
     return <p className="text-center py-20">Cargando producto...</p>
   }
 
+  const currentInCart =
+    items.find((i) => String(i.productId) === String(product.id))?.quantity ?? 0
+
+  const availableToAdd = Math.max(0, (product.stock ?? 0) - currentInCart)
+
   const breadcrumbItems = [
     { label: "Catálogo", href: "/catalogo" },
     { label: product.nombre },
   ]
 
   const handleAddToCart = () => {
+    const currentInCart =
+      items.find((i) => String(i.productId) === String(product.id))?.quantity ?? 0
+
+    const desiredTotal = currentInCart + quantity
+    const stock = product.stock ?? 0
+
+    if (stock > 0 && desiredTotal > stock) {
+      // Acá podés mostrar toast/alert en vez de console
+      alert(`Stock insuficiente. Ya tenés ${currentInCart} en el carrito y solo hay ${stock} disponibles.`)
+      return
+    }
+
     addItem({
       productId: String(product.id),
       name: product.nombre,
       price: product.precio,
       image: product.url_imagen_principal || "/placeholder.svg",
       quantity,
+      stock: product.stock ?? 0,
     })
   }
 
@@ -158,7 +184,7 @@ export default function ProductPage() {
             <div className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center">
               <button
                 onClick={() => setIsGalleryOpen(false)}
-                className="absolute top-6 right-6 text-white hover:text-brand text-3xl font-bold"
+                className="absolute top-6 right-6 text-white hover:text-brand text-3xl font-bold cursor-pointer"
               >
                 ✕
               </button>
@@ -204,17 +230,38 @@ export default function ProductPage() {
             </div>
             {product.descripcion_corta && (
               <div className="prose prose-sm text-muted-foreground" dangerouslySetInnerHTML={{ __html: product.descripcion_corta }} />)}
+
+            <div className="space-y-1">
+              <span className="inline-flex items-center rounded-full bg-green-100 text-green-700 px-3 py-1 text-sm font-medium">
+                {product.stock} disponibles
+              </span>
+            </div>
+
+
+
             {/* Cantidad y carrito */}
             <div className="flex items-center gap-4"> <Button variant="ghost" className="hover:cursor-pointer" size="sm" onClick={() => setQuantity(Math.max(1, quantity - 1))} disabled={quantity <= 1}>
               <Minus className="h-4 w-4" />
             </Button>
               <span className="px-4 py-2 font-medium">{quantity}
               </span>
-              <Button variant="ghost" className="hover:cursor-pointer" size="sm" onClick={() => setQuantity(quantity + 1)} disabled={product.stock ? quantity >= product.stock : false} >
+              <Button
+                variant="ghost"
+                className="hover:cursor-pointer"
+                size="sm"
+                onClick={() => setQuantity((q) => q + 1)}
+                disabled={product.stock ? quantity >= availableToAdd : false}
+              >
                 <Plus className="h-4 w-4" />
               </Button>
-              <Button onClick={handleAddToCart} disabled={product.stock === 0} className="flex-1 bg-primary hover:bg-brand/90 cursor-pointer" size="lg">
-                <ShoppingCart className="h-5 w-5 mr-2" /> {product.stock === 0 ? "Agotado" : "Agregar al Carrito"}
+              <Button
+                onClick={handleAddToCart}
+                disabled={product.stock === 0 || availableToAdd === 0}
+                className="flex-1 bg-primary hover:bg-brand/90 cursor-pointer"
+                size="lg"
+              >
+                <ShoppingCart className="h-5 w-5 mr-2" />
+                {product.stock === 0 ? "Agotado" : availableToAdd === 0 ? "Sin stock disponible" : "Agregar al Carrito"}
               </Button>
             </div>
           </div>

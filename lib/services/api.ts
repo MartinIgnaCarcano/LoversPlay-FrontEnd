@@ -2,7 +2,7 @@ import type { Pedido, Product, Usuario } from "@/lib/types"
 import { fetchWithAuth } from "../fetchWithAuth";
 export { fetchProductoPorId as fetchProducto }
 
-const API_URL = "http://localhost:5000/api"
+const API_URL = "http://192.168.100.219:5000/api"
 
 function handleUnauthorized(res: Response) {
   if (res.status === 401 || res.status === 403) {
@@ -419,13 +419,6 @@ export async function crearPedido(payload: {
 export async function crearPreferenciaPago(payload: {
   pedido_id: number;
   tipo_pago: string;
-  costo_envio: number;
-  items: {
-    producto_id: number;
-    nombre: string;
-    cantidad: number;
-    precio: number;
-  }[];
 }) {
   const token = localStorage.getItem("access_token");
 

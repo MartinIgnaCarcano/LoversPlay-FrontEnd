@@ -37,7 +37,36 @@ export function Step2EnvioDetalle({
                 {(shippingType === "correo" || shippingType === "transporte") && (
                     <>
                         <div className="flex flex-col gap-1">
-                            <Label htmlFor="postalCode3">Código Postal *</Label>
+                            {shippingType === "transporte" && (
+                                <div>
+                                    <Label>Elegí el transporte</Label>
+                                    <RadioGroup
+                                        value={shippingCarrier}
+                                        onValueChange={(value: ShippingCarrier) => setShippingCarrier(value)}
+                                        className="space-y-3 mt-2"
+                                    >
+                                        <div className="flex items-center space-x-2 p-3 border rounded-lg">
+                                            <RadioGroupItem value="viacargo" id="viacargo" />
+                                            <Label htmlFor="viacargo" className="cursor-pointer">
+                                                ViaCargo
+                                            </Label>
+                                        </div>
+                                        <div className="flex items-center space-x-2 p-3 border rounded-lg">
+                                            <RadioGroupItem value="cata" id="cata" />
+                                            <Label htmlFor="cata" className="cursor-pointer">
+                                                Cata
+                                            </Label>
+                                        </div>
+                                        <div className="flex items-center space-x-2 p-3 border rounded-lg">
+                                            <RadioGroupItem value="andesmar" id="andesmar" />
+                                            <Label htmlFor="andesmar" className="cursor-pointer">
+                                                Andesmar
+                                            </Label>
+                                        </div>
+                                    </RadioGroup>
+                                </div>
+                            )}
+                            <Label htmlFor="postalCode3" className="py-2">Código Postal *</Label>
                             <div className="flex gap-2">
                                 <Input
                                     id="postalCode3"
@@ -61,36 +90,6 @@ export function Step2EnvioDetalle({
                                 </Button>
                             </div>
                         </div>
-
-                        {shippingType === "transporte" && (
-                            <div>
-                                <Label>Elegí el transporte</Label>
-                                <RadioGroup
-                                    value={shippingCarrier}
-                                    onValueChange={(value: ShippingCarrier) => setShippingCarrier(value)}
-                                    className="space-y-3 mt-2"
-                                >
-                                    <div className="flex items-center space-x-2 p-3 border rounded-lg">
-                                        <RadioGroupItem value="viacargo" id="viacargo" />
-                                        <Label htmlFor="viacargo" className="cursor-pointer">
-                                            ViaCargo
-                                        </Label>
-                                    </div>
-                                    <div className="flex items-center space-x-2 p-3 border rounded-lg">
-                                        <RadioGroupItem value="cata" id="cata" />
-                                        <Label htmlFor="cata" className="cursor-pointer">
-                                            Cata
-                                        </Label>
-                                    </div>
-                                    <div className="flex items-center space-x-2 p-3 border rounded-lg">
-                                        <RadioGroupItem value="andesmar" id="andesmar" />
-                                        <Label htmlFor="andesmar" className="cursor-pointer">
-                                            Andesmar
-                                        </Label>
-                                    </div>
-                                </RadioGroup>
-                            </div>
-                        )}
 
                         {shippingCost > 0 && (
                             <div className="p-3 bg-muted rounded-lg">

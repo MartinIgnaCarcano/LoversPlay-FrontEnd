@@ -21,10 +21,11 @@ export function Step4Pago({ paymentMethod, setPaymentMethod }: Step4PagoProps) {
                     onValueChange={setPaymentMethod}
                     className="space-y-4"
                 >
+                    
                     <div className="flex items-center space-x-2 p-4 border rounded-lg">
-                        <RadioGroupItem value="transferencia" id="transferencia" />
-                        <Label htmlFor="transferencia" className="cursor-pointer">
-                            Transferencia bancaria
+                        <RadioGroupItem value="mercadopago" id="mercadopago" />
+                        <Label htmlFor="mercadopago" className="cursor-pointer">
+                            Mercado Pago
                         </Label>
                     </div>
 
@@ -43,9 +44,9 @@ export function Step4Pago({ paymentMethod, setPaymentMethod }: Step4PagoProps) {
                     </div>
 
                     <div className="flex items-center space-x-2 p-4 border rounded-lg">
-                        <RadioGroupItem value="mercadopago" id="mercadopago" />
-                        <Label htmlFor="mercadopago" className="cursor-pointer">
-                            Mercado Pago
+                        <RadioGroupItem value="transferencia" id="transferencia" />
+                        <Label htmlFor="transferencia" className="cursor-pointer">
+                            Transferencia bancaria
                         </Label>
                     </div>
                 </RadioGroup>

@@ -51,6 +51,7 @@ export interface CartItem {
   salePrice?: number
   image: string
   quantity: number
+  stock?: number
 }
 
 // 🏠 Dirección de envío
@@ -80,6 +81,7 @@ export type Pedido = {
   fecha: string
   total: number
   estado: string
+  estado_pago: string
   items: {
     producto: string
     cantidad: number
@@ -107,6 +109,16 @@ export type BackendProduct = {
   vistas?: number
   descripcion?: string
 }
+
+export type ZonaEnvio = {
+  id: number;
+  nombre: string;
+  cp_inicio: number;
+  cp_fin: number;
+  precio: number;
+  tipo_envio: "correo" | "andesmar" | "cata" | "viacargo" | string;
+  activa: boolean;
+};
 
 // 🔽 Opciones de ordenamiento
 export type SortOption =

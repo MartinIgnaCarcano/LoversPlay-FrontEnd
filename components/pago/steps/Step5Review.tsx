@@ -76,19 +76,24 @@ export function Step5Review({
                     </p>
 
                     {paymentMethod === "transferencia" && (
-                        <p className="text-500 font-medium">
-                            Alias: loversplay.mp
-                            <br />
-                            CBU: 000000000000000123123123
-                            <br />
-                            <br />
-                            - Realizá la transferencia por el monto indicado usando los datos de la cuenta que figuran debajo.
-                            <br />
-                            👉 Importante: incluí PEDIDO Nº "ID_PEDIDO" en el concepto para que podamos identificar el pago.
-                            <br />
-                            - Una vez recibida la transferencia, el pago será verificado y te avisaremos por email cuando el pedido cambie de estado.
-                            <br />
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                            <span className="font-medium text-foreground">Datos para transferencia bancaria</span>
+                            <br /><br />
 
+                            <span className="font-medium text-foreground">Alias:</span> loversplay.mp
+                            <br />
+                            <span className="font-medium text-foreground">CBU:</span> 000000000000000123123123
+                            <br /><br />
+
+                            Realizá la transferencia por el <span className="font-medium text-foreground">monto indicado</span> utilizando los datos de la cuenta que figuran arriba.
+                            <br /><br />
+
+                            👉 <span className="font-medium text-foreground">Importante:</span>
+                            Luego de presionar <span className="font-medium text-foreground">“Confirmar y pagar”</span>, se te mostrará el <span className="font-medium text-foreground">número de pedido</span>.
+                            Ese número debe ser indicado como <span className="font-medium text-foreground">concepto o referencia</span> en la transferencia.
+                            <br /><br />
+
+                            Una vez recibida la transferencia, el pago será verificado y te notificaremos por email cuando el pedido cambie de estado.
                         </p>
                     )}
 

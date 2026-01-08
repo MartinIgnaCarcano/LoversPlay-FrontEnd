@@ -70,29 +70,54 @@ export const useCartStore = create<CartStore>()(
       addItem: (item) =>
         set((state) => {
           const existingItem = state.items.find((i) => String(i.productId) === String(item.productId))
+          const currentQty = existingItem?.quantity ?? 0
+
+          // stock puede venir undefined (si no lo pasás). En ese caso no limitamos.
+          const maxStock = item.stock ?? existingItem?.stock ?? Infinity
+          const desiredQty = currentQty + item.quantity
+          const finalQty = Math.min(desiredQty, maxStock)
+
+          // si no hay stock disponible, no hacemos nada
+          if (finalQty <= 0 || finalQty === currentQty) {
+            return state
+          }
+
           if (existingItem) {
             return {
               items: state.items.map((i) =>
                 String(i.productId) === String(item.productId)
-                  ? { ...i, quantity: i.quantity + item.quantity }
+                  ? { ...i, quantity: finalQty, stock: item.stock ?? i.stock }
                   : i,
               ),
             }
           }
-          return { items: [...state.items, item] }
+
+          return {
+            items: [...state.items, { ...item, quantity: finalQty }],
+          }
         }),
+
+      updateQuantity: (productId, quantity) =>
+        set((state) => {
+          const item = state.items.find((i) => String(i.productId) === String(productId))
+          if (!item) return state
+
+          const maxStock = item.stock ?? Infinity
+          const clampedQty = Math.min(quantity, maxStock)
+
+          return {
+            items:
+              clampedQty <= 0
+                ? state.items.filter((i) => String(i.productId) !== String(productId))
+                : state.items.map((i) =>
+                  String(i.productId) === String(productId) ? { ...i, quantity: clampedQty } : i,
+                ),
+          }
+        }),
+
       removeItem: (productId) =>
         set((state) => ({
           items: state.items.filter((item) => item.productId !== productId),
-        })),
-      updateQuantity: (productId, quantity) =>
-        set((state) => ({
-          items:
-            quantity <= 0
-              ? state.items.filter((item) => String(item.productId) !== String(productId))
-              : state.items.map((item) =>
-                String(item.productId) === String(productId) ? { ...item, quantity } : item,
-              ),
         })),
       clearCart: () => set({ items: [] }),
       getTotalItems: () => get().items.reduce((total, item) => total + item.quantity, 0),

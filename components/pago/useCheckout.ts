@@ -224,35 +224,18 @@ export function useCheckout() {
             if (paymentMethod === "transferencia") {
                 const resp = await crearPreferenciaPago({
                     pedido_id: pedidoId,
-                    tipo_pago: "transferencia",
-                    costo_envio: shipping,
-                    items: cartItems.map((item: any) => ({
-                        producto_id: item.productId,
-                        nombre: item.name || item.nombre,
-                        cantidad: item.quantity,
-                        precio: item.price,
-                    })),
+                    tipo_pago: "transferencia"
                 })
 
                 setTransferInfo(resp)
-                setStep(5)
+                router.push(`/pagos/pending?pedido_id=${pedidoId}`)
                 return
             }
 
             // 3) MERCADO PAGO 👉 igual que hoy
             const pref = await crearPreferenciaPago({
                 pedido_id: pedidoId,
-                tipo_pago: paymentMethod,
-                costo_envio: shipping,
-                items: cartItems.map((item: any) => ({
-                    producto_id: item.productId,
-                    nombre: item.name || item.nombre,
-                    cantidad: item.quantity,
-                    precio:
-                        paymentMethod === "credito"
-                            ? item.price * 1.10
-                            : item.price,
-                })),
+                tipo_pago: paymentMethod
             })
 
             if (!pref?.init_point) {
