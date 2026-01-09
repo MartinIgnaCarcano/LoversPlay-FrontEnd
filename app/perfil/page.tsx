@@ -17,8 +17,25 @@ import { useRouter } from "next/navigation"
 import { fetchUsuario, fetchPedidosPorUsuario, actualizarUsuario, fetchFavorites, eliminarFavorito } from "@/lib/services/api"
 import type { Pedido, Product } from "@/lib/types"
 import withAuth from "@/lib/withAuth"
+import { PedidoDetalleModal } from "@/components/pedido/PedidoDetalleModal"
 import { set } from "date-fns"
 import { stringify } from "querystring"
+
+
+/* ================= helpers ================= */
+
+function moneyARS(value: number) {
+  return new Intl.NumberFormat("es-AR", {
+    style: "currency",
+    currency: "ARS",
+  }).format(value)
+}
+
+function badgeVariant(estado: string) {
+  if (estado === "PAGADO") return "default"
+  if (estado === "RECHAZADO") return "destructive"
+  return "secondary"
+}
 
 
 function ProfilePage() {
@@ -28,6 +45,11 @@ function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false)
   const [pedidos, setPedidos] = useState<Pedido[]>([])
   const [wishlist, setWishlist] = useState<Product[]>([])
+
+  const [modalOpen, setModalOpen] = useState(false)
+  const [selectedPedidoId, setSelectedPedidoId] = useState<number | null>(null)
+
+
   const [profileData, setProfileData] = useState({
     nombre: "",
     email: "",
@@ -102,6 +124,11 @@ function ProfilePage() {
     fetchData();
   }, [user])
 
+  //abrir modal de pedido
+  const openPedido = (id: number) => {
+    setSelectedPedidoId(id)
+    setModalOpen(true)
+  }
 
   const handleLogout = () => {
     logout()
@@ -326,47 +353,51 @@ function ProfilePage() {
             </TabsContent>
 
             {/* pedidos Tab */}
-            <TabsContent value="pedidos" className="mt-6">
+            {/* ================= PEDIDOS ================= */}
+            <TabsContent value="pedidos">
               <Card>
                 <CardHeader>
-                  <CardTitle className="font-[family-name:var(--font-poppins)]">Historial de Pedidos</CardTitle>
-                  <CardDescription>Revisa el estado de tus pedidos anteriores</CardDescription>
+                  <CardTitle>Mis pedidos</CardTitle>
+                  <CardDescription>
+                    Consultá el estado y reintentá el pago si está pendiente
+                  </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {pedidos.map((pedido) => (
-                      <div key={pedido.id} className="border border-border rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-4">
-                            <Package className="h-5 w-5 text-muted-foreground" />
-                            <div>
-                              <p className="font-semibold">Pedido</p>
-                              <p className="text-sm text-muted-foreground">
-                                {new Date(pedido.fecha).toLocaleDateString("es-ES")} • {pedido.items.length} producto
-                                {pedido.items.length !== 1 ? "s" : ""}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <Badge variant={pedido.estado === "ENTREGADO" ? "default" : "secondary"}>
-                              {pedido.estado}
-                            </Badge>
-                            <p className="text-lg font-bold mt-1">${pedido.total}</p>
-                          </div>
-                        </div>
 
-                        {/* Listado de productos dentro del pedido */}
-                        <div className="mt-2 space-y-1 text-sm text-muted-foreground">
-                          {pedido.items.map((item, idx) => (
-                            <p key={idx}>
-                              {item.producto} × {item.cantidad} — ${item.subtotal}
-                            </p>
-                          ))}
+                <CardContent className="space-y-4">
+                  {pedidos.length === 0 && (
+                    <p className="text-sm text-muted-foreground">
+                      Todavía no realizaste pedidos
+                    </p>
+                  )}
+
+                  {pedidos.map((p) => (
+                    <div
+                      key={p.id}
+                      className="border rounded-xl p-4 flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                          <Package className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-semibold">Pedido #{p.id}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {new Date(p.fecha).toLocaleDateString()}
+                          </p>
                         </div>
                       </div>
-                    ))}
 
-                  </div>
+                      <div className="flex items-center gap-4">
+                        <Badge variant={badgeVariant(p.estado)}>
+                          {p.estado}
+                        </Badge>
+                        <p className="font-bold">{moneyARS(p.total)}</p>
+                        <Button size="sm" onClick={() => openPedido(p.id)}>
+                          Ver pedido
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -485,6 +516,17 @@ function ProfilePage() {
       </main>
 
       <Footer />
+
+      {/* ===== MODAL ===== */}
+      <PedidoDetalleModal
+        open={modalOpen}
+        pedidoId={selectedPedidoId}
+        onOpenChange={(open) => {
+          setModalOpen(open)
+          if (!open) setSelectedPedidoId(null)
+        }}
+      />
+
     </div>
   )
 }

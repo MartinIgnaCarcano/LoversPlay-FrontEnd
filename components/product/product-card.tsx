@@ -153,7 +153,7 @@ export function ProductCard({ product, className = "" }: ProductCardProps) {
           <Button
             onClick={handleAddToCart}
             disabled={stock === 0}
-            className={`flex-1 transition-all duration-200 cursor-pointer ${added ? "bg-green-600 hover:bg-green-600" : "bg-primary hover:bg-brand/90"
+            className={`w-full mt-auto bg-primary hover:bg-primary/60 cursor-pointer text-[10px] sm:text-sm h-8 sm:h-10 ${added ? "bg-green-600 hover:bg-green-600" : "bg-primary hover:bg-brand/90"
               }`}
             size="sm"
           >

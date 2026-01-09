@@ -77,7 +77,7 @@ export type Usuario = {
 
 // pedido
 export type Pedido = {
-  id: string
+  id: number
   fecha: string
   total: number
   estado: string
