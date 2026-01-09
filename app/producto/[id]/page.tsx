@@ -237,7 +237,15 @@ export default function ProductPage() {
             <div className="space-y-1">
               {product.stock > 0 ? (
                 <span className="inline-flex items-center rounded-full bg-green-100 text-green-700 px-3 py-1 text-sm font-medium">
-                  {product.stock} disponibles
+                  {product.stock < 50 ? (
+                    <>
+                    {product.stock}
+                    </>
+                  ) : (
+                    <>
+                    +50
+                    </>
+                  )} disponibles
                 </span>
               ) : (
                 <span className="inline-flex items-center rounded-full bg-red-100 text-red-700 px-3 py-1 text-sm font-medium">
