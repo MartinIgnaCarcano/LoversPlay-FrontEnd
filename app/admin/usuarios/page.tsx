@@ -1,14 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  adminFetchUsuarios,
-  adminDeleteUsuario
-} from "@/lib/services/api-admin";
+import { adminFetchUsuarios, adminDeleteUsuario } from "@/lib/services/api-admin";
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash } from "lucide-react";
+
+type ActivoFilter = "all" | "true" | "false";
 
 export default function AdminUsuariosPage() {
   const [usuarios, setUsuarios] = useState<any[]>([]);
@@ -20,22 +19,25 @@ export default function AdminUsuariosPage() {
   const [total, setTotal] = useState(0);
 
   const [search, setSearch] = useState("");
-  const [soloActivos, setSoloActivos] = useState(true); // true = activos, false = desactivados
+  const [activoFilter, setActivoFilter] = useState<ActivoFilter>("all"); // all | true | false
 
   // =======================================
-  // CARGAR USUARIOS
+  // CARGAR USUARIOS (backend)
   // =======================================
-  async function loadData(pagina = page, activos = soloActivos) {
+  async function loadData(pagina = page, filtro = activoFilter) {
     setLoading(true);
 
     try {
-      const data = await adminFetchUsuarios(
-        pagina,
-        perPage
-      );
+      // Enviamos al back:
+      // - "all" => null (sin filtro)
+      // - "true"/"false" => boolean
+      const activosParam =
+        filtro === "all" ? null : filtro === "true";
+
+      const data = await adminFetchUsuarios(pagina, perPage, activosParam);
 
       setUsuarios(data.usuarios);
-      setUsuariosBase(data.usuarios); // para filtrado local
+      setUsuariosBase(data.usuarios);
       setTotal(data.total);
     } catch (err) {
       console.error(err);
@@ -45,16 +47,12 @@ export default function AdminUsuariosPage() {
   }
 
   useEffect(() => {
-    loadData(1, soloActivos); // 🔥 Reset al cambiar filtro
-    setPage(1);
-  }, [soloActivos]);
-
-  useEffect(() => {
-    loadData(page, soloActivos);
-  }, [page]);
+    loadData(page, activoFilter);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, activoFilter]);
 
   // =======================================
-  // BUSCADOR (local)
+  // BUSCADOR (local, sobre la página actual)
   // =======================================
   function handleSearch(e: any) {
     const value = e.target.value;
@@ -84,7 +82,8 @@ export default function AdminUsuariosPage() {
 
     try {
       await adminDeleteUsuario(id);
-      loadData();
+      loadData(1, activoFilter); // recargar desde página 1 para evitar inconsistencias
+      setPage(1);
     } catch (err) {
       alert("Error desactivando usuario");
       console.error(err);
@@ -108,14 +107,17 @@ export default function AdminUsuariosPage() {
         />
 
         <select
-          value={soloActivos ? "1" : "0"}
+          value={activoFilter}
           onChange={(e) => {
-            setSoloActivos(e.target.value === "1");
+            setSearch(""); // opcional: resetea búsqueda al cambiar filtro
+            setPage(1);
+            setActivoFilter(e.target.value as ActivoFilter);
           }}
           className="border px-3 py-2 rounded"
         >
-          <option value="1">Activos</option>
-          <option value="0">Desactivados</option>
+          <option value="all">Todos</option>
+          <option value="true">Activos</option>
+          <option value="false">Desactivados</option>
         </select>
       </div>
 
@@ -156,7 +158,6 @@ export default function AdminUsuariosPage() {
                   <td className="p-3">{u.rol || "-"}</td>
                   <td className="p-3">{u.fecha_registro?.split("T")[0]}</td>
 
-                  {/* 🔥 Activo / Desactivado */}
                   <td className="p-3">
                     {u.activo ? (
                       <span className="text-green-600 font-semibold">Sí</span>
@@ -167,7 +168,11 @@ export default function AdminUsuariosPage() {
 
                   <td className="p-3 flex justify-end gap-2">
                     <Link href={`/admin/usuarios/${u.id}`}>
-                      <Button variant="outline" size="sm" className="cursor-pointer">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="cursor-pointer"
+                      >
                         <Pencil className="w-4 h-4" />
                       </Button>
                     </Link>

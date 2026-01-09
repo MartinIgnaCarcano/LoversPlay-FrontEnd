@@ -7,7 +7,6 @@ export function Footer() {
   const quickLinks = [
     { name: "Inicio", href: "/" },
     { name: "Catálogo", href: "/catalogo" },
-    { name: "Blog", href: "/blog" },
     { name: "Contacto", href: "/contacto" },
   ]
 

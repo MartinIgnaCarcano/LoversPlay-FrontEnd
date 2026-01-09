@@ -219,15 +219,20 @@ export async function adminDeleteEnvio(id: number) {
 //      USUARIOS ADMIN
 // ===========================
 
-export async function adminFetchUsuarios(page = 1, perPage = 20) {
+export async function adminFetchUsuarios(
+  page = 1,
+  perPage = 20,
+  activos: boolean | null = null
+) {
   const url = new URL(`${API_URL}/auth/listar`);
   url.searchParams.set("page", String(page));
   url.searchParams.set("per_page", String(perPage));
+  if (activos !== null) url.searchParams.set("activo", String(activos));
 
   const res = await fetch(url.toString(), {
     headers: {
-      Authorization: `Bearer ${localStorage.getItem("access_token")}`
-    }
+      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+    },
   });
 
   if (!res.ok) throw new Error("Error cargando usuarios");
@@ -294,9 +299,7 @@ export async function adminFetchPedido(id: number) {
 
   const res = await fetch(url, {
     method: "GET",
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-    },
+    headers: authHeaders()
   })
   if (!res.ok) throw new Error("Error cargando pedidos");
 
@@ -304,10 +307,13 @@ export async function adminFetchPedido(id: number) {
 }
 
 export async function adminUpdatePedidoEstado(id: number, nuevoEstado: string) {
+  console.log(nuevoEstado)
   const res = await fetch(`${API_URL}/pedidos/${id}`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
+    headers: {
+      ...authHeaders(),
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({ estado: nuevoEstado }),
   });
 
@@ -318,7 +324,7 @@ export async function adminUpdatePedidoEstado(id: number, nuevoEstado: string) {
 export async function adminDeletePedido(id: number) {
   const res = await fetch(`${API_URL}/pedidos/${id}`, {
     method: "DELETE",
-    credentials: "include"
+    headers: authHeaders()
   });
 
   if (!res.ok) throw new Error("Error eliminando pedido");

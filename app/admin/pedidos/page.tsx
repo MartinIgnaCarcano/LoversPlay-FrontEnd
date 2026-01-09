@@ -120,16 +120,17 @@ export default function AdminPedidosPage() {
 
                   <td className="p-3 flex justify-end gap-2">
                     <Link href={`/admin/pedidos/${p.id}`}>
-                      <Button variant="outline" size="sm">Ver</Button>
+                      <Button variant="outline" size="sm" className="cursor-pointer">Ver</Button>
                     </Link>
 
-                    <Button
+                    {/* <Button
                       size="sm"
                       variant="destructive"
                       onClick={() => handleDelete(p.id)}
+                      className="cursor-pointer"
                     >
                       Eliminar
-                    </Button>
+                    </Button> */}
                   </td>
                 </tr>
               ))
@@ -144,6 +145,7 @@ export default function AdminPedidosPage() {
           variant="outline"
           onClick={() => setPage((p) => Math.max(1, p - 1))}
           disabled={page === 1}
+          className="cursor-pointer"
         >
           Anterior
         </Button>
@@ -154,6 +156,7 @@ export default function AdminPedidosPage() {
           variant="outline"
           onClick={() => setPage((p) => p + 1)}
           disabled={page * perPage >= total}
+          className="cursor-pointer"
         >
           Siguiente
         </Button>

@@ -203,13 +203,13 @@ export function PedidoDetalleModal({ open, onOpenChange, pedidoId }: Props) {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={refresh} disabled={loading}>
+            <Button variant="outline" size="sm" className="cursor-pointer" onClick={refresh} disabled={loading}>
               Actualizar
             </Button>
 
             <button
               onClick={close}
-              className="h-9 w-9 rounded-xl border border-border hover:bg-muted flex items-center justify-center"
+              className="h-9 w-9 rounded-xl border border-border hover:bg-muted flex items-center justify-center cursor-pointer"
               aria-label="Cerrar"
             >
               <X className="h-4 w-4" />

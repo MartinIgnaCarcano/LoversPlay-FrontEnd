@@ -13,7 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Eye, EyeOff, Mail, Lock, User, Phone } from "lucide-react"
 import { useAuthStore } from "@/lib/store"
 import { useRouter, useSearchParams } from "next/navigation"
-import { login as loginApi, register } from "@/lib/services/api" // 👈 importa tu función real
+import { login as loginApi, register } from "@/lib/services/api"
 import { toast } from "sonner"
 
 export default function AuthPage() {
@@ -41,19 +41,17 @@ export default function AuthPage() {
     newsletter: false,
   })
 
-  // ✅ LOGIN REAL
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     try {
       const success = await loginApi(loginForm.email, loginForm.password)
       if (success) {
-        // Actualiza el store global (para que Header muestre "Mi perfil")
         login({
           id: String(success.id),
-          nombre: String(success.nombre)
+          nombre: String(success.nombre),
         })
-        router.push(redirect) // redirige a la página de destino
+        router.push(redirect)
       } else {
         alert("Error iniciando sesión. Revisa tus credenciales.")
       }
@@ -65,13 +63,14 @@ export default function AuthPage() {
     }
   }
 
-  // 🔧 TODO: Cuando implementes el registro real, vas a reemplazar el mock de abajo
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
+
     if (registerForm.password !== registerForm.confirmPassword) {
       alert("Las contraseñas no coinciden")
       return
     }
+
     if (!registerForm.acceptTerms) {
       alert("Debes aceptar los términos y condiciones")
       return
@@ -79,17 +78,21 @@ export default function AuthPage() {
 
     try {
       setIsLoading(true)
-      const success = await register(registerForm.name, registerForm.email, registerForm.password, registerForm.phone)
+      const success = await register(
+        registerForm.name,
+        registerForm.email,
+        registerForm.password,
+        registerForm.phone
+      )
+
       if (success) {
         toast.success("Registro exitoso! Ya puedes iniciar sesión.")
-        // Cambiar a la pestaña de login
+
         const loginTab = document.querySelector('[role="tab"][data-state="active"]') as HTMLElement
-        if (loginTab) {
-          loginTab.click()
-        }
-        // Opcional: Completar el email en el formulario de login
+        if (loginTab) loginTab.click()
+
         setLoginForm({ ...loginForm, email: registerForm.email })
-        // Opcional: Limpiar el formulario de registro
+
         setRegisterForm({
           name: "",
           email: "",
@@ -103,14 +106,17 @@ export default function AuthPage() {
         alert("Error en el registro. Intenta nuevamente.")
       }
     } catch (error) {
-      console.error("Error en registro:", error);
+      console.error("Error en registro:", error)
+      alert("Error en el registro. Intenta nuevamente.")
     } finally {
       setIsLoading(false)
     }
-
   }
 
   const breadcrumbItems = [{ label: "Iniciar Sesión" }]
+
+  // ✅ Botón habilitado solo si aceptó términos (y no está cargando)
+  const canRegister = registerForm.acceptTerms && !isLoading
 
   return (
     <div className="min-h-screen bg-background">
@@ -200,7 +206,8 @@ export default function AuthPage() {
                 <Button
                   type="submit"
                   className="w-full bg-primary hover:bg-primary/70 cursor-pointer"
-                  disabled={isLoading}>
+                  disabled={isLoading}
+                >
                   {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
                 </Button>
               </form>
@@ -317,19 +324,24 @@ export default function AuthPage() {
                         onCheckedChange={(checked) =>
                           setRegisterForm({ ...registerForm, acceptTerms: checked as boolean })
                         }
-                        required
                       />
                       <Label htmlFor="accept-terms" className="text-sm leading-relaxed cursor-pointer">
                         Acepto los{" "}
-                        <Button variant="link" className="text-sm p-0 h-auto cursor-pointer">
+                        <Button variant="link" className="text-sm p-0 h-auto cursor-pointer" type="button">
                           términos y condiciones
                         </Button>{" "}
                         y la{" "}
-                        <Button variant="link" className="text-sm p-0 h-auto cursor-pointer">
+                        <Button variant="link" className="text-sm p-0 h-auto cursor-pointer" type="button">
                           política de privacidad
                         </Button>
                       </Label>
                     </div>
+
+                    {!registerForm.acceptTerms && (
+                      <p className="text-xs text-muted-foreground">
+                        Para crear la cuenta tenés que aceptar los términos.
+                      </p>
+                    )}
 
                     <div className="flex items-start space-x-2">
                       <Checkbox
@@ -346,14 +358,19 @@ export default function AuthPage() {
                   </div>
                 </div>
 
-                <Button type="submit" className="w-full bg-primary cursor-pointer hover:bg-primary/70" disabled={isLoading}>
+                <Button
+                  type="submit"
+                  className="w-full bg-primary cursor-pointer hover:bg-primary/70"
+                  disabled={!canRegister}
+                  aria-disabled={!canRegister}
+                  title={!registerForm.acceptTerms ? "Aceptá los términos para continuar" : undefined}
+                >
                   {isLoading ? "Creando cuenta..." : "Crear Cuenta"}
                 </Button>
               </form>
             </TabsContent>
           </Tabs>
 
-          {/* Trust badges */}
           <div className="mt-8 pt-6 border-t border-border">
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>

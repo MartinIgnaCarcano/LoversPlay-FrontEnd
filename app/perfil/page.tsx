@@ -186,7 +186,7 @@ function ProfilePage() {
           </div>
 
           <Tabs defaultValue="profile" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-4 bg-card">
               <TabsTrigger value="profile" className="cursor-pointer">Perfil</TabsTrigger>
               <TabsTrigger value="pedidos" className="cursor-pointer">Pedidos</TabsTrigger>
               <TabsTrigger value="wishlist" className="cursor-pointer">Favoritos</TabsTrigger>
@@ -392,7 +392,7 @@ function ProfilePage() {
                           {p.estado}
                         </Badge>
                         <p className="font-bold">{moneyARS(p.total)}</p>
-                        <Button size="sm" onClick={() => openPedido(p.id)}>
+                        <Button size="sm" className="cursor-pointer" onClick={() => openPedido(p.id)}>
                           Ver pedido
                         </Button>
                       </div>

@@ -96,6 +96,7 @@ export default function EditUsuarioPage() {
             email,
             telefono,
             rol,
+            activo
         };
 
         if (direccion) {
@@ -103,6 +104,7 @@ export default function EditUsuarioPage() {
         }
 
         try {
+            console.log(payload)
             await adminUpdateUsuario(id, payload);
             alert("Usuario actualizado correctamente");
             router.push("/admin/usuarios");
@@ -122,20 +124,6 @@ export default function EditUsuarioPage() {
         setFavoritos(nuevos);
 
         await adminUpdateUsuario(id, { favoritos: nuevos });
-    }
-
-    // =====================
-    // Activar / Desactivar
-    // =====================
-    async function toggleActivo() {
-        const nuevoEstado = !activo;
-
-        try {
-            await adminUpdateUsuario(id, { activo: nuevoEstado });
-            setActivo(nuevoEstado);
-        } catch (err) {
-            alert("Error cambiando estado");
-        }
     }
 
     return (
@@ -289,7 +277,7 @@ export default function EditUsuarioPage() {
 
                     <Button
                         variant={activo ? "destructive" : "default"}
-                        onClick={toggleActivo}
+                        onClick={() => {setActivo(!activo)}}
                         type="button"
                         className="cursor-pointer"
                     >

@@ -64,7 +64,7 @@ export default function AdminPedidoDetallePage() {
       <h1 className="text-3xl font-bold mb-6">Pedido #{pedido.id}</h1>
 
       {/* INFO GENERAL */}
-      <div className="mb-6">
+      <div className="mb-6 flex-1">
         <p><strong>Fecha:</strong> {pedido.fecha.split("T")[0]}</p>
         <p><strong>Total:</strong> ${pedido.total}</p>
 
@@ -72,15 +72,16 @@ export default function AdminPedidoDetallePage() {
         <select
           value={estado}
           onChange={(e) => setEstado(e.target.value)}
-          className="border px-3 py-2 rounded"
+          className="w-xl border px-3 py-2 rounded"
         >
           <option value="PENDIENTE">PENDIENTE</option>
+          <option value="PAGADO">PAGADO</option>
           <option value="ENVIADO">ENVIADO</option>
           <option value="ENTREGADO">ENTREGADO</option>
           <option value="CANCELADO">CANCELADO</option>
         </select>
 
-        <Button onClick={handleUpdateEstado} className="mt-3">
+        <Button onClick={handleUpdateEstado} className="mt-3 cursor-pointer">
           Guardar estado
         </Button>
       </div>
@@ -110,14 +111,14 @@ export default function AdminPedidoDetallePage() {
         </table>
       </div>
 
-      {/* ELIMINAR */}
+      {/* ELIMINAR
       <Button
         variant="destructive"
-        className="mt-10"
+        className="mt-10 cursor-pointer"
         onClick={handleDelete}
       >
         Eliminar pedido
-      </Button>
+      </Button> */}
     </div>
   );
 }
