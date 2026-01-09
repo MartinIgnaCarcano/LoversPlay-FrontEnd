@@ -125,7 +125,7 @@ export default function CartPage() {
                             size="icon"
                             onClick={() => updateQuantity(String(item.productId), item.quantity + 1)}
                             className="hover:cursor-pointer"
-                            disabled={typeof item.stock === "number" ? item.quantity >= item.stock : false}
+                            disabled={typeof item.stock !== "number" || item.quantity >= item.stock}
                           >
                             <Plus className="h-4 w-4" />
                           </Button>

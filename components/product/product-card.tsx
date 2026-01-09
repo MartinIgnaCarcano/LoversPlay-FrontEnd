@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge"
 import { useCartStore } from "@/lib/store"
 import type { Product } from "@/lib/types"
 import { agregarFavorito } from "@/lib/services/api"
+import { Check } from "lucide-react"
+import { useAddToCartFeedback } from "@/hooks/useAddToCartFeedBack"
 
 interface ProductCardProps {
   product: Product
@@ -17,6 +19,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product, className = "" }: ProductCardProps) {
   const { addItem } = useCartStore()
+  const { added, trigger } = useAddToCartFeedback(700)
 
   // 🔧 Compat: soporta ambas formas (API cruda y normalizada)
   const nombre: string =
@@ -44,6 +47,7 @@ export function ProductCard({ product, className = "" }: ProductCardProps) {
   const descripcionCorta: string | undefined =
     (product as any).descripcion_corta ?? (product as any).shortDesc
 
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -53,7 +57,9 @@ export function ProductCard({ product, className = "" }: ProductCardProps) {
       price: precio || 0,
       image: imagenActual,
       quantity: 1,
+      stock: Number(stock ?? 0),
     })
+    trigger()
   }
   const handleLike = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -147,11 +153,20 @@ export function ProductCard({ product, className = "" }: ProductCardProps) {
           <Button
             onClick={handleAddToCart}
             disabled={stock === 0}
-            className="w-full mt-auto bg-primary hover:bg-primary/60 cursor-pointer text-[10px] sm:text-sm h-8 sm:h-10"
+            className={`flex-1 transition-all duration-200 cursor-pointer ${added ? "bg-green-600 hover:bg-green-600" : "bg-primary hover:bg-brand/90"
+              }`}
             size="sm"
           >
-            <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-            {stock === 0 ? "Agotado" : "Agregar al Carrito"}
+            {added ? (
+              <>
+                <Check className="h-5 w-5 mr-2" /> Agregado
+              </>
+            ) : (
+              <>
+                <ShoppingCart className="h-5 w-5 mr-2" />
+                {product.stock === 0 ?  "Sin stock disponible" : "Agregar al Carrito"}
+              </>
+            )}
           </Button>
         </div>
       </Link>

@@ -13,7 +13,7 @@ export type Product = {
   nombre: string
   slug?: string
   precio: number
-  stock?: number
+  stock: number
   categoria_id?: number
   descripcion_corta?: string
   descripcion_larga?: string

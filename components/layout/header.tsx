@@ -42,12 +42,21 @@ CartBadge.displayName = "CartBadge"
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
-  const { getTotalItems } = useCartStore()
+  const { getTotalItems, cartPulse } = useCartStore()
   const { isAuthenticated, user } = useAuthStore()
   const totalItems = getTotalItems()
-
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
+
+  const [pulse, setPulse] = useState(false)
+  useEffect(() => {
+    if (!mounted) return
+    if (cartPulse === 0) return
+    setPulse(true)
+    const t = setTimeout(() => setPulse(false), 250)
+    return () => clearTimeout(t)
+  }, [cartPulse, mounted])
+
 
 
   const handleMobileMenuOpen = useCallback(() => setIsMobileMenuOpen(true), [])
@@ -141,9 +150,14 @@ export function Header() {
                 </Link>
               </Button>
               {/* Cart */}
-              <Button variant="ghost" size="sm" className="relative hover:bg-brand/10 transition-colors" asChild>
-                <Link href="/carrito" aria-label={`Carrito de compras`}>
-                  <ShoppingCart className="h-5 w-5" aria-hidden="true" />
+              <Button
+                variant="ghost"
+                size="sm"
+                className={`relative transition-all duration-200 hover:bg-brand/10 ${pulse ? "bg-brand/20 scale-110" : ""
+                  }`}
+                asChild
+              ><Link href="/carrito" aria-label={`Carrito de compras`}>
+                  <ShoppingCart className={`h-5 w-5 ${pulse ? "text-brand" : ""}`} aria-hidden="true" />
                   <CartBadge totalItems={totalItems} />
                 </Link>
               </Button>

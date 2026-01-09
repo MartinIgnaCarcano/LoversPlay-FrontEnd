@@ -4,6 +4,8 @@ import type { CartItem, Usuario, FilterState, SortOption } from "./types"
 
 interface CartStore {
   items: CartItem[]
+  cartPulse: number
+  pulseCart: () => void
   addItem: (item: CartItem) => void
   removeItem: (productId: string) => void
   updateQuantity: (productId: string, quantity: number) => void
@@ -27,6 +29,12 @@ interface FiltersStore {
   setSortBy: (sort: SortOption) => void
   setSearchQuery: (query: string) => void
   clearFilters: () => void
+}
+
+const toNumberOrNull = (v: unknown): number | null => {
+  if (typeof v === "number" && Number.isFinite(v)) return v
+  if (typeof v === "string" && v.trim() !== "" && Number.isFinite(Number(v))) return Number(v)
+  return null
 }
 
 // 🔹 Filtros
@@ -67,20 +75,31 @@ export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
+
+      cartPulse: 0, // ✅ NUEVO
+      pulseCart: () => set((s) => ({ cartPulse: s.cartPulse + 1 })), // ✅ NUEVO
+
       addItem: (item) =>
         set((state) => {
           const existingItem = state.items.find((i) => String(i.productId) === String(item.productId))
           const currentQty = existingItem?.quantity ?? 0
 
-          // stock puede venir undefined (si no lo pasás). En ese caso no limitamos.
-          const maxStock = item.stock ?? existingItem?.stock ?? Infinity
+          const knownStock =
+            toNumberOrNull(item.stock) ??
+            toNumberOrNull(existingItem?.stock) ??
+            null
+
+          if (knownStock === null) return state
+
           const desiredQty = currentQty + item.quantity
-          const finalQty = Math.min(desiredQty, maxStock)
+          const finalQty = Math.min(desiredQty, knownStock)
 
           // si no hay stock disponible, no hacemos nada
           if (finalQty <= 0 || finalQty === currentQty) {
             return state
           }
+
+          setTimeout(() => get().pulseCart(), 0)
 
           if (existingItem) {
             return {
@@ -102,8 +121,29 @@ export const useCartStore = create<CartStore>()(
           const item = state.items.find((i) => String(i.productId) === String(productId))
           if (!item) return state
 
-          const maxStock = item.stock ?? Infinity
-          const clampedQty = Math.min(quantity, maxStock)
+          const currentQty = item.quantity
+
+          const stockNum = toNumberOrNull(item.stock)
+
+          if (stockNum === null) {
+            if (quantity > currentQty) return state
+            const q = quantity
+            return {
+              items:
+                q <= 0
+                  ? state.items.filter((i) => String(i.productId) !== String(productId))
+                  : state.items.map((i) =>
+                    String(i.productId) === String(productId) ? { ...i, quantity: q } : i
+                  ),
+            }
+          }
+
+          const clampedQty = Math.min(quantity, stockNum)
+
+          // ✅ NUEVO: pulso solo si aumentó
+          if (clampedQty > currentQty) {
+            setTimeout(() => get().pulseCart(), 0)
+          }
 
           return {
             items:
@@ -117,7 +157,7 @@ export const useCartStore = create<CartStore>()(
 
       removeItem: (productId) =>
         set((state) => ({
-          items: state.items.filter((item) => item.productId !== productId),
+          items: state.items.filter((i) => String(i.productId) !== String(productId)),
         })),
       clearCart: () => set({ items: [] }),
       getTotalItems: () => get().items.reduce((total, item) => total + item.quantity, 0),

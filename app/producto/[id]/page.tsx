@@ -12,7 +12,8 @@ import { ProductGrid } from "@/components/product/product-grid"
 import type { Product } from "@/lib/types"
 import { fetchProductoPorId } from "@/lib/services/api"
 import { useKeenSlider } from "keen-slider/react"
-import { Package } from "lucide-react"
+import { Check } from "lucide-react"
+import { useAddToCartFeedback } from "@/hooks/useAddToCartFeedBack"
 import "keen-slider/keen-slider.min.css"
 
 export default function ProductPage() {
@@ -23,7 +24,7 @@ export default function ProductPage() {
   const { addItem, items } = useCartStore()
   const [mounted, setMounted] = useState(false)
   const [isGalleryOpen, setIsGalleryOpen] = useState(false)
-
+  const { added, trigger } = useAddToCartFeedback()
   // --- Sliders ---
   const [sliderRefSmall, sliderSmall] = useKeenSlider<HTMLDivElement>({
     loop: true,
@@ -100,6 +101,8 @@ export default function ProductPage() {
       quantity,
       stock: product.stock ?? 0,
     })
+
+    trigger()
   }
 
   const imagenes = [
@@ -232,9 +235,15 @@ export default function ProductPage() {
               <div className="prose prose-sm text-muted-foreground" dangerouslySetInnerHTML={{ __html: product.descripcion_corta }} />)}
 
             <div className="space-y-1">
-              <span className="inline-flex items-center rounded-full bg-green-100 text-green-700 px-3 py-1 text-sm font-medium">
-                {product.stock} disponibles
-              </span>
+              {product.stock > 0 ? (
+                <span className="inline-flex items-center rounded-full bg-green-100 text-green-700 px-3 py-1 text-sm font-medium">
+                  {product.stock} disponibles
+                </span>
+              ) : (
+                <span className="inline-flex items-center rounded-full bg-red-100 text-red-700 px-3 py-1 text-sm font-medium">
+                  {product.stock} disponibles
+                </span>
+              )}
             </div>
 
 
@@ -257,11 +266,20 @@ export default function ProductPage() {
               <Button
                 onClick={handleAddToCart}
                 disabled={product.stock === 0 || availableToAdd === 0}
-                className="flex-1 bg-primary hover:bg-brand/90 cursor-pointer"
+                className={`flex-1 transition-all duration-200 cursor-pointer ${added ? "bg-green-600 hover:bg-green-600" : "bg-primary hover:bg-brand/90"
+                  }`}
                 size="lg"
               >
-                <ShoppingCart className="h-5 w-5 mr-2" />
-                {product.stock === 0 ? "Agotado" : availableToAdd === 0 ? "Sin stock disponible" : "Agregar al Carrito"}
+                {added ? (
+                  <>
+                    <Check className="h-5 w-5 mr-2" /> Agregado
+                  </>
+                ) : (
+                  <>
+                    <ShoppingCart className="h-5 w-5 mr-2" />
+                    {product.stock === 0 ? "Agotado" : availableToAdd === 0 ? "Sin stock disponible" : "Agregar al Carrito"}
+                  </>
+                )}
               </Button>
             </div>
           </div>
