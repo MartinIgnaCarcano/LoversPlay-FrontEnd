@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/footer"
 import { Hero } from "@/components/layout/hero"
 import { ShippingMethods } from "@/components/shipping/shipping-methods"
 import { ProductGrid } from "@/components/product/product-grid"
+import { ProductCarousel } from "@/components/product/product-carousel"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { fetchProductos } from "@/lib/services/api"
@@ -18,12 +19,12 @@ export default function HomePage() {
 
   useEffect(() => {
     // 🔹 Cargar productos destacados (los primeros 4, por ejemplo)
-    fetchProductos(1, 4)
+    fetchProductos(1, 8)
       .then((data) => setFeaturedProducts(data.productos))
       .catch((err) => console.error("Error cargando destacados:", err))
 
     // 🔹 Cargar productos más vistos (página 2, otros 4 productos)
-    fetchProductos(2, 4)
+    fetchProductos(2, 8)
       .then((data) => setPopularProducts(data.productos))
       .catch((err) => console.error("Error cargando populares:", err))
   }, [])
@@ -38,7 +39,7 @@ export default function HomePage() {
 
 
         {/* Featured products */}
-        <section className="py-16 bg-muted/30">
+        <section className="py-2 bg-white">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-foreground mb-4 font-[family-name:var(--font-poppins)]">
@@ -48,37 +49,23 @@ export default function HomePage() {
                 Nuestra selección de productos más populares
               </p>
             </div>
-            <ProductGrid products={featuredProducts} className="mb-8" />
+            <ProductCarousel products={featuredProducts} className="mb-8"/>
             <div className="text-center">
-              <Link href="/catalogo">
-                <Button size="lg" variant="outline" asChild>
-                  Ver Todos los Productos
-                </Button>
-              </Link>
+              <Button size="lg" variant="outline" asChild>
+                <Link href="/catalogo">Ver Todos los Productos</Link>
+              </Button>
+
             </div>
           </div>
         </section>
 
-        {/* Popular products */}
-        <section className="py-16">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-foreground mb-4 font-[family-name:var(--font-poppins)]">
-                Más Vistos
-              </h2>
-              <p className="text-muted-foreground font-[family-name:var(--font-inter)]">
-                Los productos que más interesan a nuestros clientes
-              </p>
-            </div>
-            <ProductGrid products={popularProducts} />
-          </div>
-        </section>
+
 
         {/* Why choose us section */}
 
         <section
           className="py-16 bg-no-repeat"
-          style={{ backgroundImage: "url(/fondoTela.png)" }}
+          style={{ backgroundImage: "url(/hero1.png)" }}
         >
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl font-bold text-foreground mb-8 font-[family-name:var(--font-poppins)]">
@@ -121,6 +108,23 @@ export default function HomePage() {
                 </p>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Popular products */}
+        <section className="py-16">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-foreground mb-4 font-[family-name:var(--font-poppins)]">
+                Más Vistos
+              </h2>
+              <p className="text-muted-foreground font-[family-name:var(--font-inter)]">
+                Los productos que más interesan a nuestros clientes
+              </p>
+            </div>
+
+            <ProductCarousel products={popularProducts}/>
+
           </div>
         </section>
 

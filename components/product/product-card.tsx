@@ -70,7 +70,16 @@ export function ProductCard({ product, className = "" }: ProductCardProps) {
 
   return (
     <div
-      className={`group relative bg-card rounded-xl border border-border shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 overflow-hidden ${className}`}
+      className={`group relative bg-white rounded-xl border border-border
+      shadow-md
+      transition-all duration-300 ease-out
+      hover:-translate-y-2
+      hover:shadow-xl
+      hover:shadow-black/10
+      overflow-hidden
+      active:translate-y-0
+      active:scale-[0.98]
+      ${className}`}
     >
       <Link href={`/producto/${(product as any).id}`}>
         {/* Imagen */}
@@ -164,7 +173,7 @@ export function ProductCard({ product, className = "" }: ProductCardProps) {
             ) : (
               <>
                 <ShoppingCart className="h-5 w-5 mr-2" />
-                {product.stock === 0 ?  "Sin stock disponible" : "Agregar al Carrito"}
+                {product.stock === 0 ? "Sin stock disponible" : "Agregar al Carrito"}
               </>
             )}
           </Button>
