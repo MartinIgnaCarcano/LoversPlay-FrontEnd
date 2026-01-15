@@ -4,14 +4,12 @@ import { useEffect, useMemo, useState } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import type { Product } from "@/lib/types"
 import { Button } from "@/components/ui/button"
-
-// AJUSTÁ ESTE IMPORT SI TU CARD ESTÁ EN OTRA RUTA
 import { ProductCard } from "@/components/product/product-card"
 
 type Props = {
   products: Product[]
   className?: string
-  step?: number // cuánto avanza por click (1 recomendado)
+  step?: number
 }
 
 function useItemsPerView() {
@@ -20,10 +18,10 @@ function useItemsPerView() {
   useEffect(() => {
     const calc = () => {
       const w = window.innerWidth
-      if (w < 640) return 1      // <sm
-      if (w < 768) return 2      // sm
-      if (w < 1024) return 3     // md
-      return 4                   // lg+
+      if (w < 640) return 1
+      if (w < 768) return 2
+      if (w < 1024) return 3
+      return 4
     }
     const onResize = () => setItems(calc())
     onResize()
@@ -38,13 +36,9 @@ export function ProductCarousel({ products, className = "", step = 1 }: Props) {
   const itemsPerView = useItemsPerView()
   const total = products?.length ?? 0
 
-  const maxIndex = useMemo(() => {
-    return Math.max(0, total - itemsPerView)
-  }, [total, itemsPerView])
-
+  const maxIndex = useMemo(() => Math.max(0, total - itemsPerView), [total, itemsPerView])
   const [index, setIndex] = useState(0)
 
-  // Si cambia el responsive y el index queda fuera de rango, lo ajustamos
   useEffect(() => {
     setIndex((i) => Math.min(i, maxIndex))
   }, [maxIndex])
@@ -55,12 +49,9 @@ export function ProductCarousel({ products, className = "", step = 1 }: Props) {
   const prev = () => setIndex((i) => Math.max(0, i - step))
   const next = () => setIndex((i) => Math.min(maxIndex, i + step))
 
-  // Cada item ocupa 100/itemsPerView %
   const itemBasis = `${100 / itemsPerView}%`
-  // Movemos por items: index * (100/itemsPerView)
   const translate = `-${index * (100 / itemsPerView)}%`
 
-  // Dots/paginación: cantidad de “páginas” (moviendo de a itemsPerView)
   const pages = useMemo(() => {
     if (total === 0) return 0
     return Math.ceil(total / itemsPerView)
@@ -71,17 +62,15 @@ export function ProductCarousel({ products, className = "", step = 1 }: Props) {
     return Math.floor(index / itemsPerView)
   }, [index, itemsPerView, pages])
 
-  const goToPage = (p: number) => {
-    const target = Math.min(maxIndex, p * itemsPerView)
-    setIndex(target)
-  }
+  const goToPage = (p: number) => setIndex(Math.min(maxIndex, p * itemsPerView))
 
   if (!products || products.length === 0) return null
 
   return (
     <div className={className}>
-      <div className="relative">
-        {/* FLECHA IZQ - bien visible */}
+      {/* relative + overflow-visible para que las flechas "salgan" */}
+      <div className="relative overflow-visible">
+        {/* FLECHA IZQ: afuera, sin borde */}
         <Button
           type="button"
           onClick={prev}
@@ -91,10 +80,12 @@ export function ProductCarousel({ products, className = "", step = 1 }: Props) {
           aria-label="Anterior"
           className="
             cursor-pointer
-            absolute left-2 top-1/2 -translate-y-1/2 z-10
+            absolute top-1/2 -translate-y-1/2 z-20
+            -left-6 md:-left-8
             h-12 w-12 rounded-full
             bg-background/95 backdrop-blur
-            border border-border shadow-lg
+            shadow-xl
+            border-2 border-primary shadow-lg
             hover:bg-background
             disabled:opacity-40
           "
@@ -102,7 +93,7 @@ export function ProductCarousel({ products, className = "", step = 1 }: Props) {
           <ChevronLeft className="h-6 w-6" />
         </Button>
 
-        {/* FLECHA DER - bien visible */}
+        {/* FLECHA DER: afuera, sin borde */}
         <Button
           type="button"
           onClick={next}
@@ -112,10 +103,12 @@ export function ProductCarousel({ products, className = "", step = 1 }: Props) {
           aria-label="Siguiente"
           className="
             cursor-pointer
-            absolute right-2 top-1/2 -translate-y-1/2 z-10
+            absolute top-1/2 -translate-y-1/2 z-20
+            -right-6 md:-right-8
             h-12 w-12 rounded-full
             bg-background/95 backdrop-blur
-            border border-border shadow-lg
+            shadow-xl
+            border-2 border-primary shadow-lg
             hover:bg-background
             disabled:opacity-40
           "
@@ -123,9 +116,8 @@ export function ProductCarousel({ products, className = "", step = 1 }: Props) {
           <ChevronRight className="h-6 w-6" />
         </Button>
 
-        {/* VIEWPORT */}
+        {/* VIEWPORT: acá sí overflow-hidden */}
         <div className="overflow-hidden">
-          {/* TRACK */}
           <div
             className="flex transition-transform duration-500 ease-out will-change-transform"
             style={{ transform: `translateX(${translate})` }}

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { ShoppingCart, Minus, Plus, ChevronLeft, ChevronRight, Heart } from "lucide-react"
 import { useCartStore } from "@/lib/store"
 import { ProductGrid } from "@/components/product/product-grid"
+import { ProductCarousel } from "@/components/product/product-carousel"
 import type { Product } from "@/lib/types"
 import { fetchProductoPorId } from "@/lib/services/api"
 import { useKeenSlider } from "keen-slider/react"
@@ -314,7 +315,7 @@ export default function ProductPage() {
             <h2 className="text-2xl font-bold text-foreground mb-6">
               Productos Relacionados
             </h2>
-            <ProductGrid products={related} />
+            <ProductCarousel products={related} className="mb-8"/>
           </section>
         )}
       </main>

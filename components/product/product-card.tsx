@@ -70,7 +70,7 @@ export function ProductCard({ product, className = "" }: ProductCardProps) {
 
   return (
     <div
-      className={`group relative bg-white rounded-xl border border-border
+      className={`group relative bg-card rounded-xl border border-border
       shadow-md
       transition-all duration-300 ease-out
       hover:-translate-y-2
