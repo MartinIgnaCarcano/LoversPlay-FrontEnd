@@ -253,7 +253,7 @@ export default function AdminProductosPage() {
                   <td className="p-3">{p.vistas}</td>
 
                   <td className="p-3 flex items-center justify-end gap-2">
-                    <Link href={`/admin/productos/${p.id}`}>
+                    <Link href={`/admin/productos/edit?id=${p.id}`}>
                       <Button variant="outline" size="sm" className="cursor-pointer">
                         <Pencil className="w-4 h-4" />
                       </Button>

@@ -139,7 +139,7 @@ export default function AdminCategoriasPage() {
                   <td className="p-3">{c.cantidad_productos}</td>
 
                   <td className="p-3 flex items-center justify-end gap-2">
-                    <Link href={`/admin/categorias/${c.id}`}>
+                    <Link href={`/admin/categorias/edit?id=${c.id}`}>
                       <Button variant="outline" size="sm" className="cursor-pointer">
                         <Pencil className="w-4 h-4" />
                       </Button>

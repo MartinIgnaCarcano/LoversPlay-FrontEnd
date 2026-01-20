@@ -167,7 +167,7 @@ export default function AdminUsuariosPage() {
                   </td>
 
                   <td className="p-3 flex justify-end gap-2">
-                    <Link href={`/admin/usuarios/${u.id}`}>
+                    <Link href={`/admin/usuarios/editar?id=${u.id}`}>
                       <Button
                         variant="outline"
                         size="sm"

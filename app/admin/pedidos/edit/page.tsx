@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
 import {
@@ -11,15 +11,22 @@ import {
 } from "@/lib/services/api-admin";
 
 export default function AdminPedidoDetallePage() {
-  const params = useParams();
   const router = useRouter();
-  const id = Number(params.id);
+  const searchParams = useSearchParams();
+
+  const idParam = searchParams.get("id");
+  const id = idParam ? Number(idParam) : NaN;
 
   const [pedido, setPedido] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [estado, setEstado] = useState("");
 
   async function load() {
+    if (!idParam || Number.isNaN(id)) {
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       const p = await adminFetchPedido(id);
@@ -33,9 +40,15 @@ export default function AdminPedidoDetallePage() {
 
   useEffect(() => {
     load();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idParam]);
 
   async function handleUpdateEstado() {
+    if (!idParam || Number.isNaN(id)) {
+      alert("Falta el id en la URL. Ej: /admin/pedidos/detalle?id=10");
+      return;
+    }
+
     try {
       await adminUpdatePedidoEstado(id, estado);
       alert("Estado actualizado");
@@ -47,6 +60,7 @@ export default function AdminPedidoDetallePage() {
   }
 
   async function handleDelete() {
+    if (!idParam || Number.isNaN(id)) return;
     if (!confirm("¿Eliminar este pedido?")) return;
 
     try {
@@ -54,10 +68,28 @@ export default function AdminPedidoDetallePage() {
       router.push("/admin/pedidos");
     } catch (err) {
       alert("Error eliminando pedido");
+      console.error(err);
     }
   }
 
-  if (loading || !pedido) return <p className="p-10">Cargando pedido...</p>;
+  if (loading) return <p className="p-10">Cargando pedido...</p>;
+
+  if (!idParam || Number.isNaN(id)) {
+    return (
+      <div className="max-w-4xl mx-auto py-10">
+        <h1 className="text-2xl font-bold mb-2">Detalle de pedido</h1>
+        <p className="text-muted-foreground">
+          Falta el parámetro <b>id</b> en la URL.
+        </p>
+
+        <Button className="mt-6 cursor-pointer" onClick={() => router.push("/admin/pedidos")}>
+          Volver
+        </Button>
+      </div>
+    );
+  }
+
+  if (!pedido) return <p className="p-10">No se encontró el pedido.</p>;
 
   return (
     <div className="max-w-4xl mx-auto py-10">
@@ -65,7 +97,7 @@ export default function AdminPedidoDetallePage() {
 
       {/* INFO GENERAL */}
       <div className="mb-6 flex-1">
-        <p><strong>Fecha:</strong> {pedido.fecha.split("T")[0]}</p>
+        <p><strong>Fecha:</strong> {pedido.fecha?.split("T")?.[0]}</p>
         <p><strong>Total:</strong> ${pedido.total}</p>
 
         <label className="block mt-4 mb-1 font-semibold">Estado:</label>
@@ -100,7 +132,7 @@ export default function AdminPedidoDetallePage() {
           </thead>
 
           <tbody>
-            {pedido.detalles.map((d: any, i: number) => (
+            {pedido.detalles?.map((d: any, i: number) => (
               <tr key={i} className="border-t">
                 <td className="p-3">{d.producto}</td>
                 <td className="p-3">{d.cantidad}</td>
@@ -111,14 +143,16 @@ export default function AdminPedidoDetallePage() {
         </table>
       </div>
 
-      {/* ELIMINAR
+      {/* ELIMINAR (si lo querés activar)
       <Button
         variant="destructive"
         className="mt-10 cursor-pointer"
         onClick={handleDelete}
       >
         Eliminar pedido
-      </Button> */}
+      </Button>
+      */}
     </div>
   );
 }
+

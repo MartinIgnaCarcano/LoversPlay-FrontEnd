@@ -414,7 +414,7 @@ function ProfilePage() {
                     {wishlist.map((item) => (
                       <div
                         key={item.id}
-                        onClick={() => router.push(`/producto/${item.id}`)}
+                        onClick={() => router.push(`/producto?id=${item.id}`)}
                         className="border border-border rounded-lg p-4 cursor-pointer"
                       >
                         <div className="flex gap-4">

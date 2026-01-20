@@ -119,7 +119,7 @@ export default function AdminPedidosPage() {
                   <td className="p-3">{p.estado}</td>
 
                   <td className="p-3 flex justify-end gap-2">
-                    <Link href={`/admin/pedidos/${p.id}`}>
+                    <Link href={`/admin/pedidos/edit?id=${p.id}`}>
                       <Button variant="outline" size="sm" className="cursor-pointer">Ver</Button>
                     </Link>
 

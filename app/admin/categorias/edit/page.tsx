@@ -1,18 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import {
-  adminFetchCategoria,
-  adminUpdateCategoria,
-} from "@/lib/services/api-admin";
+import { useRouter, useSearchParams } from "next/navigation";
+import { adminFetchCategoria, adminUpdateCategoria } from "@/lib/services/api-admin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export default function EditarCategoriaPage() {
   const router = useRouter();
-  const params = useParams();
-  const id = Number(params.id);
+  const searchParams = useSearchParams();
+
+  const idParam = searchParams.get("id");
+  const id = idParam ? Number(idParam) : NaN;
 
   const [loading, setLoading] = useState(true);
   const [nombre, setNombre] = useState("");
@@ -32,6 +31,11 @@ export default function EditarCategoriaPage() {
 
   useEffect(() => {
     async function load() {
+      if (!idParam || Number.isNaN(id)) {
+        setLoading(false);
+        return;
+      }
+
       try {
         const data = await adminFetchCategoria(id);
         setNombre(data.nombre);
@@ -42,16 +46,21 @@ export default function EditarCategoriaPage() {
       }
       setLoading(false);
     }
+
     load();
-  }, [id]);
+  }, [idParam, id]);
 
   async function handleSubmit(e: any) {
     e.preventDefault();
 
+    if (!idParam || Number.isNaN(id)) {
+      alert("Falta el id en la URL. Ej: /admin/categorias/edit?id=3");
+      return;
+    }
+
     const fd = new FormData();
     fd.append("nombre", nombre);
     fd.append("slug", slug);
-
     if (imagenNueva) fd.append("imagen", imagenNueva);
 
     try {
@@ -65,14 +74,26 @@ export default function EditarCategoriaPage() {
 
   if (loading) return <p>Cargando...</p>;
 
+  if (!idParam || Number.isNaN(id)) {
+    return (
+      <div className="max-w-xl mx-auto py-10">
+        <h1 className="text-2xl font-bold mb-2">Editar categoría</h1>
+        <p className="text-muted-foreground">
+          Falta el parámetro <b>id</b> en la URL.
+        </p>
+
+        <Button className="mt-6 cursor-pointer" onClick={() => router.push("/admin/categorias")}>
+          Volver
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-xl mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-6">
-        Editar Categoría #{id}
-      </h1>
+      <h1 className="text-3xl font-bold mb-6">Editar Categoría #{id}</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-
         <div>
           <label className="font-medium">Nombre</label>
           <Input
@@ -114,3 +135,4 @@ export default function EditarCategoriaPage() {
     </div>
   );
 }
+

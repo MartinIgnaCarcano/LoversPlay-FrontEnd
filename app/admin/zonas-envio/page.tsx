@@ -205,7 +205,7 @@ export default function AdminEnviosPage() {
                   <td className="p-3">{z.activa ? "Sí" : "No"}</td>
 
                   <td className="p-3 flex items-center justify-end gap-2">
-                    <Link href={`/admin/zonas-envio/${z.id}`}>
+                    <Link href={`/admin/zonas-envio/edit?id=${z.id}`}>
                       <Button variant="outline" size="sm" className="cursor-pointer">
                         <Pencil className="w-4 h-4" />
                       </Button>

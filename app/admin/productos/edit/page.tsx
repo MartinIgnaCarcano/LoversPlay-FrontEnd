@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   adminFetchProducto,
   adminUpdateProducto,
-  adminFetchCategorias
+  adminFetchCategorias,
 } from "@/lib/services/api-admin";
 
 import { Button } from "@/components/ui/button";
@@ -14,9 +14,11 @@ import { Label } from "@/components/ui/label";
 import { EditorHTML } from "@/components/admin/EditorHtml";
 
 export default function EditProductoPage() {
-  const params = useParams();
   const router = useRouter();
-  const id = Number(params.id);
+  const searchParams = useSearchParams();
+
+  const idParam = searchParams.get("id");
+  const id = idParam ? Number(idParam) : NaN;
 
   const [loading, setLoading] = useState(true);
 
@@ -43,50 +45,68 @@ export default function EditProductoPage() {
   function generarSlug(value: string) {
     const s = value
       .toLowerCase()
-      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
     setSlug(s);
   }
 
   useEffect(() => {
-  async function loadAll() {
-    try {
-      // 1) Cargar categorías primero
-      const cats = await adminFetchCategorias();
-      setCategorias(cats);
+    async function loadAll() {
+      if (!idParam || Number.isNaN(id)) {
+        setLoading(false);
+        return;
+      }
 
-      // 2) Ahora cargar el producto
-      const p = await adminFetchProducto(id);
+      try {
+        // 1) Cargar categorías primero
+        const cats = await adminFetchCategorias();
+        setCategorias(cats);
 
-      setNombre(p.nombre || "");
-      setSlug(p.slug || "");
-      setPrecio(String(p.precio || ""));
-      setStock(String(p.stock || ""));
-      setCategoriaId(String(p.categoria_id || ""));
-      setPeso(String(p.peso || "0"));
-      setDescripcion(p.descripcion_larga || "");
-      setDescripcionCorta(p.descripcion_corta || "");
+        // 2) Ahora cargar el producto
+        const p = await adminFetchProducto(id);
 
-      setImgPrincipalActual(
-        p.url_imagen_principal ||
-        p.imagenes?.[0] ||
-        "/placeholder.svg"
-      );
+        setNombre(p.nombre || "");
+        setSlug(p.slug || "");
+        setPrecio(String(p.precio || ""));
+        setStock(String(p.stock || ""));
+        setCategoriaId(String(p.categoria_id || ""));
+        setPeso(String(p.peso || "0"));
+        setDescripcion(p.descripcion_larga || "");
+        setDescripcionCorta(p.descripcion_corta || "");
 
-      setImgSecundariasActuales(p.imagenes || []);
+        setImgPrincipalActual(
+          p.url_imagen_principal || p.imagenes?.[0] || "/placeholder.svg"
+        );
 
-    } catch (err) {
-      console.error(err);
+        setImgSecundariasActuales(p.imagenes || []);
+      } catch (err) {
+        console.error(err);
+      }
+
+      setLoading(false);
     }
 
-    setLoading(false);
-  }
-
-  loadAll();
-}, [id]);
+    loadAll();
+  }, [idParam, id]);
 
   if (loading) return <p>Cargando producto...</p>;
+
+  if (!idParam || Number.isNaN(id)) {
+    return (
+      <div className="max-w-4xl mx-auto pb-20">
+        <h1 className="text-2xl font-bold mb-2">Editar producto</h1>
+        <p className="text-muted-foreground">
+          Falta el parámetro <b>id</b>. Ej: <code>/admin/productos/editar?id=123</code>
+        </p>
+
+        <Button className="mt-6 cursor-pointer" onClick={() => router.push("/admin/productos")}>
+          Volver
+        </Button>
+      </div>
+    );
+  }
 
   // SUBMIT PATCH
   async function handleSubmit(e: React.FormEvent) {
@@ -94,7 +114,6 @@ export default function EditProductoPage() {
 
     const formData = new FormData();
 
-    // Solo agrego campos modificados (tu backend lo permite)
     formData.append("nombre", nombre);
     formData.append("slug", slug);
     formData.append("precio", precio);
@@ -116,9 +135,7 @@ export default function EditProductoPage() {
 
     try {
       await adminUpdateProducto(id, formData);
-
       alert("Producto actualizado correctamente");
-
       router.push("/admin/productos");
     } catch (err) {
       console.error(err);
@@ -131,7 +148,6 @@ export default function EditProductoPage() {
       <h1 className="text-3xl font-bold mb-6">Editar Producto #{id}</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-
         {/* NOMBRE */}
         <div>
           <Label>Nombre</Label>
@@ -238,11 +254,7 @@ export default function EditProductoPage() {
           <Label>Imágenes secundarias actuales</Label>
           <div className="flex gap-3 flex-wrap">
             {imgSecundariasActuales.map((img, i) => (
-              <img
-                key={i}
-                src={img}
-                className="w-20 h-20 object-cover rounded border"
-              />
+              <img key={i} src={img} className="w-20 h-20 object-cover rounded border" />
             ))}
           </div>
         </div>
@@ -254,9 +266,7 @@ export default function EditProductoPage() {
             type="file"
             accept="image/*"
             multiple
-            onChange={(e) =>
-              setImgSecundariasNuevas(Array.from(e.target.files || []))
-            }
+            onChange={(e) => setImgSecundariasNuevas(Array.from(e.target.files || []))}
           />
         </div>
 
@@ -268,3 +278,4 @@ export default function EditProductoPage() {
     </div>
   );
 }
+

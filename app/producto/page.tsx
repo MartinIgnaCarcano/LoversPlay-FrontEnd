@@ -1,14 +1,13 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useParams } from "next/navigation"
+import { useEffect, useMemo, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import { Breadcrumbs } from "@/components/ui/breadcrumbs"
 import { Button } from "@/components/ui/button"
-import { ShoppingCart, Minus, Plus, ChevronLeft, ChevronRight, Heart } from "lucide-react"
+import { ShoppingCart, Minus, Plus, ChevronLeft, ChevronRight } from "lucide-react"
 import { useCartStore } from "@/lib/store"
-import { ProductGrid } from "@/components/product/product-grid"
 import { ProductCarousel } from "@/components/product/product-carousel"
 import type { Product } from "@/lib/types"
 import { fetchProductoPorId } from "@/lib/services/api"
@@ -18,7 +17,17 @@ import { useAddToCartFeedback } from "@/hooks/useAddToCartFeedBack"
 import "keen-slider/keen-slider.min.css"
 
 export default function ProductPage() {
-  const params = useParams<{ id: string }>()
+  const searchParams = useSearchParams()
+
+  // Lee ?id=123
+  const idParam = searchParams.get("id")
+
+  // Convertimos a number de forma segura
+  const productId = useMemo(() => {
+    const n = Number(idParam)
+    return Number.isFinite(n) && n > 0 ? n : null
+  }, [idParam])
+
   const [product, setProduct] = useState<Product | null>(null)
   const [related, setRelated] = useState<Product[]>([])
   const [quantity, setQuantity] = useState(1)
@@ -26,6 +35,9 @@ export default function ProductPage() {
   const [mounted, setMounted] = useState(false)
   const [isGalleryOpen, setIsGalleryOpen] = useState(false)
   const { added, trigger } = useAddToCartFeedback()
+
+  const [activeSlide, setActiveSlide] = useState(0)
+
   // --- Sliders ---
   const [sliderRefSmall, sliderSmall] = useKeenSlider<HTMLDivElement>({
     loop: true,
@@ -38,16 +50,34 @@ export default function ProductPage() {
     loop: true,
   })
 
-  const [activeSlide, setActiveSlide] = useState(0);
+  useEffect(() => {
+    if (!sliderSmall.current) return
+    sliderSmall.current.on("slideChanged", (s) => {
+      setActiveSlide(s.track.details.rel)
+    })
+  }, [sliderSmall])
 
   useEffect(() => {
-    if (!sliderSmall.current) return;
+    setMounted(true)
+  }, [])
 
-    sliderSmall.current.on("slideChanged", (s) => {
-      setActiveSlide(s.track.details.rel);
-    });
-  }, [sliderSmall]);
+  // 🔥 Cargar producto por query ?id=
+  useEffect(() => {
+    if (!productId) {
+      setProduct(null)
+      setRelated([])
+      return
+    }
 
+    fetchProductoPorId(productId)
+      .then((data) => {
+        setProduct(data.producto)
+        setRelated(data.sugeridos)
+      })
+      .catch((err) => console.error("❌ Error cargando producto:", err))
+  }, [productId])
+
+  // Ajuste de cantidad según stock - carrito
   useEffect(() => {
     if (!mounted || !product) return
     const inCart = items.find((i) => String(i.productId) === String(product.id))?.quantity ?? 0
@@ -55,20 +85,37 @@ export default function ProductPage() {
     setQuantity((q) => Math.min(q, available))
   }, [product?.id, product?.stock, items, mounted])
 
-  useEffect(() => {
-    setMounted(true)
-    if (!params?.id) return
+  if (!mounted) return null
 
-    fetchProductoPorId(Number(params.id))
-      .then((data) => {
-        setProduct(data.producto)
-        setRelated(data.sugeridos)
-      })
-      .catch((err) => console.error("❌ Error cargando producto:", err))
-  }, [params?.id])
+  // Caso: no hay id o id inválido
+  if (!productId) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container mx-auto px-4 py-20">
+          <p className="text-center text-muted-foreground">
+            Falta el parámetro <span className="font-semibold">id</span> en la URL.
+          </p>
+          <p className="text-center text-muted-foreground mt-2">
+            Ejemplo: <span className="font-mono">/producto?id=123</span>
+          </p>
+        </main>
+        <Footer />
+      </div>
+    )
+  }
 
+  // Caso: todavía cargando
   if (!product) {
-    return <p className="text-center py-20">Cargando producto...</p>
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container mx-auto px-4 py-20">
+          <p className="text-center">Cargando producto...</p>
+        </main>
+        <Footer />
+      </div>
+    )
   }
 
   const currentInCart =
@@ -89,7 +136,6 @@ export default function ProductPage() {
     const stock = product.stock ?? 0
 
     if (stock > 0 && desiredTotal > stock) {
-      // Acá podés mostrar toast/alert en vez de console
       alert(`Stock insuficiente. Ya tenés ${currentInCart} en el carrito y solo hay ${stock} disponibles.`)
       return
     }
@@ -111,8 +157,6 @@ export default function ProductPage() {
     ...(product.imagenes ?? []),
   ].filter(Boolean)
 
-  if (!mounted) return null
-
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -121,10 +165,8 @@ export default function ProductPage() {
         <Breadcrumbs items={breadcrumbItems} className="mb-6" />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
-
           {/* ------------------ GALERÍA COMPLETA ------------------ */}
           <div className="flex gap-6">
-
             {/* Miniaturas verticales */}
             <div className="flex flex-col gap-2">
               {imagenes.map((img, idx) => (
@@ -143,7 +185,7 @@ export default function ProductPage() {
               ))}
             </div>
 
-            {/* Carrusel principal con ancho controlado */}
+            {/* Carrusel principal */}
             <div className="relative w-full max-w-[450px]">
               <div
                 ref={sliderRefSmall}
@@ -151,10 +193,7 @@ export default function ProductPage() {
                 onClick={() => setIsGalleryOpen(true)}
               >
                 {imagenes.map((img, index) => (
-                  <div
-                    key={index}
-                    className="keen-slider__slide flex items-center justify-center"
-                  >
+                  <div key={index} className="keen-slider__slide flex items-center justify-center">
                     <img
                       src={img || "/placeholder.svg"}
                       alt={`${product.nombre} ${index + 1}`}
@@ -164,7 +203,6 @@ export default function ProductPage() {
                 ))}
               </div>
 
-              {/* Botones prev/next */}
               <button
                 onClick={() => sliderSmall.current?.prev()}
                 className="absolute top-1/2 left-2 -translate-y-1/2 bg-black/50 text-white rounded-full p-2 cursor-pointer"
@@ -181,8 +219,6 @@ export default function ProductPage() {
             </div>
           </div>
 
-
-
           {/* ------------------ FULLSCREEN GALLERY (NO TOCAR) ------------------ */}
           {isGalleryOpen && (
             <div className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center">
@@ -198,13 +234,11 @@ export default function ProductPage() {
                 className="keen-slider w-full max-w-5xl h-[80vh] rounded-xl overflow-hidden"
               >
                 {imagenes.map((img, index) => (
-                  <div
-                    key={index}
-                    className="keen-slider__slide flex items-center justify-center"
-                  >
+                  <div key={index} className="keen-slider__slide flex items-center justify-center">
                     <img
                       src={img || "/placeholder.svg"}
                       className="object-contain max-h-full max-w-full"
+                      alt=""
                     />
                   </div>
                 ))}
@@ -229,24 +263,22 @@ export default function ProductPage() {
           {/* Info producto */}
           <div className="space-y-6">
             <h1 className="text-3xl font-bold text-foreground mb-2">{product.nombre}</h1>
+
             <div className="flex items-center gap-4">
               <span className="text-3xl font-bold text-brand">${product.precio}</span>
             </div>
+
             {product.descripcion_corta && (
-              <div className="prose prose-sm text-muted-foreground" dangerouslySetInnerHTML={{ __html: product.descripcion_corta }} />)}
+              <div
+                className="prose prose-sm text-muted-foreground"
+                dangerouslySetInnerHTML={{ __html: product.descripcion_corta }}
+              />
+            )}
 
             <div className="space-y-1">
               {product.stock > 0 ? (
                 <span className="inline-flex items-center rounded-full bg-green-100 text-green-700 px-3 py-1 text-sm font-medium">
-                  {product.stock < 50 ? (
-                    <>
-                    {product.stock}
-                    </>
-                  ) : (
-                    <>
-                    +50
-                    </>
-                  )} disponibles
+                  {product.stock < 50 ? <>{product.stock}</> : <>+50</>} disponibles
                 </span>
               ) : (
                 <span className="inline-flex items-center rounded-full bg-red-100 text-red-700 px-3 py-1 text-sm font-medium">
@@ -255,14 +287,20 @@ export default function ProductPage() {
               )}
             </div>
 
-
-
             {/* Cantidad y carrito */}
-            <div className="flex items-center gap-4"> <Button variant="ghost" className="hover:cursor-pointer" size="sm" onClick={() => setQuantity(Math.max(1, quantity - 1))} disabled={quantity <= 1}>
-              <Minus className="h-4 w-4" />
-            </Button>
-              <span className="px-4 py-2 font-medium">{quantity}
-              </span>
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                className="hover:cursor-pointer"
+                size="sm"
+                onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                disabled={quantity <= 1}
+              >
+                <Minus className="h-4 w-4" />
+              </Button>
+
+              <span className="px-4 py-2 font-medium">{quantity}</span>
+
               <Button
                 variant="ghost"
                 className="hover:cursor-pointer"
@@ -272,11 +310,13 @@ export default function ProductPage() {
               >
                 <Plus className="h-4 w-4" />
               </Button>
+
               <Button
                 onClick={handleAddToCart}
                 disabled={product.stock === 0 || availableToAdd === 0}
-                className={`flex-1 transition-all duration-200 cursor-pointer ${added ? "bg-green-600 hover:bg-green-600" : "bg-primary hover:bg-brand/90"
-                  }`}
+                className={`flex-1 transition-all duration-200 cursor-pointer ${
+                  added ? "bg-green-600 hover:bg-green-600" : "bg-primary hover:bg-brand/90"
+                }`}
                 size="lg"
               >
                 {added ? (
@@ -286,39 +326,46 @@ export default function ProductPage() {
                 ) : (
                   <>
                     <ShoppingCart className="h-5 w-5 mr-2" />
-                    {product.stock === 0 ? "Agotado" : availableToAdd === 0 ? "Sin stock disponible" : "Agregar al Carrito"}
+                    {product.stock === 0
+                      ? "Agotado"
+                      : availableToAdd === 0
+                      ? "Sin stock disponible"
+                      : "Agregar al Carrito"}
                   </>
                 )}
               </Button>
             </div>
           </div>
         </div>
-        {/* Tabs como en tu diseño */}
+
+        {/* Descripción */}
         <div className="border-t border-border pt-6 padding-x-4">
           <div className="flex gap-6 mb-4">
             <button className="px-4 py-2 font-semibold border-b-2 border-brand">
               Descripción
             </button>
           </div>
+
           <div className="prose prose-sm text-muted-foreground">
             {product.descripcion_larga ? (
-              <div dangerouslySetInnerHTML={{ __html: product.descripcion_larga }} />) : (
-              <p>
-                No hay descripción detallada disponible.
-              </p>
+              <div dangerouslySetInnerHTML={{ __html: product.descripcion_larga }} />
+            ) : (
+              <p>No hay descripción detallada disponible.</p>
             )}
           </div>
         </div>
-        {/* Productos relacionados */}
+
+        {/* Relacionados */}
         {related.length > 0 && (
           <section className="mt-12">
             <h2 className="text-2xl font-bold text-foreground mb-6">
               Productos Relacionados
             </h2>
-            <ProductCarousel products={related} className="mb-8"/>
+            <ProductCarousel products={related} className="mb-8" />
           </section>
         )}
       </main>
+
       <Footer />
     </div>
   )

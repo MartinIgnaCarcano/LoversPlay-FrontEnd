@@ -121,7 +121,7 @@ export function SearchBar({ isOpen, onClose }: SearchBarProps) {
                   {results.map((p) => (
                     <Link
                       key={p.id}
-                      href={`/producto/${p.id}`}
+                      href={`/producto?id=${p.id}`}
                       onClick={onClose}
                       className="flex items-center gap-3 p-2 rounded hover:bg-muted transition-colors"
                     >

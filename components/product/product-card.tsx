@@ -81,7 +81,7 @@ export function ProductCard({ product, className = "" }: ProductCardProps) {
       active:scale-[0.98]
       ${className}`}
     >
-      <Link href={`/producto/${(product as any).id}`}>
+      <Link href={`/producto?id=${(product as any).id}`}>
         {/* Imagen */}
         <div className="relative aspect-square overflow-hidden bg-gray-50 rounded-xl flex items-center justify-center"
           onMouseEnter={() => setImagenActual(imagenSecundaria)}
