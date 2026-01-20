@@ -75,10 +75,10 @@ export function Pagination({
       <button
         disabled={currentPage === 1}
         onClick={() => onPageChange(currentPage - 1)}
-        className="px-2 py-1 text-sm text-muted-foreground disabled:opacity-40
+        className="px-2 py-1 text-xl text-muted-foreground disabled:opacity-40
              sm:hidden"
       >
-        ◄
+        ◄-
       </button>
 
       {/* Números */}
@@ -117,10 +117,10 @@ export function Pagination({
       <button
         disabled={currentPage === totalPages}
         onClick={() => onPageChange(currentPage + 1)}
-        className="px-2 py-1 text-sm text-muted-foreground disabled:opacity-40
+        className="px-2 py-1 text-xl text-muted-foreground disabled:opacity-40
              sm:hidden"
       >
-        ►
+        -►
       </button>
 
     </div>

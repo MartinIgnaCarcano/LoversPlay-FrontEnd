@@ -12,6 +12,18 @@ import { Filter, Grid, List } from "lucide-react"
 import { useFiltersStore } from "@/lib/store"
 import { fetchProductos, fetchProductosPorCategorias } from "@/lib/services/api"
 import { Pagination } from "@/components/ui/pagination"
+import Link from "next/link"
+import {
+  CircleDot,
+  Droplets,
+  Shirt,
+  Hand,
+  Waves,
+  Vibrate,
+  Plug,
+  Sparkles,
+  Pill,
+} from "lucide-react"
 
 
 export default function CatalogPage() {
@@ -26,6 +38,21 @@ export default function CatalogPage() {
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [categoriasSeleccionadas, setCategoriasSeleccionadas] = useState<number[]>([])
+
+  const categorias = useMemo(
+    () => [
+      { label: "Anillos", href: "/catalogo?cat=anillos", Icon: CircleDot },
+      { label: "Lamido", href: "/catalogo?cat=lamido", Icon: Droplets },
+      { label: "Lencería", href: "/catalogo?cat=lenceria", Icon: Shirt },
+      { label: "Masturbadores", href: "/catalogo?cat=masturbadores", Icon: Hand },
+      { label: "Succionadores", href: "/catalogo?cat=succionadores", Icon: Waves },
+      { label: "Vibradores", href: "/catalogo?cat=vibradores", Icon: Vibrate },
+      { label: "Anal", href: "/catalogo?cat=anal", Icon: Plug },
+      { label: "Cosmética Erótica", href: "/catalogo?cat=cosmetica", Icon: Sparkles },
+      { label: "Suplementos", href: "/catalogo?cat=suplementos", Icon: Pill },
+    ],
+    []
+  )
 
   // Normalizador para que coincidan con tus componentes
   const normalizeProductos = (apiProductos: any[]) =>
@@ -157,6 +184,7 @@ export default function CatalogPage() {
 
           {/* Main content */}
           <div className="flex-1">
+
             {/* Toolbar */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 p-4 bg-card rounded-xl border border-border">
               <div className="flex items-center gap-4">
@@ -176,6 +204,26 @@ export default function CatalogPage() {
                 <SortSelect />
               </div>
             </div>
+
+            {/* Categorías (como tu ejemplo) */}
+            <div className="bg-background border-t border-border">
+              <div className="mx-auto max-w-6xl px-6 py-6">
+                <div className="flex flex-wrap items-center justify-center gap-6">
+                  {categorias.map(({ label, href, Icon }) => (
+                    <Link key={label} href={href} className="group flex flex-col items-center gap-2">
+                      <div className="h-12 w-12 rounded-full border border-border bg-background flex items-center justify-center group-hover:scale-105 transition">
+                        <Icon className="h-7 w-7 text-brand" />
+                      </div>
+                      <span className="text-xs text-muted-foreground group-hover:text-foreground transition text-center">
+                        {label}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            
 
             {/* Products grid */}
             <ProductGrid products={filteredAndSortedProducts} />

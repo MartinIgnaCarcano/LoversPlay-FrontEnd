@@ -19,6 +19,7 @@ export function SearchBar({ isOpen, onClose }: SearchBarProps) {
   const [results, setResults] = useState<any[]>([])
   const [fuse, setFuse] = useState<Fuse<any> | null>(null)
   const [productos, setProductos] = useState<any[]>([])
+  const [loaded, setLoaded] = useState(false) // ✅ cache: ya cargó una vez
   const inputRef = useRef<HTMLInputElement>(null)
   const { setSearchQuery } = useFiltersStore()
 
@@ -35,12 +36,15 @@ export function SearchBar({ isOpen, onClose }: SearchBarProps) {
     }
   }, [isOpen])
 
-  // Cargar productos una sola vez
+  // ✅ Cargar productos SOLO cuando se abre, y SOLO una vez
   useEffect(() => {
+    if (!isOpen) return
+    if (loaded) return
+
     const cargarProductos = async () => {
       try {
         const prods = await fetchProductosBase()
-        const productosLimpios = prods.filter((p: any) => p && p.nombre)
+        const productosLimpios = (prods || []).filter((p: any) => p && p.nombre)
         setProductos(productosLimpios)
 
         const fuseInstance = new Fuse(productosLimpios, {
@@ -48,13 +52,15 @@ export function SearchBar({ isOpen, onClose }: SearchBarProps) {
           threshold: 0.3,
         })
         setFuse(fuseInstance)
+
+        setLoaded(true)
       } catch (err) {
         console.error("❌ Error cargando productos:", err)
       }
     }
 
     cargarProductos()
-  }, [])
+  }, [isOpen, loaded])
 
   // Búsqueda local con Fuse.js
   useEffect(() => {
@@ -84,7 +90,6 @@ export function SearchBar({ isOpen, onClose }: SearchBarProps) {
     <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
       <div className="container mx-auto px-4 pt-20">
         <div className="max-w-2xl mx-auto">
-          {/* Input de búsqueda */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
@@ -110,7 +115,6 @@ export function SearchBar({ isOpen, onClose }: SearchBarProps) {
             </Button>
           </div>
 
-          {/* Resultados */}
           {results.length > 0 && (
             <div className="mt-4 bg-card rounded-lg border border-border shadow-lg max-h-96 overflow-y-auto">
               <div className="p-4">
@@ -145,7 +149,6 @@ export function SearchBar({ isOpen, onClose }: SearchBarProps) {
             </div>
           )}
 
-          {/* Sin resultados */}
           {query.length > 2 && results.length === 0 && (
             <div className="mt-4 bg-card rounded-lg border border-border p-8 text-center">
               <p className="text-muted-foreground">
