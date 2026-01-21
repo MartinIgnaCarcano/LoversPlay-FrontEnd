@@ -390,12 +390,17 @@ export async function crearPedido(payload: {
 }) {
   const token = localStorage.getItem("access_token");
 
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  if (token && token.split(".").length === 3) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
   const res = await fetch(`${API_URL}/pedidos`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
+    headers,
     body: JSON.stringify(payload),
   });
 
@@ -409,8 +414,9 @@ export async function crearPedido(payload: {
     return null;
   }
 
-  return await res.json(); // { id, ... }
+  return await res.json();
 }
+
 
 // -----------------------------
 // 2) Crear preferencia de MP
