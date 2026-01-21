@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import type { Product } from "@/lib/types"
 import { Button } from "@/components/ui/button"
@@ -9,7 +9,10 @@ import { ProductCard } from "@/components/product/product-card"
 type Props = {
   products: Product[]
   className?: string
-  step?: number
+  swipe?: boolean
+  marquee?: boolean
+  marqueeSpeedPxPerSec?: number
+  showArrows?: boolean
 }
 
 function useItemsPerView() {
@@ -32,99 +35,240 @@ function useItemsPerView() {
   return items
 }
 
-export function ProductCarousel({ products, className = "", step = 1 }: Props) {
-  const itemsPerView = useItemsPerView()
-  const total = products?.length ?? 0
-
-  const maxIndex = useMemo(() => Math.max(0, total - itemsPerView), [total, itemsPerView])
-  const [index, setIndex] = useState(0)
+function useIsDesktop() {
+  const [isDesktop, setIsDesktop] = useState(false)
 
   useEffect(() => {
-    setIndex((i) => Math.min(i, maxIndex))
-  }, [maxIndex])
+    const calc = () => window.innerWidth >= 1024
+    const onResize = () => setIsDesktop(calc())
+    onResize()
+    window.addEventListener("resize", onResize)
+    return () => window.removeEventListener("resize", onResize)
+  }, [])
 
-  const canPrev = index > 0
-  const canNext = index < maxIndex
+  return isDesktop
+}
 
-  const prev = () => setIndex((i) => Math.max(0, i - step))
-  const next = () => setIndex((i) => Math.min(maxIndex, i + step))
+export function ProductCarousel({
+  products,
+  className = "",
+  swipe = true,
+  marquee = true,
+  marqueeSpeedPxPerSec = 45,
+  showArrows = true,
+}: Props) {
+  const itemsPerView = useItemsPerView()
+  const isDesktop = useIsDesktop()
 
+  const viewportRef = useRef<HTMLDivElement | null>(null)
+
+  const [paused, setPaused] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragOffsetPx, setDragOffsetPx] = useState(0)
+
+  const offsetRef = useRef(0)
+  const rafRef = useRef<number | null>(null)
+  const lastTsRef = useRef<number | null>(null)
+  const [renderOffset, setRenderOffset] = useState(0)
+
+  const total = products?.length ?? 0
   const itemBasis = `${100 / itemsPerView}%`
-  const translate = `-${index * (100 / itemsPerView)}%`
 
-  const pages = useMemo(() => {
-    if (total === 0) return 0
-    return Math.ceil(total / itemsPerView)
-  }, [total, itemsPerView])
+  const duplicated = useMemo(() => {
+    if (!products || products.length === 0) return []
+    const times = products.length <= itemsPerView ? 3 : 2
+    return Array.from({ length: times }).flatMap(() => products)
+  }, [products, itemsPerView])
 
-  const currentPage = useMemo(() => {
-    if (pages <= 1) return 0
-    return Math.floor(index / itemsPerView)
-  }, [index, itemsPerView, pages])
+  const getOriginalWidthPx = useCallback(() => {
+    const vp = viewportRef.current
+    if (!vp) return 0
+    const itemW = vp.clientWidth / itemsPerView
+    return itemW * total
+  }, [itemsPerView, total])
 
-  const goToPage = (p: number) => setIndex(Math.min(maxIndex, p * itemsPerView))
+  useEffect(() => {
+    const activeMarquee = marquee && isDesktop && total > 0
+    if (!activeMarquee) return
+
+    const tick = (ts: number) => {
+      if (lastTsRef.current == null) lastTsRef.current = ts
+      const dt = (ts - lastTsRef.current) / 1000
+      lastTsRef.current = ts
+
+      const originalW = getOriginalWidthPx()
+      if (originalW <= 0) {
+        rafRef.current = requestAnimationFrame(tick)
+        return
+      }
+
+      if (!paused && !isDragging) {
+        offsetRef.current += marqueeSpeedPxPerSec * dt
+        if (offsetRef.current >= originalW) offsetRef.current -= originalW
+        setRenderOffset(offsetRef.current)
+      }
+
+      rafRef.current = requestAnimationFrame(tick)
+    }
+
+    rafRef.current = requestAnimationFrame(tick)
+
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
+      rafRef.current = null
+      lastTsRef.current = null
+    }
+  }, [marquee, isDesktop, paused, isDragging, marqueeSpeedPxPerSec, total, getOriginalWidthPx])
+
+  const pointer = useRef({ active: false, startX: 0, lastX: 0, pointerId: -1 })
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    if (!swipe) return
+    const vp = viewportRef.current
+    if (!vp) return
+    if (e.pointerType === "mouse" && e.button !== 0) return
+
+    pointer.current.active = true
+    pointer.current.startX = e.clientX
+    pointer.current.lastX = e.clientX
+    pointer.current.pointerId = e.pointerId
+
+    setPaused(true)
+    setIsDragging(true)
+    setDragOffsetPx(0)
+
+    vp.setPointerCapture(e.pointerId)
+  }
+
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (!swipe) return
+    if (!pointer.current.active) return
+    const dx = e.clientX - pointer.current.startX
+    pointer.current.lastX = e.clientX
+    setDragOffsetPx(dx)
+  }
+
+  const finishDrag = (endX?: number) => {
+    if (!pointer.current.active) return
+    pointer.current.active = false
+
+    const x = typeof endX === "number" ? endX : pointer.current.lastX
+    const dx = x - pointer.current.startX
+
+    const vp = viewportRef.current
+    if (!vp) return
+
+    const itemW = vp.clientWidth / itemsPerView
+
+    let nextOffset = offsetRef.current - dx
+
+    // SNAP perfecto al item
+    const snappedIndex = Math.round(nextOffset / itemW)
+    nextOffset = snappedIndex * itemW
+
+    // wrap infinito
+    const originalW = getOriginalWidthPx()
+    if (originalW > 0) nextOffset = ((nextOffset % originalW) + originalW) % originalW
+
+    offsetRef.current = nextOffset
+    setRenderOffset(nextOffset)
+
+    setIsDragging(false)
+    setDragOffsetPx(0)
+    setPaused(false)
+  }
+
+  const onPointerUp = (e: React.PointerEvent) => finishDrag(e.clientX)
+  const onPointerCancel = () => finishDrag()
+
+  const shiftByOneItem = (dir: -1 | 1) => {
+    const vp = viewportRef.current
+    if (!vp) return
+    const itemW = vp.clientWidth / itemsPerView
+
+    let nextOffset = offsetRef.current + dir * itemW
+    const originalW = getOriginalWidthPx()
+    if (originalW > 0) nextOffset = ((nextOffset % originalW) + originalW) % originalW
+
+    offsetRef.current = nextOffset
+    setRenderOffset(nextOffset)
+  }
 
   if (!products || products.length === 0) return null
 
   return (
     <div className={className}>
-      {/* relative + overflow-visible para que las flechas "salgan" */}
-      <div className="relative overflow-visible">
-        {/* FLECHA IZQ: afuera, sin borde */}
-        <Button
-          type="button"
-          onClick={prev}
-          disabled={!canPrev}
-          size="icon"
-          variant="secondary"
-          aria-label="Anterior"
-          className="
-            cursor-pointer
-            absolute top-1/2 -translate-y-1/2 z-20
-            -left-6 md:-left-8
-            h-12 w-12 rounded-full
-            bg-background/95 backdrop-blur
-            shadow-xl
-            border-2 border-primary shadow-lg
-            hover:bg-background
-            disabled:opacity-40
-          "
-        >
-          <ChevronLeft className="h-6 w-6" />
-        </Button>
+      <div
+        className="relative overflow-visible"
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+        onFocusCapture={() => setPaused(true)}
+        onBlurCapture={() => setPaused(false)}
+      >
+        {showArrows && (
+          <>
+            <Button
+              type="button"
+              onClick={() => shiftByOneItem(-1)}
+              size="icon"
+              variant="secondary"
+              aria-label="Anterior"
+              className="
+                absolute top-1/2 -translate-y-1/2 z-20
+                -left-6 md:-left-8
+                h-12 w-12 rounded-full
+                bg-background/95 backdrop-blur
+                shadow-xl
+                border border-foreground/10
+                hover:bg-background
+                cursor-pointer
+              "
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </Button>
 
-        {/* FLECHA DER: afuera, sin borde */}
-        <Button
-          type="button"
-          onClick={next}
-          disabled={!canNext}
-          size="icon"
-          variant="secondary"
-          aria-label="Siguiente"
-          className="
-            cursor-pointer
-            absolute top-1/2 -translate-y-1/2 z-20
-            -right-6 md:-right-8
-            h-12 w-12 rounded-full
-            bg-background/95 backdrop-blur
-            shadow-xl
-            border-2 border-primary shadow-lg
-            hover:bg-background
-            disabled:opacity-40
-          "
-        >
-          <ChevronRight className="h-6 w-6" />
-        </Button>
+            <Button
+              type="button"
+              onClick={() => shiftByOneItem(1)}
+              size="icon"
+              variant="secondary"
+              aria-label="Siguiente"
+              className="
+                absolute top-1/2 -translate-y-1/2 z-20
+                -right-6 md:-right-8
+                h-12 w-12 rounded-full
+                bg-background/95 backdrop-blur
+                shadow-xl
+                border border-foreground/10
+                hover:bg-background
+                cursor-pointer
+              "
+            >
+              <ChevronRight className="h-6 w-6" />
+            </Button>
+          </>
+        )}
 
-        {/* VIEWPORT: acá sí overflow-hidden */}
-        <div className="overflow-hidden">
+        <div
+          ref={viewportRef}
+          className={["overflow-hidden", swipe ? "touch-pan-y select-none" : ""].join(" ")}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerCancel}
+        >
           <div
-            className="flex transition-transform duration-500 ease-out will-change-transform"
-            style={{ transform: `translateX(${translate})` }}
+            className={[
+              "flex will-change-transform",
+              isDragging ? "transition-none" : "transition-transform duration-300 ease-out",
+            ].join(" ")}
+            style={{
+              transform: `translateX(calc(-${renderOffset}px + ${dragOffsetPx}px))`,
+            }}
           >
-            {products.map((product, i) => (
+            {duplicated.map((product, i) => (
               <div
-                key={(product as any).id ?? i}
+                key={`${(product as any).id ?? "p"}-${i}`}
                 className="shrink-0 px-2"
                 style={{ flexBasis: itemBasis }}
               >
@@ -134,27 +278,8 @@ export function ProductCarousel({ products, className = "", step = 1 }: Props) {
           </div>
         </div>
       </div>
-
-      {/* DOTS */}
-      {pages > 1 && (
-        <div className="mt-5 flex items-center justify-center gap-2">
-          {Array.from({ length: pages }).map((_, p) => {
-            const active = p === currentPage
-            return (
-              <button
-                key={p}
-                type="button"
-                onClick={() => goToPage(p)}
-                aria-label={`Ir a página ${p + 1}`}
-                className={[
-                  "h-2.5 rounded-full transition-all",
-                  active ? "w-8 bg-foreground" : "w-2.5 bg-muted-foreground/40 hover:bg-muted-foreground/60",
-                ].join(" ")}
-              />
-            )
-          })}
-        </div>
-      )}
     </div>
   )
 }
+
+

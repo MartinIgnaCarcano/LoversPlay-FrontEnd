@@ -1,32 +1,29 @@
 "use client"
+
 import Link from "next/link"
-import { X, Minus, Plus, ShoppingBag, ArrowRight } from "lucide-react"
+import { X, Minus, Plus, ShoppingBag, ArrowRight, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useCartStore } from "@/lib/store"
-import { mockProducts } from "@/lib/services/mock-data"
 
 interface CartDrawerProps {
   isOpen: boolean
   onClose: () => void
 }
 
+// Recorta y agrega "…"
+function truncateText(text: string, maxLength: number): string {
+  if (!text) return ""
+  if (text.length <= maxLength) return text
+
+  const truncated = text.slice(0, maxLength)
+  const lastSpace = truncated.lastIndexOf(" ")
+  return (lastSpace > 0 ? truncated.slice(0, lastSpace) : truncated).trimEnd() + "…"
+}
+
 export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
   const { items, updateQuantity, removeItem, getTotalItems, getTotalPrice } = useCartStore()
 
-  const cartItems = items
-    .map((item) => {
-      const product = mockProducts.find((p) => p.id === item.productId)
-      return {
-        ...item,
-        product,
-      }
-    })
-    .filter((item) => item.product)
-
-  const subtotal = cartItems.reduce((total, item) => {
-    const price = item.product!.salePrice || item.product!.price
-    return total + price * item.quantity
-  }, 0)
+  const subtotal = getTotalPrice()
 
   if (!isOpen) return null
 
@@ -49,7 +46,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
           </div>
 
           {/* Content */}
-          {cartItems.length === 0 ? (
+          {items.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
               <ShoppingBag className="h-16 w-16 text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold text-card-foreground mb-2 font-[family-name:var(--font-poppins)]">
@@ -66,47 +63,85 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             <>
               {/* Items */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {cartItems.map((item) => (
-                  <div key={`${item.productId}-`} className="flex gap-3">
-                    <img
-                      src={item.product!.images[0] || "/placeholder.svg"}
-                      alt={item.product!.name}
-                      className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-card-foreground line-clamp-2 font-[family-name:var(--font-poppins)]">
-                        {item.product!.name}
-                      </h3>
-                      <div className="flex items-center justify-between mt-2">
-                        <div className="flex items-center border border-border rounded">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => updateQuantity(item.productId, item.quantity - 1)}
-                            disabled={item.quantity <= 1}
-                            className="h-8 w-8 p-0"
-                          >
-                            <Minus className="h-3 w-3" />
-                          </Button>
-                          <span className="px-2 text-sm font-medium">{item.quantity}</span>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => updateQuantity(item.productId, item.quantity + 1)}
-                            className="h-8 w-8 p-0"
-                          >
-                            <Plus className="h-3 w-3" />
-                          </Button>
-                        </div>
-                        <div className="text-right">
-                          <div className="font-semibold text-card-foreground font-[family-name:var(--font-poppins)]">
-                            ${((item.product!.salePrice || item.product!.price) * item.quantity).toFixed(2)}
+                {items.map((item: any) => {
+                  const name = String(item.name ?? "Producto")
+                  const image = String(item.image ?? "/placeholder.svg")
+                  const price = Number(item.price ?? 0)
+                  const quantity = Number(item.quantity ?? 1)
+                  const totalPrice = price * quantity
+
+                  return (
+                    <div
+                      key={String(item.productId)}
+                      className="relative rounded-2xl border border-border bg-muted/20 p-3"
+                    >
+                      {/* 🗑️ Basurín DENTRO del recuadro (no rompe layout) */}
+                      <button
+                        type="button"
+                        onClick={() => removeItem(String(item.productId))}
+                        aria-label="Eliminar producto"
+                        className="absolute right-2 top-2 z-10 rounded-full p-2 hover:bg-black/5 active:scale-95"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </button>
+
+                      <div className="flex gap-3">
+                        {/* Imagen */}
+                        <img
+                          src={image}
+                          alt={name}
+                          className="w-16 h-16 rounded-xl object-cover flex-shrink-0 bg-white"
+                        />
+
+                        {/* Texto + controles */}
+                        {/* pr-10 = deja lugar al basurín para que no se encime */}
+                        <div className="flex-1 min-w-0 pr-10">
+                          {/* ✅ Mobile: truncado + … */}
+                          <h3 className="font-medium text-card-foreground font-[family-name:var(--font-poppins)] text-sm sm:text-base">
+                            <span className="block w-full truncate sm:hidden">
+                              {truncateText(name, 10)}
+                            </span>
+                            <span className="hidden sm:block">{name}</span>
+                          </h3>
+
+                          {/* ✅ Mobile: columna para que no se desborde */}
+                          <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                            {/* Cantidad */}
+                            <div className="flex items-center border border-border rounded-xl bg-background/60 w-fit">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => updateQuantity(String(item.productId), quantity - 1)}
+                                disabled={quantity <= 1}
+                                className="h-9 w-9 p-0"
+                              >
+                                <Minus className="h-4 w-4" />
+                              </Button>
+
+                              <span className="px-3 text-sm font-medium">{quantity}</span>
+
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => updateQuantity(String(item.productId), quantity + 1)}
+                                className="h-9 w-9 p-0"
+                              >
+                                <Plus className="h-4 w-4" />
+                              </Button>
+                            </div>
+
+                            {/* Precio */}
+                            <div className="text-left sm:text-right">
+                              <div className="font-semibold text-card-foreground font-[family-name:var(--font-poppins)] text-lg sm:text-base">
+                                ${totalPrice.toFixed(2)}
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
 
               {/* Footer */}
@@ -123,6 +158,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                       <ArrowRight className="h-4 w-4 ml-2" />
                     </Link>
                   </Button>
+
                   <Button variant="outline" className="w-full bg-transparent" onClick={onClose} asChild>
                     <Link href="/catalogo">Continuar Comprando</Link>
                   </Button>
@@ -135,3 +171,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
     </div>
   )
 }
+
+
+
+

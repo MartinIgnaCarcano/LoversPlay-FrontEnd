@@ -69,7 +69,7 @@ export default function CartPage() {
               <h1 className="text-2xl font-bold text-foreground font-[family-name:var(--font-poppins)]">
                 Carrito de Compras
               </h1>
-              <Button variant="outline" size="sm" onClick={clearCart} className="hover:cursor-pointer" >
+              <Button variant="outline" size="sm" onClick={clearCart} className="hover:cursor-pointer">
                 <Trash2 className="h-4 w-4 mr-2" />
                 Vaciar carrito
               </Button>
@@ -77,7 +77,7 @@ export default function CartPage() {
 
             <div className="space-y-4">
               {items.map((item) => (
-                <div key={item.productId} className="bg-card rounded-xl border border-border p-6">
+                <div key={String(item.productId)} className="bg-card rounded-xl border border-border p-4 sm:p-6">
                   <div className="flex gap-4">
                     {/* Product image */}
                     <div className="flex-shrink-0">
@@ -89,27 +89,37 @@ export default function CartPage() {
                     </div>
 
                     {/* Product details */}
-                    <div className="flex-1">
-                      {/* Nombre + tacho */}
-                      <div className="flex justify-between items-center mb-3 sm:mb-2">
-                        <h3 className="font-semibold text-card-foreground font-[family-name:var(--font-poppins)] truncate">
+                    <div className="flex-1 min-w-0">
+                      {/* ✅ HEADER: nombre + tacho (con ellipsis real) */}
+                      <div className="flex items-start gap-2 mb-3">
+                        <h3
+                          className="
+                            flex-1 min-w-0
+                            font-semibold text-card-foreground
+                            font-[family-name:var(--font-poppins)]
+                            text-sm sm:text-base
+                            truncate
+                          "
+                          title={item.name}
+                        >
                           {item.name}
                         </h3>
+
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => removeItem(item.productId)}
-                          className="text-muted-foreground cursor-pointer hover:text-destructive transition-colors"
+                          onClick={() => removeItem(String(item.productId))}
+                          className="shrink-0 text-muted-foreground cursor-pointer hover:text-destructive transition-colors"
                           aria-label="Eliminar producto"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
 
-                      {/* Sumador + precio */}
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                      {/* ✅ CONTROLES: mobile en columna / desktop en fila */}
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         {/* Quantity controls */}
-                        <div className="flex items-center justify-center sm:justify-start border border-border rounded-lg px-1">
+                        <div className="flex items-center justify-center sm:justify-start border border-border rounded-lg px-1 w-fit">
                           <Button
                             variant="ghost"
                             size="icon"
@@ -119,7 +129,9 @@ export default function CartPage() {
                           >
                             <Minus className="h-4 w-4" />
                           </Button>
+
                           <span className="px-4 py-2 font-medium">{item.quantity}</span>
+
                           <Button
                             variant="ghost"
                             size="icon"
@@ -132,14 +144,14 @@ export default function CartPage() {
                         </div>
 
                         {/* Price */}
-                        <div className="text-center sm:text-right">
+                        <div className="text-left sm:text-right">
                           <div className="font-bold text-lg text-card-foreground font-[family-name:var(--font-poppins)]">
                             ${(item.price * item.quantity).toFixed(2)}
                           </div>
                         </div>
                       </div>
                     </div>
-
+                    {/* /details */}
                   </div>
                 </div>
               ))}
@@ -201,7 +213,6 @@ export default function CartPage() {
                 </div>
               </div>
 
-              {/* Checkout button */}
               <Button className="w-full bg-primary hover:bg-primary/60 mb-4" size="lg" asChild>
                 <Link href="/pago">
                   Proceder al pago

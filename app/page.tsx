@@ -1,16 +1,19 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Image from "next/image"
+import Link from "next/link"
+
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import { Hero } from "@/components/layout/hero"
 import { ShippingMethods } from "@/components/shipping/shipping-methods"
-import { ProductGrid } from "@/components/product/product-grid"
 import { ProductCarousel } from "@/components/product/product-carousel"
 import { Button } from "@/components/ui/button"
-import Link from "next/link"
+
 import { fetchProductos } from "@/lib/services/api"
 import type { Product } from "@/lib/types"
+
 import "@/styles/globals.css"
 
 export default function HomePage() {
@@ -18,12 +21,10 @@ export default function HomePage() {
   const [popularProducts, setPopularProducts] = useState<Product[]>([])
 
   useEffect(() => {
-    // 🔹 Cargar productos destacados (los primeros 4, por ejemplo)
     fetchProductos(1, 8)
       .then((data) => setFeaturedProducts(data.productos))
       .catch((err) => console.error("Error cargando destacados:", err))
 
-    // 🔹 Cargar productos más vistos (página 2, otros 4 productos)
     fetchProductos(2, 8)
       .then((data) => setPopularProducts(data.productos))
       .catch((err) => console.error("Error cargando populares:", err))
@@ -36,8 +37,6 @@ export default function HomePage() {
       <main>
         <Hero />
 
-
-
         {/* Featured products */}
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
@@ -49,36 +48,43 @@ export default function HomePage() {
                 Nuestra selección de productos más populares
               </p>
             </div>
-            <ProductCarousel products={featuredProducts} className="mb-8"/>
+
+            <ProductCarousel products={featuredProducts} className="mb-8" />
+
             <div className="text-center">
               <Button size="lg" variant="outline" asChild>
                 <Link href="/catalogo">Ver Todos los Productos</Link>
               </Button>
-
             </div>
           </div>
         </section>
 
-
-
         {/* Why choose us section */}
+        <section className="relative py-16 overflow-hidden">
+          <Image
+            src="/hero1.png"
+            alt=""
+            fill
+            sizes="100vw"
+            className="object-cover object-center"
+          />
 
-        <section
-          className="py-16 bg-no-repeat"
-          style={{ backgroundImage: "url(/hero1.png)" }}
-        >
-          <div className="container mx-auto px-4 text-center">
+          <div className="absolute inset-0 bg-background/60 backdrop-blur-[1px]" />
+
+          <div className="relative container mx-auto px-4 text-center">
             <h2 className="text-3xl font-bold text-foreground mb-8 font-[family-name:var(--font-poppins)]">
               ¿Por qué elegirnos?
             </h2>
+
             <p className="max-w-3xl mx-auto mb-12 text-lg text-muted-foreground leading-relaxed">
               Somos una tienda de bienestar íntimo con más de <strong>25 años de experiencia en Mendoza</strong>,
               acompañando a personas y parejas a descubrir su sexualidad de forma
-              <strong> segura, confiable y discreta</strong>.
-              En Lovers Play combinamos <strong>atención personalizada</strong>, un
-              <strong> catálogo variado</strong> y <strong>precios competitivos</strong>,
-              para que cada compra sea una experiencia cómoda, respetuosa y sin prejuicios.
+              <strong> segura, confiable y discreta</strong>. En Lovers Play combinamos{" "}
+              <strong>atención personalizada</strong>, un <strong>catálogo variado</strong> y{" "}
+              <strong>precios competitivos</strong>, para que cada compra sea una experiencia cómoda,
+              respetuosa y sin prejuicios.
             </p>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="bg-card rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-200">
                 <div className="text-4xl mb-4">🔒</div>
@@ -89,6 +95,7 @@ export default function HomePage() {
                   Todos nuestros productos se envían en empaques completamente discretos
                 </p>
               </div>
+
               <div className="bg-card rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-200">
                 <div className="text-4xl mb-4">⭐</div>
                 <h3 className="text-xl font-semibold text-card-foreground mb-2 font-[family-name:var(--font-poppins)]">
@@ -98,6 +105,7 @@ export default function HomePage() {
                   Productos de las mejores marcas con materiales seguros y certificados
                 </p>
               </div>
+
               <div className="bg-card rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-200">
                 <div className="text-4xl mb-4">💬</div>
                 <h3 className="text-xl font-semibold text-card-foreground mb-2 font-[family-name:var(--font-poppins)]">
@@ -123,8 +131,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            <ProductCarousel products={popularProducts}/>
-
+            <ProductCarousel products={popularProducts} />
           </div>
         </section>
 
@@ -134,12 +141,12 @@ export default function HomePage() {
             <ShippingMethods />
           </div>
         </section>
-
-
       </main>
 
       <Footer />
     </div>
   )
 }
+
+
 

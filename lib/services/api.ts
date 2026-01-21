@@ -448,3 +448,7 @@ export async function crearPreferenciaPago(payload: {
 
   return await res.json(); // { init_point }
 }
+
+
+
+
