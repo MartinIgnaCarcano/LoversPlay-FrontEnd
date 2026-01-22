@@ -2,7 +2,7 @@ import type { Pedido, Product, Usuario } from "@/lib/types"
 import { fetchWithAuth } from "../fetchWithAuth";
 export { fetchProductoPorId as fetchProducto }
 
-const API_URL = "http://192.168.5.1:5000/api"
+const API_URL = "http://192.168.1.5:5000/api"
 
 function handleUnauthorized(res: Response) {
   if (res.status === 401 || res.status === 403) {
