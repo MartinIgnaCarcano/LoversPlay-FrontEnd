@@ -1,8 +1,10 @@
 // 📂 Categorías del catálogo
 export type Category = {
-  id: string
-  name: string
-  slug: string
+  id: number
+  nombre: string
+  cantidad_productos: number
+  slug?: string
+  icon_key: string
   count?: number
   parentId?: string | null
 }

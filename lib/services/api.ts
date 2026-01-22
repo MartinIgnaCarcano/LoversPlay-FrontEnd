@@ -76,7 +76,7 @@ export async function fetchProductosPorCategorias(
 }
 
 // 🔹 Cargar categorías
-export async function fetchCategorias(): Promise<{ id: number; nombre: string; url_imagen: string | null }[]> {
+export async function fetchCategorias(): Promise<{ id: number; nombre: string; icon_key: string; cantidad_productos: number}[]> {
   const res = await fetch(`${API_URL}/categorias`)
   if (!res.ok) throw new Error("Error cargando categorías")
   const data = await res.json()

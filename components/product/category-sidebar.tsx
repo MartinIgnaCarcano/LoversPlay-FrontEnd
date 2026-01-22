@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Slider } from "@/components/ui/slider"
 import { useFiltersStore } from "@/lib/store"
 import { fetchCategorias } from "@/lib/services/api"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 interface CategorySidebarProps {
   className?: string
@@ -18,6 +19,7 @@ export function CategorySidebar({ className = "", onCategoriasChange }: Category
   const [categorias, setCategorias] = useState<{ id: number; nombre: string }[]>([])
   const [loading, setLoading] = useState(true)
   const [showAll, setShowAll] = useState(false)
+  const isMobile = useIsMobile()
 
   const toggleCategory = (categoryId: string) => {
     setExpandedCategories((prev) =>
@@ -127,64 +129,72 @@ export function CategorySidebar({ className = "", onCategoriasChange }: Category
           </div>
         </div>
         {/* Categories */}
-        <div>
-          <h3 className="font-medium text-card-foreground mb-3 font-[family-name:var(--font-poppins)]">Categorías</h3>
-          <div className="relative">
-            <div className={`space-y-2 ${!showAll ? "max-h-48 overflow-hidden" : ""}`}>
-              {loading ? (
-                <p className="text-sm text-muted-foreground">Cargando categorías...</p>
-              ) : categorias && categorias.length > 0 ? (
-                (showAll ? categorias : categorias.slice(0, 5)).map((category) => (
-                  <div key={category.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`category-${category.id}`}
-                      checked={filters.categories.includes(String(category.id))}
-                      onCheckedChange={(checked) =>
-                        handleCategoryChange(String(category.id), checked as boolean)
-                      }
-                    />
-                    <label
-                      htmlFor={`category-${category.id}`}
-                      className="text-sm text-card-foreground cursor-pointer flex-1 font-[family-name:var(--font-inter)]"
-                    >
-                      {category.nombre}
-                    </label>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-muted-foreground">No hay categorías disponibles</p>
+        {isMobile ? (
+          <>
+            <div>
+              <h3 className="font-medium text-card-foreground mb-3 font-[family-name:var(--font-poppins)]">Categorías</h3>
+              <div className="relative">
+                <div className={`space-y-2 ${!showAll ? "max-h-48 overflow-hidden" : ""}`}>
+                  {loading ? (
+                    <p className="text-sm text-muted-foreground">Cargando categorías...</p>
+                  ) : categorias && categorias.length > 0 ? (
+                    (showAll ? categorias : categorias.slice(0, 5)).map((category) => (
+                      <div key={category.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`category-${category.id}`}
+                          checked={filters.categories.includes(String(category.id))}
+                          onCheckedChange={(checked) =>
+                            handleCategoryChange(String(category.id), checked as boolean)
+                          }
+                        />
+                        <label
+                          htmlFor={`category-${category.id}`}
+                          className="text-sm text-card-foreground cursor-pointer flex-1 font-[family-name:var(--font-inter)]"
+                        >
+                          {category.nombre}
+                        </label>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No hay categorías disponibles</p>
+                  )}
+                </div>
+
+                {/* Degradado solo cuando no se muestran todas */}
+                {!showAll && categorias.length > 5 && (
+                  <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-card to-transparent pointer-events-none"></div>
+                )}
+              </div>
+
+              {/* Botón para expandir/colapsar */}
+              {categorias.length > 5 && (
+                <div className="mt-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowAll((prev) => !prev)}
+                    className="w-full"
+                  >
+                    {showAll ? "Ver menos" : "Ver más"}
+                    {showAll ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 15l-7-7-7 7" />
+                      </svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    )}
+                  </Button>
+                </div>
               )}
             </div>
+          </>
+        ) : (
+          <>
+          </>
+        )}
 
-            {/* Degradado solo cuando no se muestran todas */}
-            {!showAll && categorias.length > 5 && (
-              <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-card to-transparent pointer-events-none"></div>
-            )}
-          </div>
-
-          {/* Botón para expandir/colapsar */}
-          {categorias.length > 5 && (
-            <div className="mt-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowAll((prev) => !prev)}
-                className="w-full"
-              >
-                {showAll ? "Ver menos" : "Ver más"}
-                {showAll ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 15l-7-7-7 7" />
-                  </svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                )}
-              </Button>
-            </div>
-          )}
-        </div>
 
 
       </div>

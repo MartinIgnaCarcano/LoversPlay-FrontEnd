@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useCallback } from "react"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import { Breadcrumbs } from "@/components/ui/breadcrumbs"
@@ -12,23 +12,16 @@ import { Filter, Grid, List } from "lucide-react"
 import { useFiltersStore } from "@/lib/store"
 import { fetchProductos, fetchProductosPorCategorias } from "@/lib/services/api"
 import { Pagination } from "@/components/ui/pagination"
-import Link from "next/link"
-import {
-  CircleDot,
-  Droplets,
-  Shirt,
-  Hand,
-  Waves,
-  Vibrate,
-  Plug,
-  Sparkles,
-  Pill,
-} from "lucide-react"
+import { CategoryIconGrid } from "@/components/product/category-grid"
+import { useIsMobile } from "@/hooks/use-mobile"
+import { useSearchParams } from "next/navigation"
 
 
 export default function CatalogPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+  const isMobile = useIsMobile()
+  const searchParams = useSearchParams()
 
   const { filters, sortBy, searchQuery } = useFiltersStore()
   const [totalGlobal, setTotalGlobal] = useState(0)
@@ -39,20 +32,7 @@ export default function CatalogPage() {
   const [totalPages, setTotalPages] = useState(1)
   const [categoriasSeleccionadas, setCategoriasSeleccionadas] = useState<number[]>([])
 
-  const categorias = useMemo(
-    () => [
-      { label: "Anillos", href: "/catalogo?cat=anillos", Icon: CircleDot },
-      { label: "Lamido", href: "/catalogo?cat=lamido", Icon: Droplets },
-      { label: "Lencería", href: "/catalogo?cat=lenceria", Icon: Shirt },
-      { label: "Masturbadores", href: "/catalogo?cat=masturbadores", Icon: Hand },
-      { label: "Succionadores", href: "/catalogo?cat=succionadores", Icon: Waves },
-      { label: "Vibradores", href: "/catalogo?cat=vibradores", Icon: Vibrate },
-      { label: "Anal", href: "/catalogo?cat=anal", Icon: Plug },
-      { label: "Cosmética Erótica", href: "/catalogo?cat=cosmetica", Icon: Sparkles },
-      { label: "Suplementos", href: "/catalogo?cat=suplementos", Icon: Pill },
-    ],
-    []
-  )
+  const { setFilters } = useFiltersStore()
 
   // Normalizador para que coincidan con tus componentes
   const normalizeProductos = (apiProductos: any[]) =>
@@ -67,16 +47,13 @@ export default function CatalogPage() {
     }))
 
   // Función de carga
-  const loadProductos = async (pageNumber = 1) => {
+  const loadProductos = useCallback(async (pageNumber = 1, ids: number[] = []) => {
     setLoading(true)
     try {
-      let data
-
-      if (categoriasSeleccionadas.length > 0) {
-        data = await fetchProductosPorCategorias(categoriasSeleccionadas, pageNumber)
-      } else {
-        data = await fetchProductos(pageNumber)
-      }
+      const data =
+        ids.length > 0
+          ? await fetchProductosPorCategorias(ids, pageNumber)
+          : await fetchProductos(pageNumber)
 
       setProductos(data.productos)
       setTotalGlobal(data.total)
@@ -87,20 +64,24 @@ export default function CatalogPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
 
 
 
-  // Primera carga y cuando cambian categorías
   useEffect(() => {
-    loadProductos(1)
-  }, [categoriasSeleccionadas])
+    const cats = searchParams.get("cats")
+    const ids = cats
+      ? cats.split(",").map(Number).filter((n) => !Number.isNaN(n))
+      : []
+
+    setCategoriasSeleccionadas(ids)
+    setFilters({ categories: ids.map(String) })
+
+    loadProductos(1, ids)
+  }, [searchParams, setFilters, loadProductos])
 
 
-
-
-  const loadMore = () => setPage((prev) => prev + 1)
 
   // Filtros y orden
   const filteredAndSortedProducts = useMemo(() => {
@@ -178,6 +159,7 @@ export default function CatalogPage() {
               onCategoriasChange={(ids) => {
                 setCategoriasSeleccionadas(ids)
                 setPage(1)
+                loadProductos(1, ids)
               }}
             />
           </aside>
@@ -204,26 +186,27 @@ export default function CatalogPage() {
                 <SortSelect />
               </div>
             </div>
-
-            {/* Categorías (como tu ejemplo) */}
-            <div className="bg-background border-t border-border">
-              <div className="mx-auto max-w-6xl px-6 py-6">
-                <div className="flex flex-wrap items-center justify-center gap-6">
-                  {categorias.map(({ label, href, Icon }) => (
-                    <Link key={label} href={href} className="group flex flex-col items-center gap-2">
-                      <div className="h-12 w-12 rounded-full border border-border bg-background flex items-center justify-center group-hover:scale-105 transition">
-                        <Icon className="h-7 w-7 text-brand" />
-                      </div>
-                      <span className="text-xs text-muted-foreground group-hover:text-foreground transition text-center">
-                        {label}
-                      </span>
-                    </Link>
-                  ))}
+            {isMobile ? (
+              <>
+              </>
+            ) : (
+              <>
+                {/* Categorías */}
+                <div className="mb-6">
+                  <CategoryIconGrid
+                    onCategoriasChange={(ids) => {
+                      setCategoriasSeleccionadas(ids)
+                      setPage(1)
+                      loadProductos(1, ids)
+                    }}
+                  />
                 </div>
-              </div>
-            </div>
+              </>
+            )}
 
-            
+
+
+
 
             {/* Products grid */}
             <ProductGrid products={filteredAndSortedProducts} />

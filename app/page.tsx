@@ -10,16 +10,19 @@ import { Hero } from "@/components/layout/hero"
 import { ShippingMethods } from "@/components/shipping/shipping-methods"
 import { ProductCarousel } from "@/components/product/product-carousel"
 import { Button } from "@/components/ui/button"
+import { CategoryIconGrid } from "@/components/product/category-grid"
 
 import { fetchProductos } from "@/lib/services/api"
 import type { Product } from "@/lib/types"
 
 import "@/styles/globals.css"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 export default function HomePage() {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
   const [popularProducts, setPopularProducts] = useState<Product[]>([])
-
+  const [categoriasSeleccionadas, setCategoriasSeleccionadas] = useState<number[]>([])
+  const isMobile = useIsMobile()
   useEffect(() => {
     fetchProductos(1, 8)
       .then((data) => setFeaturedProducts(data.productos))
@@ -37,6 +40,17 @@ export default function HomePage() {
       <main>
         <Hero />
 
+        {isMobile ? (
+          <>
+          </>
+        ) : (
+          <>
+            {/* Categorías */}
+            <div className="mb-6">
+              <CategoryIconGrid mode="navigate"/>
+            </div>
+          </>
+        )}
         {/* Featured products */}
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
