@@ -9,6 +9,8 @@ export type Category = {
   parentId?: string | null
 }
 
+
+
 // 🛍️ Producto principal que se muestra en catálogo/front
 export type Product = {
   id: number
@@ -16,7 +18,7 @@ export type Product = {
   slug?: string
   precio: number
   stock: number
-  categoria_id?: number
+  categoria_id?: number[] 
   descripcion_corta?: string
   descripcion_larga?: string
   peso?: number

@@ -20,49 +20,49 @@ function handleUnauthorized(res: Response) {
   }
 }
 
-// 🔹 Cargar productos (paginado)
-export async function fetchProductos(
-  page: number = 1,
-  perPage: number = 16
-): Promise<{ page: number; per_page: number; productos: any[]; total: number }> {
-  const res = await fetch(`${API_URL}/productos?page=${page}&per_page=${perPage}`)
-  if (!res.ok) throw new Error("Error cargando productos")
-  const data = await res.json()
-  console.log("productos")
-  console.log(data)
+type ProductosSortApi =
+  | "relevance"
+  | "price_asc"
+  | "price_desc"
+  | "most_viewed"
+  | "best_selling"
 
-  return {
-    ...data,
-    productos: data.productos.map((p: any) => ({
-      id: p.id,
-      name: p.nombre,
-      price: p.precio,
-      stock: p.stock,
-      image: p.url_imagen_principal,
-      image2: p.url_imagen_secundaria,
-      rating: p.valoracion_promedio,
-      views: p.vistas,
-    })),
-  }
+type FetchProductosParams = {
+  page?: number
+  per_page?: number
+  categoria_ids?: number[] // MANY-TO-MANY ANY
+  in_stock?: boolean
+  sort?: ProductosSortApi
 }
 
-// 🔹 Cargar productos por categorías
-export async function fetchProductosPorCategorias(
-  ids: number[],
-  page: number = 1,
-  perPage: number = 16
-): Promise<{ page: number; per_page: number; productos: Product[]; total: number }> {
-  const res = await fetch(
-    `${API_URL}/productos/por_categoria?ids=${ids.join(",")}&page=${page}&per_page=${perPage}`
-  )
-  if (!res.ok) throw new Error("Error cargando productos por categorías")
+export async function fetchProductos(params: FetchProductosParams = {}) {
+  const {
+    page = 1,
+    per_page = 16,
+    categoria_ids = [],
+    in_stock = false,
+    sort = "relevance",
+  } = params
+
+  const qs = new URLSearchParams()
+  qs.set("page", String(page))
+  qs.set("per_page", String(per_page))
+
+  if (Array.isArray(categoria_ids) && categoria_ids.length > 0) {
+    qs.set("categoria_ids", categoria_ids.join(","))
+  }
+
+  if (in_stock) qs.set("in_stock", "true")
+  if (sort) qs.set("sort", sort)
+
+  const res = await fetch(`${API_URL}/productos?${qs.toString()}`)
+  if (!res.ok) throw new Error("Error cargando productos")
 
   const data = await res.json()
-  console.log("productos por categoría")
-  console.log(data)
+
   return {
     ...data,
-    productos: data.productos.map((p: any) => ({
+    productos: (data.productos || []).map((p: any) => ({
       id: p.id,
       name: p.nombre,
       price: p.precio,
@@ -71,12 +71,13 @@ export async function fetchProductosPorCategorias(
       image2: p.url_imagen_secundaria,
       rating: p.valoracion_promedio,
       views: p.vistas,
+      categoria_ids: p.categoria_ids,
     })),
   }
 }
 
 // 🔹 Cargar categorías
-export async function fetchCategorias(): Promise<{ id: number; nombre: string; icon_key: string; cantidad_productos: number}[]> {
+export async function fetchCategorias(): Promise<{ id: number; nombre: string; icon_key: string; cantidad_productos: number }[]> {
   const res = await fetch(`${API_URL}/categorias`)
   if (!res.ok) throw new Error("Error cargando categorías")
   const data = await res.json()

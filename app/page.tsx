@@ -1,3 +1,4 @@
+// FILE: app/page.tsx
 "use client"
 
 import { useEffect, useState } from "react"
@@ -21,14 +22,15 @@ import { useIsMobile } from "@/hooks/use-mobile"
 export default function HomePage() {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
   const [popularProducts, setPopularProducts] = useState<Product[]>([])
-  const [categoriasSeleccionadas, setCategoriasSeleccionadas] = useState<number[]>([])
   const isMobile = useIsMobile()
+
   useEffect(() => {
-    fetchProductos(1, 8)
+    // ✅ cambia solo esto: ahora el back ordena
+    fetchProductos({ page: 1, per_page: 8, sort: "relevance" })
       .then((data) => setFeaturedProducts(data.productos))
       .catch((err) => console.error("Error cargando destacados:", err))
 
-    fetchProductos(2, 8)
+    fetchProductos({ page: 1, per_page: 8, sort: "most_viewed" })
       .then((data) => setPopularProducts(data.productos))
       .catch((err) => console.error("Error cargando populares:", err))
   }, [])
@@ -40,17 +42,12 @@ export default function HomePage() {
       <main>
         <Hero />
 
-        {isMobile ? (
-          <>
-          </>
-        ) : (
-          <>
-            {/* Categorías */}
-            <div className="mb-6">
-              <CategoryIconGrid mode="navigate"/>
-            </div>
-          </>
+        {isMobile ? null : (
+          <div className="mb-6">
+            <CategoryIconGrid mode="navigate" />
+          </div>
         )}
+
         {/* Featured products */}
         <section className="bg-white pb-4">
           <div className="container mx-auto px-4">
@@ -75,14 +72,7 @@ export default function HomePage() {
 
         {/* Why choose us section */}
         <section className="relative py-16 overflow-hidden">
-          <Image
-            src="/hero1.png"
-            alt=""
-            fill
-            sizes="100vw"
-            className="object-cover object-center"
-          />
-
+          <Image src="/hero1.png" alt="" fill sizes="100vw" className="object-cover object-center" />
           <div className="absolute inset-0 bg-background/60 backdrop-blur-[1px]" />
 
           <div className="relative container mx-auto px-4 text-center">
@@ -161,6 +151,3 @@ export default function HomePage() {
     </div>
   )
 }
-
-
-

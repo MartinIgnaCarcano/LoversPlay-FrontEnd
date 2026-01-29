@@ -86,8 +86,8 @@ export function CategorySidebar({ className = "", onCategoriasChange }: Category
   return (
     <div className={`bg-card rounded-xl border border-border p-6 ${className}`}>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-card-foreground font-[family-name:var(--font-poppins)]">Filtros</h2>
-        <Button className="cursor-pointer" variant="ghost" size="sm" onClick={handleClearButton}>
+        <h2 className="text-xl font-semibold text-card-foreground font-[family-name:var(--font-poppins)]">Filtros</h2>
+        <Button className="cursor-pointer text-base" variant="ghost" size="sm" onClick={handleClearButton}>
           Limpiar
         </Button>
       </div>
@@ -107,7 +107,7 @@ export function CategorySidebar({ className = "", onCategoriasChange }: Category
               step={500}
               className="w-full"
             />
-            <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <div className="flex items-center justify-between text-base text-muted-foreground">
               <span>${filters.priceRange[0]?.toLocaleString?.("es-AR")}</span>
               <span>${filters.priceRange[1]?.toLocaleString?.("es-AR")}</span>
             </div>
@@ -122,7 +122,7 @@ export function CategorySidebar({ className = "", onCategoriasChange }: Category
             <Checkbox id="in-stock" checked={filters.inStock} onCheckedChange={handleStockChange} />
             <label
               htmlFor="in-stock"
-              className="text-sm text-card-foreground cursor-pointer font-[family-name:var(--font-inter)]"
+              className="text-base text-card-foreground cursor-pointer font-[family-name:var(--font-inter)]"
             >
               Solo productos en stock
             </label>
