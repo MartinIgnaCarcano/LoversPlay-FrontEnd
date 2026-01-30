@@ -120,7 +120,23 @@ export function ProductCarousel({
     }
   }, [marquee, isDesktop, paused, isDragging, marqueeSpeedPxPerSec, total, getOriginalWidthPx])
 
-  const pointer = useRef({ active: false, startX: 0, lastX: 0, pointerId: -1 })
+  const pointer = useRef({
+    active: false,
+    dragging: false,
+    startX: 0,
+    lastX: 0,
+    pointerId: -1,
+  })
+
+  const DRAG_THRESHOLD_PX = 6
+
+  const isInteractiveTarget = (target: EventTarget | null) => {
+    const el = target as HTMLElement | null
+    if (!el) return false
+    return !!el.closest(
+      'button, a, input, textarea, select, option, [role="button"], [data-no-swipe="true"]'
+    )
+  }
 
   const onPointerDown = (e: React.PointerEvent) => {
     if (!swipe) return
@@ -128,45 +144,71 @@ export function ProductCarousel({
     if (!vp) return
     if (e.pointerType === "mouse" && e.button !== 0) return
 
+    // 🔥 Si el user tocó un botón/link, NO activar swipe
+    if (isInteractiveTarget(e.target)) return
+
     pointer.current.active = true
+    pointer.current.dragging = false
     pointer.current.startX = e.clientX
     pointer.current.lastX = e.clientX
     pointer.current.pointerId = e.pointerId
 
     setPaused(true)
-    setIsDragging(true)
     setDragOffsetPx(0)
-
-    vp.setPointerCapture(e.pointerId)
   }
 
   const onPointerMove = (e: React.PointerEvent) => {
     if (!swipe) return
     if (!pointer.current.active) return
+
+    const vp = viewportRef.current
+    if (!vp) return
+
     const dx = e.clientX - pointer.current.startX
     pointer.current.lastX = e.clientX
+
+    if (!pointer.current.dragging) {
+      if (Math.abs(dx) < DRAG_THRESHOLD_PX) return
+
+      pointer.current.dragging = true
+      setIsDragging(true)
+
+      // ✅ capturar puntero SOLO cuando ya estás arrastrando
+      vp.setPointerCapture(pointer.current.pointerId)
+    }
+
+    // cuando ya estás draggeando
+    e.preventDefault()
     setDragOffsetPx(dx)
   }
 
   const finishDrag = (endX?: number) => {
     if (!pointer.current.active) return
-    pointer.current.active = false
+    const wasDragging = pointer.current.dragging
 
-    const x = typeof endX === "number" ? endX : pointer.current.lastX
-    const dx = x - pointer.current.startX
+    pointer.current.active = false
+    pointer.current.dragging = false
 
     const vp = viewportRef.current
     if (!vp) return
 
-    const itemW = vp.clientWidth / itemsPerView
+    // ✅ si NO hubo drag real, no hagas snap ni toques offset (deja que el click funcione)
+    if (!wasDragging) {
+      setPaused(false)
+      setIsDragging(false)
+      setDragOffsetPx(0)
+      return
+    }
 
+    const x = typeof endX === "number" ? endX : pointer.current.lastX
+    const dx = x - pointer.current.startX
+
+    const itemW = vp.clientWidth / itemsPerView
     let nextOffset = offsetRef.current - dx
 
-    // SNAP perfecto al item
     const snappedIndex = Math.round(nextOffset / itemW)
     nextOffset = snappedIndex * itemW
 
-    // wrap infinito
     const originalW = getOriginalWidthPx()
     if (originalW > 0) nextOffset = ((nextOffset % originalW) + originalW) % originalW
 
