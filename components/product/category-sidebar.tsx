@@ -14,12 +14,14 @@ interface CategorySidebarProps {
 }
 
 export function CategorySidebar({ className = "", onCategoriasChange }: CategorySidebarProps) {
-  const { filters, setFilters, clearFilters } = useFiltersStore()
+  const { filters, setFilters } = useFiltersStore()
   const [expandedCategories, setExpandedCategories] = useState<string[]>([])
   const [categorias, setCategorias] = useState<{ id: number; nombre: string }[]>([])
   const [loading, setLoading] = useState(true)
   const [showAll, setShowAll] = useState(false)
   const isMobile = useIsMobile()
+
+  const [localPriceRange, setLocalPriceRange] = useState(filters.priceRange)
 
   const toggleCategory = (categoryId: string) => {
     setExpandedCategories((prev) =>
@@ -67,6 +69,22 @@ export function CategorySidebar({ className = "", onCategoriasChange }: Category
     setExpandedCategories([])
   }
 
+  useEffect(() => {
+    setLocalPriceRange(filters.priceRange)
+  }, [filters.priceRange])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (
+        localPriceRange[0] !== filters.priceRange[0] ||
+        localPriceRange[1] !== filters.priceRange[1]
+      ) {
+        setFilters({ priceRange: localPriceRange })
+      }
+    }, 500) // Espera 500ms después de que el usuario deje de mover el slider
+
+    return () => clearTimeout(timer)
+  }, [localPriceRange, filters.priceRange, setFilters])
 
   useEffect(() => {
     const loadCategorias = async () => {

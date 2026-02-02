@@ -53,7 +53,7 @@ export default function CatalogPage() {
 
   // ✅ Carga: ahora TODO se lo delegás al back
   const loadProductos = useCallback(
-    async (pageNumber: number, ids: number[], inStock: boolean, sortUi: string) => {
+    async (pageNumber: number, ids: number[], inStock: boolean, sortUi: string, priceRange: [number, number]) => {
       setLoading(true)
       try {
         const data = await fetchProductos({
@@ -62,6 +62,8 @@ export default function CatalogPage() {
           categoria_ids: ids,
           in_stock: inStock,
           sort: mapSortToApi(sortUi),
+          min_price: priceRange[0],
+          max_price: priceRange[1],
         })
 
         setProductos(data.productos)
@@ -74,7 +76,7 @@ export default function CatalogPage() {
         setLoading(false)
       }
     },
-    []
+    [sortBy] // o [mapSortToApi] si la movés afuera
   )
 
   // ✅ leer cats desde URL (solo para entrar con /catalogo?cats=1,2)
@@ -88,8 +90,8 @@ export default function CatalogPage() {
 
   // ✅ cada cambio relevante dispara request (SIN ordenar en front)
   useEffect(() => {
-    loadProductos(page, categoriasSeleccionadas, !!filters.inStock, sortBy)
-  }, [page, categoriasSeleccionadas, filters.inStock, sortBy, loadProductos])
+    loadProductos(page, categoriasSeleccionadas, !!filters.inStock, sortBy, filters.priceRange)
+  }, [page, categoriasSeleccionadas, filters.inStock, sortBy, filters.priceRange, loadProductos])
 
   const breadcrumbItems = [{ label: "Catálogo" }]
 

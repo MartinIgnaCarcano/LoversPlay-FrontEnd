@@ -2,7 +2,7 @@ import type { Pedido, Product, Usuario } from "@/lib/types"
 import { fetchWithAuth } from "../fetchWithAuth";
 export { fetchProductoPorId as fetchProducto }
 
-const API_URL = "http://192.168.1.5:5000/api"
+const API_URL = "http://192.168.100.219:5000/api"
 
 function handleUnauthorized(res: Response) {
   if (res.status === 401 || res.status === 403) {
@@ -33,6 +33,8 @@ type FetchProductosParams = {
   categoria_ids?: number[] // MANY-TO-MANY ANY
   in_stock?: boolean
   sort?: ProductosSortApi
+  min_price?: number  
+  max_price?: number
 }
 
 export async function fetchProductos(params: FetchProductosParams = {}) {
@@ -42,6 +44,8 @@ export async function fetchProductos(params: FetchProductosParams = {}) {
     categoria_ids = [],
     in_stock = false,
     sort = "relevance",
+    min_price,  
+    max_price,
   } = params
 
   const qs = new URLSearchParams()
@@ -54,6 +58,9 @@ export async function fetchProductos(params: FetchProductosParams = {}) {
 
   if (in_stock) qs.set("in_stock", "true")
   if (sort) qs.set("sort", sort)
+
+  if (min_price !== undefined) qs.set("min_price", String(min_price))
+  if (max_price !== undefined) qs.set("max_price", String(max_price))
 
   const res = await fetch(`${API_URL}/productos?${qs.toString()}`)
   if (!res.ok) throw new Error("Error cargando productos")
