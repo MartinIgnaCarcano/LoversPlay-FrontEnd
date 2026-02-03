@@ -41,7 +41,8 @@ export default function CatalogPage() {
         return "price_desc"
       case "popularity":
         return "most_viewed"
-      // si algún día agregás opción “más vendidos” en el select:
+      case "newest":
+        return "newest"
       case "best-selling":
         return "best_selling"
       default:
