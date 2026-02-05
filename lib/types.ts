@@ -15,10 +15,11 @@ export type Category = {
 export type Product = {
   id: number
   nombre: string
-  slug?: string
+  extra?: string | null
   precio: number
+  slug?: string
   stock: number
-  categoria_id?: number[] 
+  categoria_id?: number[]
   descripcion_corta?: string
   descripcion_larga?: string
   peso?: number

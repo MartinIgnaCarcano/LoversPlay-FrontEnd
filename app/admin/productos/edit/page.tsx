@@ -27,9 +27,16 @@ export default function EditProductoPage() {
   const [slug, setSlug] = useState("");
   const [precio, setPrecio] = useState("");
   const [stock, setStock] = useState("");
-  const [categoriaId, setCategoriaId] = useState("");
+
+  // ✅ MULTI CATEGORÍAS
+  const [categoriaIds, setCategoriaIds] = useState<number[]>([]);
   const [categorias, setCategorias] = useState<{ id: number; nombre: string }[]>([]);
+
   const [peso, setPeso] = useState("");
+
+  // ✅ EXTRA
+  const [extra, setExtra] = useState("");
+
   const [descripcion, setDescripcion] = useState("<p></p>");
   const [descripcionCorta, setDescripcionCorta] = useState("<p></p>");
 
@@ -71,8 +78,18 @@ export default function EditProductoPage() {
         setSlug(p.slug || "");
         setPrecio(String(p.precio || ""));
         setStock(String(p.stock || ""));
-        setCategoriaId(String(p.categoria_id || ""));
+
+        // ✅ Si el backend trae categorias: [{id,...}]
+        const idsFromCats = Array.isArray(p.categorias) ? p.categorias.map((c: any) => Number(c.id)) : [];
+        // fallback si llegara categoria_ids (por las dudas)
+        const idsFromIds = Array.isArray(p.categoria_ids) ? p.categoria_ids.map((x: any) => Number(x)) : [];
+        setCategoriaIds(idsFromCats.length ? idsFromCats : idsFromIds);
+
         setPeso(String(p.peso || "0"));
+
+        // ✅ EXTRA
+        setExtra(p.extra || "");
+
         setDescripcion(p.descripcion_larga || "");
         setDescripcionCorta(p.descripcion_corta || "");
 
@@ -117,9 +134,16 @@ export default function EditProductoPage() {
     formData.append("nombre", nombre);
     formData.append("slug", slug);
     formData.append("precio", precio);
-    formData.append("categoria_id", categoriaId);
+
+    // ✅ MULTI: se manda como CSV
+    formData.append("categoria_ids", categoriaIds.join(","));
+
     formData.append("stock", stock);
     formData.append("peso", peso);
+
+    // ✅ EXTRA
+    formData.append("extra", extra);
+
     formData.append("descripcion_larga", descripcion);
     formData.append("descripcion_corta", descripcionCorta);
 
@@ -178,16 +202,45 @@ export default function EditProductoPage() {
           />
         </div>
 
-        {/* CATEGORIA */}
+        {/* ✅ CATEGORÍAS MULTI (CHIPS + X) */}
         <div>
-          <Label>Categoría</Label>
+          <Label>Categorías</Label>
+
+          <div className="flex flex-wrap gap-2 mb-2">
+            {categoriaIds.map((cid) => {
+              const cat = categorias.find((c) => c.id === cid);
+              if (!cat) return null;
+
+              return (
+                <span
+                  key={cid}
+                  className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm bg-background"
+                >
+                  {cat.nombre}
+                  <button
+                    type="button"
+                    className="text-muted-foreground hover:text-foreground"
+                    onClick={() => setCategoriaIds((prev) => prev.filter((x) => x !== cid))}
+                    aria-label={`Quitar ${cat.nombre}`}
+                  >
+                    ✕
+                  </button>
+                </span>
+              );
+            })}
+          </div>
+
           <select
-            value={categoriaId}
-            onChange={(e) => setCategoriaId(e.target.value)}
+            value=""
+            onChange={(e) => {
+              const cid = Number(e.target.value);
+              if (!Number.isFinite(cid) || cid <= 0) return;
+              setCategoriaIds((prev) => (prev.includes(cid) ? prev : [...prev, cid]));
+            }}
             className="border rounded-md px-3 py-2 w-full"
-            required
+            required={categoriaIds.length === 0}
           >
-            <option value="">Seleccionar categoría</option>
+            <option value="">Agregar categoría...</option>
             {categorias.map((c) => (
               <option key={c.id} value={c.id} className="cursor-pointer">
                 {c.nombre}
@@ -215,6 +268,16 @@ export default function EditProductoPage() {
             step="0.1"
             value={peso}
             onChange={(e) => setPeso(e.target.value)}
+          />
+        </div>
+
+        {/* ✅ EXTRA */}
+        <div>
+          <Label>Extra</Label>
+          <Input
+            value={extra}
+            onChange={(e) => setExtra(e.target.value)}
+            placeholder="Ej: 10cm, Talle M, Alta potencia..."
           />
         </div>
 
@@ -278,4 +341,5 @@ export default function EditProductoPage() {
     </div>
   );
 }
+
 

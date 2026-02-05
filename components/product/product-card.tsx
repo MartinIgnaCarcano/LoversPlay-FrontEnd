@@ -63,6 +63,15 @@ export function ProductCard({ product, className = "" }: ProductCardProps) {
     agregarFavorito((product as any).id)
   }
 
+  // ✅ EXTRA (entre nombre y precio)
+  const extraRaw = (product as any).extra
+  const extra =
+    typeof extraRaw === "string" &&
+      extraRaw.trim() !== "" &&
+      extraRaw.trim().toLowerCase() !== nombre.trim().toLowerCase()
+      ? extraRaw.trim()
+      : null
+
   return (
     <div
       className={`group relative bg-card rounded-xl border border-border
@@ -120,7 +129,6 @@ export function ProductCard({ product, className = "" }: ProductCardProps) {
         </div>
 
         <div className="p-2 sm:p-4 flex flex-col justify-between min-h-[130px] sm:min-h-[170px]">
-          {/* Título: 1 línea con ... (seguro en mobile/desktop) */}
           <h3
             className="
               font-semibold text-card-foreground mb-1 sm:mb-2
@@ -132,6 +140,21 @@ export function ProductCard({ product, className = "" }: ProductCardProps) {
           >
             {nombre || "Producto sin nombre"}
           </h3>
+
+          {extra && (
+            <div
+              className="
+                font-semibold text-card-foreground mb-1 sm:mb-2
+                font-[family-name:var(--font-poppins)]
+                text-xs sm:text-base
+                overflow-hidden whitespace-nowrap text-ellipsis
+                opacity-80
+              "
+              title={extra}
+            >
+              {extra}
+            </div>
+          )}
 
           {descripcionCorta && (
             <p className="text-[10px] sm:text-sm text-muted-foreground mb-2 sm:mb-3 font-[family-name:var(--font-inter)] line-clamp-2">
@@ -150,9 +173,8 @@ export function ProductCard({ product, className = "" }: ProductCardProps) {
           <Button
             onClick={handleAddToCart}
             disabled={stock === 0}
-            className={`w-full mt-auto cursor-pointer text-[10px] sm:text-sm h-8 sm:h-10 ${
-              added ? "bg-green-600 hover:bg-green-600" : "bg-primary hover:bg-brand/90"
-            }`}
+            className={`w-full mt-auto cursor-pointer text-[10px] sm:text-sm h-8 sm:h-10 ${added ? "bg-green-600 hover:bg-green-600" : "bg-primary hover:bg-brand/90"
+              }`}
             size="sm"
           >
             {added ? (
@@ -171,4 +193,3 @@ export function ProductCard({ product, className = "" }: ProductCardProps) {
     </div>
   )
 }
-

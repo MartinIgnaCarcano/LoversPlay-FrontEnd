@@ -7,16 +7,20 @@ import type { LucideIcon } from "lucide-react"
 import {
   ChevronDown,
   ChevronUp,
-  Key,
-  Plug,
-  Vibrate,
-  Waves,
-  Shield,
-  Target,
-  Droplets,
-  Shirt,
-  CircleDot,
+
+  Shapes,        // genérico / accesorios
+  Plug,          // anales
+  Vibrate,       // vibradores
+  Waves,         // estimuladores
+  Shield,        // fundas / prótesis
+  CircleDashed,  // succionadores
+  Droplets,      // lubricantes
+  Shirt,         // lencería
+  CircleDot,     // masturbadores
+  Lock,    // BDSM
+  Minus,         // dildos (forma simple, recta)
 } from "lucide-react"
+
 
 type Mode = "filter" | "navigate"
 
@@ -50,8 +54,10 @@ export function CategoryIconGrid({
   // 11 categorías principales (estáticas)
   const CATEGORIES: StaticCategory[] = useMemo(
     () => [
-      { label: "Accesorios", icon: Key, ids: [64] },
+      { label: "Accesorios", icon: Shapes, ids: [64] },
+
       { label: "Anales", icon: Plug, ids: [49] },
+
       {
         label: "Vibradores",
         icon: Vibrate,
@@ -60,6 +66,7 @@ export function CategoryIconGrid({
           { label: "Comunes", ids: [672] },
         ],
       },
+
       {
         label: "Estimuladores",
         icon: Waves,
@@ -68,6 +75,7 @@ export function CategoryIconGrid({
           { label: "Bolas Chinas", ids: [50] },
         ],
       },
+
       {
         label: "Fundas & Prótesis",
         icon: Shield,
@@ -76,7 +84,9 @@ export function CategoryIconGrid({
           { label: "Prótesis", ids: [51] },
         ],
       },
-      { label: "Succionadores", icon: Target, ids: [679] },
+
+      { label: "Succionadores", icon: CircleDashed, ids: [679] },
+
       {
         label: "Lubric. & Afro.",
         icon: Droplets,
@@ -85,7 +95,9 @@ export function CategoryIconGrid({
           { label: "Afrodisíacos", ids: [43] },
         ],
       },
+
       { label: "Lencería", icon: Shirt, ids: [38] },
+
       {
         label: "Masturbadores",
         icon: CircleDot,
@@ -94,10 +106,13 @@ export function CategoryIconGrid({
           { label: "Anillos", ids: [47] },
         ],
       },
-      { label: "SADO / BDSM", icon: CircleDot, ids: [65] },
+
+      { label: "SADO / BDSM", icon: Lock, ids: [65] },
+
+
       {
         label: "Dildos",
-        icon: CircleDot,
+        icon: Minus,
         children: [
           { label: "Comunes", ids: [675] },
           { label: "Realísticos", ids: [53] },
@@ -107,6 +122,8 @@ export function CategoryIconGrid({
     ],
     []
   )
+
+
 
   const selectedIds = useMemo(
     () => (filters.categories || []).map((x) => Number(x)).filter((n) => !Number.isNaN(n)),

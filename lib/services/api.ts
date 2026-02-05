@@ -2,7 +2,7 @@ import type { Pedido, Product, Usuario } from "@/lib/types"
 import { fetchWithAuth } from "../fetchWithAuth";
 export { fetchProductoPorId as fetchProducto }
 
-const API_URL = "http://192.168.100.219:5000/api"
+const API_URL = "http://127.0.0.1:5000/api"
 
 function handleUnauthorized(res: Response) {
   if (res.status === 401 || res.status === 403) {
@@ -73,6 +73,7 @@ export async function fetchProductos(params: FetchProductosParams = {}) {
     productos: (data.productos || []).map((p: any) => ({
       id: p.id,
       name: p.nombre,
+      extra:p.extra,
       price: p.precio,
       stock: p.stock,
       image: p.url_imagen_principal,
@@ -101,6 +102,7 @@ export async function fetchProductoPorId(id: number): Promise<{ producto: Produc
   const producto: Product = {
     id: p.id,
     nombre: p.nombre,
+    extra:p.extra,
     precio: p.precio,
     stock: p.stock,
     descripcion_corta: p.descripcion_corta,
@@ -115,6 +117,7 @@ export async function fetchProductoPorId(id: number): Promise<{ producto: Produc
   const sugeridos: Product[] = (p.sugeridos || []).map((s: any) => ({
     id: s.id,
     nombre: s.nombre,
+    extra:s.extra,
     precio: s.precio,
     url_imagen_principal: s.url_imagen_principal,
     url_imagen_secundaria: s.url_imagen_secundaria

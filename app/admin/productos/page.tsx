@@ -138,8 +138,6 @@ export default function AdminProductosPage() {
     setTotal(filtrados.length); // 👈 total ajustado al filtrado local
   }
 
-
-
   // ===========================
   // FILTRO POR CATEGORÍA (siempre backend)
   // ===========================
@@ -247,7 +245,28 @@ export default function AdminProductosPage() {
                     />
                   </td>
 
-                  <td className="p-3">{p.nombre}</td>
+                  {/* ✅ Nombre + chips de categorías (si vienen) */}
+                  <td className="p-3">
+                    <div className="font-medium">{p.nombre}</div>
+
+                    {Array.isArray(p.categoria_ids) && p.categoria_ids.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {p.categoria_ids.map((cid: number) => {
+                          const cat = categorias.find((c) => c.id === cid);
+                          if (!cat) return null;
+                          return (
+                            <span
+                              key={cid}
+                              className="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] bg-background"
+                            >
+                              {cat.nombre}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </td>
+
                   <td className="p-3">${p.precio}</td>
                   <td className="p-3">{p.stock}</td>
                   <td className="p-3">{p.vistas}</td>
@@ -286,7 +305,6 @@ export default function AdminProductosPage() {
         </Button>
 
         <span>Página {page}</span>
-
 
         <Button
           variant="outline"

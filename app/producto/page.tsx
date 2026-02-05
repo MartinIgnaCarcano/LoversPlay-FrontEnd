@@ -157,6 +157,15 @@ export default function ProductPage() {
     ...(product.imagenes ?? []),
   ].filter(Boolean)
 
+  // ✅ EXTRA (entre nombre y precio)
+  const extraRaw = product.extra
+  const extra =
+    typeof extraRaw === "string" &&
+      extraRaw.trim() !== "" &&
+      extraRaw.trim().toLowerCase() !== product.nombre.trim().toLowerCase()
+      ? extraRaw.trim()
+      : null
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -262,10 +271,20 @@ export default function ProductPage() {
 
           {/* Info producto */}
           <div className="space-y-6">
-            <h1 className="text-3xl font-bold text-foreground mb-2">{product.nombre}</h1>
+            <h1 className="text-3xl font-bold text-foreground">
+              {product.nombre}
+            </h1>
 
-            <div className="flex items-center gap-4">
-              <span className="text-3xl font-bold text-brand">${product.precio}</span>
+            {extra && (
+              <div className="text-3xl font-bold text-foreground opacity-80">
+                {extra}
+              </div>
+            )}
+
+            <div className="flex items-center gap-4 mt-2">
+              <span className="text-3xl font-bold text-brand">
+                ${Number(product.precio ?? 0).toLocaleString("es-AR")}
+              </span>
             </div>
 
             {product.descripcion_corta && (
@@ -314,9 +333,8 @@ export default function ProductPage() {
               <Button
                 onClick={handleAddToCart}
                 disabled={product.stock === 0 || availableToAdd === 0}
-                className={`flex-1 transition-all duration-200 cursor-pointer ${
-                  added ? "bg-green-600 hover:bg-green-600" : "bg-primary hover:bg-brand/90"
-                }`}
+                className={`flex-1 transition-all duration-200 cursor-pointer ${added ? "bg-green-600 hover:bg-green-600" : "bg-primary hover:bg-brand/90"
+                  }`}
                 size="lg"
               >
                 {added ? (
@@ -329,8 +347,8 @@ export default function ProductPage() {
                     {product.stock === 0
                       ? "Agotado"
                       : availableToAdd === 0
-                      ? "Sin stock disponible"
-                      : "Agregar al Carrito"}
+                        ? "Sin stock disponible"
+                        : "Agregar al Carrito"}
                   </>
                 )}
               </Button>

@@ -16,10 +16,17 @@ export default function NewProductoPage() {
   const [nombre, setNombre] = useState("");
   const [slug, setSlug] = useState("");
   const [precio, setPrecio] = useState("");
-  const [categoriaId, setCategoriaId] = useState("");
+
+  // ✅ MULTI CATEGORÍAS
+  const [categoriaIds, setCategoriaIds] = useState<number[]>([]);
   const [categorias, setCategorias] = useState<{ id: number; nombre: string }[]>([]);
+
   const [stock, setStock] = useState("");
   const [peso, setPeso] = useState("");
+
+  // ✅ EXTRA
+  const [extra, setExtra] = useState("");
+
   const [descripcionCorta, setDescripcionCorta] = useState("<p></p>");
   const [descripcionLarga, setDescripcionLarga] = useState("<p></p>");
 
@@ -57,16 +64,27 @@ export default function NewProductoPage() {
       return;
     }
 
+    if (categoriaIds.length === 0) {
+      alert("Debes seleccionar al menos una categoría.");
+      return;
+    }
+
     const formData = new FormData();
     formData.append("nombre", nombre);
     formData.append("slug", slug);
     formData.append("precio", precio);
-    formData.append("categoria_id", categoriaId);
+
+    // ✅ MULTI: CSV
+    formData.append("categoria_ids", categoriaIds.join(","));
+
     formData.append("stock", stock);
     formData.append("peso", peso || "0");
+
+    // ✅ EXTRA
+    formData.append("extra", extra);
+
     formData.append("descripcion_corta", descripcionCorta);   // corta
     formData.append("descripcion_larga", descripcionLarga);   // larga
-
 
     // Imagen principal
     formData.append("imagen_principal", imagenPrincipal);
@@ -123,16 +141,45 @@ export default function NewProductoPage() {
           />
         </div>
 
-        {/* CATEGORIA */}
+        {/* ✅ CATEGORÍAS MULTI (CHIPS + X) */}
         <div>
-          <Label>Categoría</Label>
+          <Label>Categorías</Label>
+
+          <div className="flex flex-wrap gap-2 mb-2">
+            {categoriaIds.map((cid) => {
+              const cat = categorias.find((c) => c.id === cid);
+              if (!cat) return null;
+
+              return (
+                <span
+                  key={cid}
+                  className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm bg-background"
+                >
+                  {cat.nombre}
+                  <button
+                    type="button"
+                    className="text-muted-foreground hover:text-foreground"
+                    onClick={() => setCategoriaIds((prev) => prev.filter((x) => x !== cid))}
+                    aria-label={`Quitar ${cat.nombre}`}
+                  >
+                    ✕
+                  </button>
+                </span>
+              );
+            })}
+          </div>
+
           <select
-            value={categoriaId}
-            onChange={(e) => setCategoriaId(e.target.value)}
+            value=""
+            onChange={(e) => {
+              const cid = Number(e.target.value);
+              if (!Number.isFinite(cid) || cid <= 0) return;
+              setCategoriaIds((prev) => (prev.includes(cid) ? prev : [...prev, cid]));
+            }}
             className="border rounded-md px-3 py-2 w-full"
-            required
+            required={categoriaIds.length === 0}
           >
-            <option value="">Seleccionar categoría</option>
+            <option value="">Agregar categoría...</option>
             {categorias.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.nombre}
@@ -160,6 +207,16 @@ export default function NewProductoPage() {
             step="0.01"
             value={peso}
             onChange={(e) => setPeso(e.target.value)}
+          />
+        </div>
+
+        {/* ✅ EXTRA */}
+        <div>
+          <Label>Extra</Label>
+          <Input
+            value={extra}
+            onChange={(e) => setExtra(e.target.value)}
+            placeholder="Ej: 10cm, Talle M, Alta potencia..."
           />
         </div>
 
