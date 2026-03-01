@@ -34,7 +34,7 @@ type FetchProductosParams = {
   categoria_ids?: number[] // MANY-TO-MANY ANY
   in_stock?: boolean
   sort?: ProductosSortApi
-  min_price?: number  
+  min_price?: number
   max_price?: number
 }
 
@@ -45,7 +45,7 @@ export async function fetchProductos(params: FetchProductosParams = {}) {
     categoria_ids = [],
     in_stock = false,
     sort = "relevance",
-    min_price,  
+    min_price,
     max_price,
   } = params
 
@@ -57,7 +57,7 @@ export async function fetchProductos(params: FetchProductosParams = {}) {
     qs.set("categoria_ids", categoria_ids.join(","))
   }
 
-  if (in_stock) qs.set("in_stock", "true")
+  qs.set("en_stock", in_stock ? "1" : "0")
   if (sort) qs.set("sort", sort)
 
   if (min_price !== undefined) qs.set("min_price", String(min_price))
@@ -73,7 +73,7 @@ export async function fetchProductos(params: FetchProductosParams = {}) {
     productos: (data.productos || []).map((p: any) => ({
       id: p.id,
       name: p.nombre,
-      extra:p.extra,
+      extra: p.extra,
       price: p.precio,
       stock: p.stock,
       image: p.url_imagen_principal,
@@ -102,7 +102,7 @@ export async function fetchProductoPorId(id: number): Promise<{ producto: Produc
   const producto: Product = {
     id: p.id,
     nombre: p.nombre,
-    extra:p.extra,
+    extra: p.extra,
     precio: p.precio,
     stock: p.stock,
     descripcion_corta: p.descripcion_corta,
@@ -117,7 +117,7 @@ export async function fetchProductoPorId(id: number): Promise<{ producto: Produc
   const sugeridos: Product[] = (p.sugeridos || []).map((s: any) => ({
     id: s.id,
     nombre: s.nombre,
-    extra:s.extra,
+    extra: s.extra,
     precio: s.precio,
     url_imagen_principal: s.url_imagen_principal,
     url_imagen_secundaria: s.url_imagen_secundaria
@@ -136,6 +136,19 @@ export async function fetchProductosBase() {
     categoria_id: p.categoria_id,
     url_imagen_principal: p.url_imagen_principal
   }))
+}
+
+export async function checkStock(items: { id: number; qty: number }[]) {
+  const res = await fetch(`${API_URL}/productos/stock/check`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ items }),
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.error || "Error validando stock");
+
+  return data as { ok: boolean; issues: { id: number; available: number; requested: number }[] };
 }
 
 // 🔹 Login
@@ -461,6 +474,20 @@ export async function crearPreferenciaPago(payload: {
   return await res.json(); // { init_point }
 }
 
-
+export async function sendContactEmail(data: {
+  name: string
+  email: string
+  phone: string
+  subject: string
+  message: string
+}) {
+  const res = await fetch(`${API_URL}/contact`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) throw new Error("Error al enviar el mensaje")
+  return res.json()
+}
 
 

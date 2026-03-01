@@ -10,30 +10,6 @@ import { mockShippingMethods } from "@/lib/services/mock-data"
 export default function ShippingPage() {
   const breadcrumbItems = [{ label: "Información de Envíos" }]
 
-  const shippingZones = [
-    {
-      zone: "Zona Metropolitana",
-      cities: ["Ciudad de México", "Guadalajara", "Monterrey", "Puebla"],
-      standardTime: "1-2 días",
-      expressTime: "Mismo día",
-      cost: "Desde $8.99",
-    },
-    {
-      zone: "Zona Nacional",
-      cities: ["Resto del país"],
-      standardTime: "3-5 días",
-      expressTime: "2-3 días",
-      cost: "Desde $12.99",
-    },
-    {
-      zone: "Zona Remota",
-      cities: ["Áreas rurales y remotas"],
-      standardTime: "5-7 días",
-      expressTime: "3-5 días",
-      cost: "Desde $18.99",
-    },
-  ]
-
   const faqItems = [
     {
       question: "¿Cómo garantizan la discreción en el envío?",
@@ -46,14 +22,9 @@ export default function ShippingPage() {
         "Sí, una vez que tu pedido sea enviado, recibirás un número de seguimiento por email. Podrás rastrear tu paquete en tiempo real a través de nuestra página web o directamente en el sitio de la paquetería.",
     },
     {
-      question: "¿Hay envío gratuito?",
-      answer:
-        "Sí, ofrecemos envío gratuito en pedidos superiores a $50. Para pedidos menores, aplicamos una tarifa de envío que varía según la zona de entrega.",
-    },
-    {
       question: "¿Entregan en fines de semana?",
       answer:
-        "Las entregas estándar se realizan de lunes a viernes. Sin embargo, con nuestro servicio express, también realizamos entregas los sábados en zonas metropolitanas.",
+        "Las entregas estándar se realizan de lunes a viernes. Sin embargo, con nuestro servicio express, también realizamos entregas los sábados por la mañana en zonas metropolitanas.",
     },
     {
       question: "¿Qué medidas de seguridad toman durante el envío?",

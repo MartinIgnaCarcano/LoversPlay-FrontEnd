@@ -6,6 +6,7 @@ import { Space_Grotesk, DM_Sans } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import "@/styles/globals.css"
+import { Toaster } from "sonner"
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -82,6 +83,8 @@ export default function RootLayout({
       >
         <Suspense fallback={null}>{children}</Suspense>
         <Analytics />
+        {children}
+        <Toaster richColors position="top-right" />
       </body>
     </html>
   )

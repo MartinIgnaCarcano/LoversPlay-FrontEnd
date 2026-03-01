@@ -96,7 +96,7 @@ export const mockShippingMethods: ShippingMethod[] = [
     name: "Correo Argentino",
     eta: "",
     regions: ["Nacional"],
-    priceRules: "Gratis en compras mayores a $500000",
+    priceRules: "Envios a todo el pais",
     icon: "📦",
   },
   {

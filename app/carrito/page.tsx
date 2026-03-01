@@ -10,6 +10,9 @@ import { Separator } from "@/components/ui/separator"
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, Tag } from "lucide-react"
 import { useCartStore, useAuthStore } from "@/lib/store"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { checkStock } from "@/lib/services/api"
+import { toast } from "sonner"
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem, clearCart, getTotalItems, getTotalPrice } = useCartStore()
@@ -21,12 +24,46 @@ export default function CartPage() {
   const shipping = subtotal >= 50 ? 0 : 8.99
   const discount = appliedPromo === "WELCOME10" ? subtotal * 0.1 : 0
   const total = subtotal + shipping - discount
-
+  const router = useRouter()
+  const [checkingStock, setCheckingStock] = useState(false)
   const handleApplyPromo = () => {
     if (promoCode === "WELCOME10") {
       setAppliedPromo(promoCode)
     } else {
       alert("Código promocional inválido")
+    }
+  }
+  const handleProceedToPay = async () => {
+    setCheckingStock(true)
+    try {
+      const payload = items.map((i: any) => ({
+        id: Number(i.productId),
+        qty: Number(i.quantity),
+      }))
+
+      const result = await checkStock(payload)
+
+      if (!result.ok) {
+        for (const issue of result.issues) {
+          const idStr = String(issue.id)
+          if (issue.available <= 0) {
+            removeItem(idStr)
+          } else {
+            updateQuantity(idStr, issue.available)
+          }
+        }
+
+        toast.warning("Actualizamos tu carrito", {
+          description: "Algunos productos cambiaron de stock. Revisalo antes de pagar.",
+        })
+        return
+      }
+
+      router.push("/pago")
+    } catch (e: any) {
+      alert(e?.message || "No se pudo validar el stock. Probá de nuevo.")
+    } finally {
+      setCheckingStock(false)
     }
   }
 
@@ -213,11 +250,20 @@ export default function CartPage() {
                 </div>
               </div>
 
-              <Button className="w-full bg-primary hover:bg-primary/60 mb-4" size="lg" asChild>
-                <Link href="/pago">
-                  Proceder al pago
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Link>
+              <Button
+                className="w-full bg-primary hover:bg-primary/60 mb-4"
+                size="lg"
+                onClick={handleProceedToPay}
+                disabled={checkingStock}
+              >
+                {checkingStock ? (
+                  "Verificando stock..."
+                ) : (
+                  <>
+                    Proceder al pago
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </>
+                )}
               </Button>
 
               <Button variant="outline" className="w-full bg-transparent" asChild>

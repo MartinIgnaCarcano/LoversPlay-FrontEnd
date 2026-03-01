@@ -52,15 +52,15 @@ export function Footer() {
             <div className="space-y-2 mb-6">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Phone className="h-4 w-4" />
-                <span>+1 (555) 123-4567</span>
+                <span>+54 9 261 616 3377</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Mail className="h-4 w-4" />
-                <span>info@loversplay.com</span>
+                <span>ventas @ loversplaysexshop.com</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4" />
-                <span>123 Calle Principal, Ciudad</span>
+                <span>Juan B. Alberdi 315, M5519, Mendoza, Argentina</span>
               </div>
             </div>
 
@@ -143,7 +143,7 @@ export function Footer() {
         <div className="mt-12 pt-8 border-t border-border">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-muted-foreground font-[family-name:var(--font-inter)]">
-              © 2024 LoversPlay. Todos los derechos reservados.
+              © 2026 LoversPlay. Todos los derechos reservados.
             </p>
             <div className="flex flex-wrap gap-4">
               {legal.map((item) => (

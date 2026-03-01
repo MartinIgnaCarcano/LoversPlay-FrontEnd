@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { MapPin, Phone, Mail, Clock, MessageCircle, Send, CheckCircle } from "lucide-react"
+import { sendContactEmail } from "@/lib/services/api"
 
 export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -26,22 +27,19 @@ export default function ContactPage() {
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+  e.preventDefault()
+  setIsSubmitting(true)
 
-    // Mock form submission
-    setTimeout(() => {
-      setIsSubmitting(false)
-      setIsSubmitted(true)
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        subject: "",
-        message: "",
-      })
-    }, 2000)
+  try {
+    await sendContactEmail(formData)
+    setIsSubmitted(true)
+    setFormData({ name: "", email: "", phone: "", subject: "", message: "" })
+  } catch {
+    alert("Error al enviar el mensaje. Intentá de nuevo.")
+  } finally {
+    setIsSubmitting(false)
   }
+}
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -74,7 +72,7 @@ export default function ContactPage() {
       details: ["Juan B. Alberdi 315, M5519, Mendoza, Argentina"],
       description: "Oficinas principales",
     },
-    
+
   ]
 
   const subjects = [
@@ -222,12 +220,12 @@ export default function ContactPage() {
                 <CardContent className="p-0">
                   <div className="bg-muted rounded-lg h-80 flex items-center justify-center">
                     <iframe
-                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d90147.25845334327!2d-68.82435112795741!3d-32.895060550260446!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x967e09207eca3a5b%3A0x832a5e393fda2e31!2sLovers%20Play!5e0!3m2!1ses!2sar!4v1758118740510!5m2!1ses!2sar" 
-                      width="100%" 
-                      height="100%" 
-                      style={{ border: 0 }} 
-                      allowFullScreen 
-                      loading="lazy" 
+                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d90147.25845334327!2d-68.82435112795741!3d-32.895060550260446!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x967e09207eca3a5b%3A0x832a5e393fda2e31!2sLovers%20Play!5e0!3m2!1ses!2sar!4v1758118740510!5m2!1ses!2sar"
+                      width="100%"
+                      height="100%"
+                      style={{ border: 0 }}
+                      allowFullScreen
+                      loading="lazy"
                       referrerPolicy="no-referrer-when-downgrade">
                     </iframe>
                   </div>
