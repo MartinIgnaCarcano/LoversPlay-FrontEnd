@@ -77,7 +77,7 @@ export default function EditProductoPage() {
         setNombre(p.nombre || "");
         setSlug(p.slug || "");
         setPrecio(String(p.precio || ""));
-        setStock(String(p.stock || ""));
+        setStock(String(p.stock || "0"));
 
         // ✅ Si el backend trae categorias: [{id,...}]
         const idsFromCats = Array.isArray(p.categorias) ? p.categorias.map((c: any) => Number(c.id)) : [];
