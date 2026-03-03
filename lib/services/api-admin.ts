@@ -1,5 +1,5 @@
 // lib/services/api-admin.ts
-const API_URL = "http://localhost:5000/api";
+const API_URL = "https://mdz.loversplaysexshop.com/api";
 
 // Utilidad: incluir token automáticamente
 function authHeaders() {

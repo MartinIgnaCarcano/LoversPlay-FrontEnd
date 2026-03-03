@@ -83,7 +83,6 @@ export default function RootLayout({
       >
         <Suspense fallback={null}>{children}</Suspense>
         <Analytics />
-        {children}
         <Toaster richColors position="top-right" />
       </body>
     </html>

@@ -2,7 +2,7 @@ import type { Pedido, Product, Usuario } from "@/lib/types"
 import { fetchWithAuth } from "../fetchWithAuth";
 export { fetchProductoPorId as fetchProducto }
 
-const API_URL = "http://127.0.0.1:5000/api"
+const API_URL = "https://mdz.loversplaysexshop.com/api"
 
 function handleUnauthorized(res: Response) {
   if (res.status === 401 || res.status === 403) {
