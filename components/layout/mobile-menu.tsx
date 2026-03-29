@@ -47,8 +47,6 @@ export function MobileMenu({ isOpen, onClose, navigation }: MobileMenuProps) {
               </Link>
             ))}
           </nav>
-
-
           {/* Auth section */}
           <div className="px-4 py-4 border-t border-border">
             {isAuthenticated ? (
