@@ -27,6 +27,7 @@ type ProductosSortApi =
   | "most_viewed"
   | "best_selling"
   | "newest"
+  | "views"
 
 type FetchProductosParams = {
   page?: number

@@ -133,4 +133,5 @@ export type SortOption =
   | "popularity"
   | "newest"
   | "rating"
+  | "views"
 

@@ -7,6 +7,7 @@ export function Footer() {
   const quickLinks = [
     { name: "Inicio", href: "/" },
     { name: "Catálogo", href: "/catalogo" },
+    { name: "Nosotros", href: "/nosotros" },
     { name: "Contacto", href: "/contacto" },
   ]
 
@@ -25,9 +26,7 @@ export function Footer() {
 
   const legal = [
     { name: "Términos y Condiciones", href: "/terminos" },
-    { name: "Política de Privacidad", href: "/privacidad" },
-    { name: "Política de Cookies", href: "/cookies" },
-    { name: "Aviso Legal", href: "/aviso-legal" },
+    { name: "Política de Privacidad", href: "/privacidad" }
   ]
 
   return (
@@ -52,7 +51,11 @@ export function Footer() {
             <div className="space-y-2 mb-6">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Phone className="h-4 w-4" />
-                <span>+54 9 261 616 3377</span>
+                <span>Fijo: 2618021263 (Solo para llamadas)</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Phone className="h-4 w-4" />
+                <span>WhatsApp: +54 9 261 616 3377 (Solo mensajes de WhatsApp)</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Mail className="h-4 w-4" />

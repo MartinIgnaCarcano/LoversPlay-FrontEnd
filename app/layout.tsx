@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   generator: "v0.app",
   keywords: "bienestar íntimo, juguetes adultos, lubricantes, lencería, parejas",
   authors: [{ name: "LoversPlay" }],
-  metadataBase: new URL("https://loversplay.com"),
+  metadataBase: new URL("https://mdz.loversplay.com"),
   alternates: {
     canonical: "/",
   },
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     description: "Descubre nuestra colección de productos de bienestar íntimo de alta calidad.",
     type: "website",
     locale: "es_ES",
-    url: "https://loversplay.com",
+    url: "https://mdz.loversplay.com",
     siteName: "LoversPlay",
     images: [
       {

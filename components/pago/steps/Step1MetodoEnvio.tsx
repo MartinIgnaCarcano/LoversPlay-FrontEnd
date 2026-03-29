@@ -51,6 +51,7 @@ export function Step1MetodoEnvio({ shippingType, setShippingType }: Step1MetodoE
                         <RadioGroupItem value="arrange" id="arrange" />
                         <Label htmlFor="arrange" className="flex flex-col items-start cursor-pointer">
                             <span className="font-medium">Arreglar con el vendedor</span>
+                            <span className="text-xs text-muted-foreground">Costo del envío a cargo del comprador</span>
                         </Label>
                     </div>
                 </RadioGroup>

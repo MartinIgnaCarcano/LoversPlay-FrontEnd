@@ -19,7 +19,7 @@ export default function ShippingPage() {
     {
       question: "¿Puedo rastrear mi pedido?",
       answer:
-        "Sí, una vez que tu pedido sea enviado, recibirás un número de seguimiento por email. Podrás rastrear tu paquete en tiempo real a través de nuestra página web o directamente en el sitio de la paquetería.",
+        "Sí, una vez que tu pedido sea enviado, recibirás un número de seguimiento por email. Podrás rastrear tu paquete en tiempo real a través del sitio de la paquetería.",
     },
     {
       question: "¿Entregan en fines de semana?",
@@ -92,7 +92,7 @@ export default function ShippingPage() {
                   Cobertura Gran Mendoza
                 </CardTitle>
                 <CardDescription className="text-center">
-                  Mensajería en Luján, Godoy Cruz, Maipú, Guaymallén, Las Heras
+                  Mensajería en Ciudad, Godoy Cruz, Guaymallén y Las Heras (arreglar con el vendedor)
                 </CardDescription>
               </CardHeader>
               <CardContent>
