@@ -85,7 +85,7 @@
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "tanstack": "^1.0.2",
-    "tinymce": "^8.2.2",
+    "tinymce": "^8.3.2",
     "use-sync-external-store": "latest",
     "vaul": "^0.9.9",
     "zod": "3.25.67",

@@ -51,11 +51,11 @@ export function MobileMenu({ isOpen, onClose, navigation }: MobileMenuProps) {
           <div className="px-4 py-6 border-t border-border space-y-4">
             <div className="flex items-center gap-3 text-sm text-muted-foreground">
               <Phone className="h-4 w-4" />
-              <span>+1 (555) 123-4567</span>
+              <span>+54 9 261 616 3377</span>
             </div>
             <div className="flex items-center gap-3 text-sm text-muted-foreground">
               <Mail className="h-4 w-4" />
-              <span>info@loversplay.com</span>
+              <span>ventas @ loversplaysexshop.com</span>
             </div>
           </div>
 
